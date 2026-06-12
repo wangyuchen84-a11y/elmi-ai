@@ -57,13 +57,12 @@
 </div>
 <script>
 (function(){
-  function H(s){let h=0;for(let i=0;i<s.length;i++)h=(Math.imul(31,h)+s.charCodeAt(i))|0;return Math.abs(h).toString(16);}
-  const KEY="elmi_auth_37910", HASH=H("***REMOVED***");
-  if(sessionStorage.getItem(KEY)===HASH) document.getElementById("elmiLoginOverlay").style.display="none";
+  const KEY="elmi_auth_37910", PWD="***REMOVED***";
+  if(sessionStorage.getItem(KEY)===PWD) document.getElementById("elmiLoginOverlay").style.display="none";
   window.elmiCheckLogin=function(){
     const v=document.getElementById("elmiLoginPwd").value;
-    if(H(v)===HASH){
-      sessionStorage.setItem(KEY,HASH);
+    if(v===PWD){
+      sessionStorage.setItem(KEY,PWD);
       document.getElementById("elmiLoginOverlay").style.display="none";
     } else {
       document.getElementById("elmiLoginErr").textContent="Incorrect password.";
