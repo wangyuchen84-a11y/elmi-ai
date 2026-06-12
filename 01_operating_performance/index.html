@@ -275,22 +275,24 @@ function updateLangBtns(){
 
 function injectLangToggle(){
   if(document.getElementById('elmi-lang-toggle'))return;
-  /* Inject into .gbar (right side of appbar, white background) — dark text */
-  var gbar=document.querySelector('.gbar');
-  if(!gbar){
+  /* Target the upper appbar section — try .appbar-top first, fall back to .appbar */
+  var target=document.querySelector('.appbar-top')||document.querySelector('.appbar');
+  if(!target){
     var _lp=0,_lpi=setInterval(function(){
       _lp++;
       if(document.getElementById('elmi-lang-toggle')||_lp>60){clearInterval(_lpi);return;}
-      var g=document.querySelector('.gbar');
+      var g=document.querySelector('.appbar-top')||document.querySelector('.appbar');
       if(g){clearInterval(_lpi);injectLangToggle();}
     },100);
     return;
   }
-  var wrap=mk('div',{id:'elmi-lang-toggle',style:'display:flex;align-items:center;justify-content:flex-end;gap:4px;padding:0 12px;height:100%'});
+  var wrap=mk('div',{id:'elmi-lang-toggle',style:'position:absolute;top:50%;right:16px;transform:translateY(-50%);display:flex;align-items:center;gap:6px;z-index:200'});
+  /* ensure target has position so absolute child works */
+  if(getComputedStyle(target).position==='static')target.style.position='relative';
   ['en','de'].forEach(function(lang){
     var btn=mk('button',{
       id:'elmi-lang-btn-'+lang,
-      style:'background:transparent;border:1px solid rgba(0,0,0,0.18);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;color:#666;transition:all .15s;white-space:nowrap;letter-spacing:.3px'
+      style:'background:transparent;border:1px solid rgba(0,0,0,0.22);border-radius:6px;padding:4px 11px;cursor:pointer;font-size:12px;color:#555;transition:all .15s;white-space:nowrap;letter-spacing:.3px;line-height:1.4'
     },lang==='en'?'EN':'DE');
     var flag=mk('span',{style:'margin-right:4px;font-size:14px;line-height:1'},lang==='en'?'🇬🇧':'🇩🇪');
     btn.insertBefore(flag,btn.firstChild);
@@ -299,17 +301,22 @@ function injectLangToggle(){
       LANG=lang;
       localStorage.setItem('elmi_lang',lang);
       updateLangBtns();
+      /* Re-render whichever custom page is active */
       var h=location.hash;
-      if(h==='#roadmap')renderFP(window.ELMI.app.metrics());
+      if(h==='#roadmap'){renderFP(window.ELMI.app.metrics());return;}
       if(h==='#input'){
         var card=document.getElementById('elmi-fp-card');
         if(card){card.parentNode.removeChild(card);}
         injectSettingsCard();
+        return;
       }
+      /* For other pages: if our FP card/note exists anywhere, refresh it */
+      var card2=document.getElementById('elmi-fp-card');
+      if(card2){card2.parentNode.removeChild(card2);injectSettingsCard();}
     });
     wrap.appendChild(btn);
   });
-  gbar.appendChild(wrap);
+  target.appendChild(wrap);
   updateLangBtns();
 }
 
