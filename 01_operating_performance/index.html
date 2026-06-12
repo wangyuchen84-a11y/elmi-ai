@@ -235,12 +235,7 @@ function injectSettingsCard(){
     numF('fp-block-frei','Freiminuten je Session (min)',s.blockierFrei,'1')
   );
 
-  var card=mk('div',{'class':'card card-pad','id':'elmi-fp-card'},
-    mk('div',{'class':'section-title',style:'margin-top:0'},'Financial Performance Settings'),
-    inner
-  );
-
-  card.addEventListener('change',function(){
+  function doSave(){
     saveS({
       stromVerkauf: parseFloat(document.getElementById('fp-strom-vk').value)||0,
       stromEinkauf: parseFloat(document.getElementById('fp-strom-ek').value)||0,
@@ -250,7 +245,23 @@ function injectSettingsCard(){
       blockierModus:document.getElementById('fp-block-modus').value||'fix',
       blockierFrei: parseFloat(document.getElementById('fp-block-frei').value)||0
     });
-  });
+    saveBtn.textContent='✓ Gespeichert';
+    saveBtn.style.background='#1a8a4a';
+    setTimeout(function(){saveBtn.textContent='Speichern';saveBtn.style.background='';},1800);
+  }
+
+  var saveBtn=mk('button',{
+    type:'button',
+    style:'margin-top:16px;padding:8px 20px;border:none;border-radius:8px;background:#E32028;color:#fff;font-weight:700;cursor:pointer;font-size:14px'
+  },'Speichern');
+  saveBtn.addEventListener('click',doSave);
+
+  var card=mk('div',{'class':'card card-pad','id':'elmi-fp-card'},
+    mk('div',{'class':'section-title',style:'margin-top:0'},'Financial Performance Settings'),
+    inner,
+    saveBtn
+  );
+
   grid.appendChild(card);
 }
 
