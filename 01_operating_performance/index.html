@@ -120,12 +120,18 @@
   function injectBackBtn(){
     if(document.getElementById("elmi-back-btn")) return;
     const bar=findTabBar();
-    if(bar){
-      // Insert button as first child of tab bar, shift tabs right
-      bar.style.paddingLeft="0";
-      bar.insertBefore(makeBtn(),bar.firstChild);
+    if(bar && bar.parentElement){
+      // Insert before the tab bar in its parent — avoids interfering with tab flex layout
+      bar.parentElement.insertBefore(makeBtn(),bar);
+    } else if(bar){
+      // Fallback: prepend into bar but with absolute positioning so it doesn't push tabs
+      const a=makeBtn();
+      a.style.position="absolute";
+      a.style.left="8px";
+      bar.style.position="relative";
+      bar.style.paddingLeft="90px";
+      bar.insertBefore(a,bar.firstChild);
     } else {
-      // Fallback: fixed bottom-left so it doesn't cover header
       const a=makeBtn();
       a.style.cssText+="position:fixed;bottom:16px;left:16px;z-index:9999999;background:#1B1B22;border:1px solid rgba(255,255,255,.2)";
       document.body.appendChild(a);
@@ -300,13 +306,14 @@ function injectLangToggle(){
 /* ---------- Settings card ---------- */
 function injectSettingsCard(){
   if(document.getElementById('elmi-fp-card'))return;
-  var grid=document.querySelector('.input-grid');
-  if(!grid){
+  /* Inject into .page (always exists) — fallback: poll until it appears */
+  var parent=document.querySelector('#content .page');
+  if(!parent){
     var _poll=0,_pi=setInterval(function(){
       _poll++;
       if(document.getElementById('elmi-fp-card')||_poll>30){clearInterval(_pi);return;}
-      var g=document.querySelector('.input-grid');
-      if(g){clearInterval(_pi);injectSettingsCard();}
+      var p=document.querySelector('#content .page');
+      if(p){clearInterval(_pi);injectSettingsCard();}
     },100);
     return;
   }
@@ -353,11 +360,11 @@ function injectSettingsCard(){
     setTimeout(function(){saveBtn.textContent=t('save');saveBtn.style.background='#E32028';},1800);
   });
 
-  var card=mk('div',{'class':'card card-pad','id':'elmi-fp-card'},
+  var card=mk('div',{'class':'card card-pad','id':'elmi-fp-card',style:'margin-top:24px'},
     mk('div',{'class':'section-title',style:'margin-top:0'},t('settingsTitle')),
     inner,saveBtn
   );
-  grid.appendChild(card);
+  parent.appendChild(card);
 }
 
 /* ---------- Financial Performance renderer ---------- */
