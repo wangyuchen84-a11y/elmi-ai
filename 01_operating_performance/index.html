@@ -87,22 +87,55 @@
     }
   }
 
-  function injectBackBtn(){
-    if(document.getElementById("elmi-back-btn")) return;
+  function makeBtn(){
     const a=document.createElement("a");
     a.id="elmi-back-btn";
     a.href="../";
-    a.textContent="← Zurück zur Hauptseite";
-    a.style.cssText="position:fixed;top:12px;left:12px;z-index:9999999;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1B1B22;border:1px solid rgba(255,255,255,.12);border-radius:999px;color:#ccc;font:13px/1 system-ui,sans-serif;text-decoration:none;transition:background .2s";
-    a.onmouseover=function(){this.style.background="#2a2a35";};
-    a.onmouseout=function(){this.style.background="#1B1B22";};
-    document.body.appendChild(a);
+    a.textContent="← Zurück";
+    a.style.cssText="flex-shrink:0;display:inline-flex;align-items:center;white-space:nowrap;padding:6px 12px;margin-right:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#ccc;font:12px/1 system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:background .2s;z-index:1";
+    a.onmouseover=function(){this.style.background="rgba(255,255,255,.14)";};
+    a.onmouseout=function(){this.style.background="rgba(255,255,255,.07)";};
+    return a;
+  }
+
+  function findTabBar(){
+    // Try ARIA tablist first
+    const tl=document.querySelector('[role="tablist"]');
+    if(tl) return tl;
+    // Find top-positioned flex/inline row with multiple children
+    const candidates=Array.from(document.querySelectorAll("nav,header,[class*='tab'],[class*='nav'],[class*='menu'],[class*='toolbar']"));
+    for(const el of candidates){
+      const r=el.getBoundingClientRect();
+      if(r.top<120 && r.width>200 && el.children.length>=2) return el;
+    }
+    // Fallback: any top-area element with 3+ children
+    const all=Array.from(document.querySelectorAll("body > * > *,body > * > * > *"));
+    for(const el of all){
+      const r=el.getBoundingClientRect();
+      if(r.top<80 && r.top>=0 && r.width>300 && el.children.length>=3) return el;
+    }
+    return null;
+  }
+
+  function injectBackBtn(){
+    if(document.getElementById("elmi-back-btn")) return;
+    const bar=findTabBar();
+    if(bar){
+      // Insert button as first child of tab bar, shift tabs right
+      bar.style.paddingLeft="0";
+      bar.insertBefore(makeBtn(),bar.firstChild);
+    } else {
+      // Fallback: fixed bottom-left so it doesn't cover header
+      const a=makeBtn();
+      a.style.cssText+="position:fixed;bottom:16px;left:16px;z-index:9999999;background:#1B1B22;border:1px solid rgba(255,255,255,.2)";
+      document.body.appendChild(a);
+    }
   }
 
   checkSession();
   // Re-inject after bundle replaces DOM
-  setTimeout(function(){checkSession();injectBackBtn();},500);
-  setTimeout(function(){checkSession();injectBackBtn();},2000);
+  setTimeout(function(){checkSession();injectBackBtn();},800);
+  setTimeout(function(){if(!document.getElementById("elmi-back-btn")){injectBackBtn();}},2500);
 })();
 </script>
 
