@@ -153,7 +153,7 @@ var LS_KEY='elmi_fp_v1';
 
 function getS(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'{}');}catch(e){return {};}}
 function saveS(o){localStorage.setItem(LS_KEY,JSON.stringify(o));}
-function def(){return{stromVerkauf:0.30,stromEinkauf:0.20,thgVerkauf:0.00,thgEinkauf:0.00,blockierPreis:0.00,blockierModus:'fix'};}
+function def(){return{stromVerkauf:0.30,stromEinkauf:0.20,thgVerkauf:0.00,thgEinkauf:0.00,blockierPreis:0.00,blockierModus:'fix',blockierFrei:0};}
 function cfg(){return Object.assign({},def(),getS());}
 
 /* -- number formatting -- */
@@ -202,7 +202,16 @@ function buildTbl(headers,rows){
 function injectSettingsCard(){
   if(document.getElementById('elmi-fp-card'))return;
   var grid=document.querySelector('.input-grid');
-  if(!grid)return;
+  if(!grid){
+    /* .input-grid not yet rendered — poll up to 3s */
+    var _poll=0,_pi=setInterval(function(){
+      _poll++;
+      if(document.getElementById('elmi-fp-card')||_poll>30){clearInterval(_pi);return;}
+      var g=document.querySelector('.input-grid');
+      if(g){clearInterval(_pi);injectSettingsCard();}
+    },100);
+    return;
+  }
   var s=cfg();
 
   function numF(id,label,val,step){
@@ -222,7 +231,8 @@ function injectSettingsCard(){
     numF('fp-thg-vk','THG-Quote Verkaufspreis (EUR/kWh)',s.thgVerkauf,'0.001'),
     numF('fp-thg-ek','THG-Quote COGS (EUR/kWh)',s.thgEinkauf,'0.001'),
     numF('fp-block-preis','Blockiergebühr-Preis',s.blockierPreis,'0.01'),
-    mk('div',{'class':'field'},mk('label',null,'Blockiergebühr-Modus'),modus)
+    mk('div',{'class':'field'},mk('label',null,'Blockiergebühr-Modus'),modus),
+    numF('fp-block-frei','Freiminuten je Session (min)',s.blockierFrei,'1')
   );
 
   var card=mk('div',{'class':'card card-pad','id':'elmi-fp-card'},
@@ -237,7 +247,8 @@ function injectSettingsCard(){
       thgVerkauf:   parseFloat(document.getElementById('fp-thg-vk').value)||0,
       thgEinkauf:   parseFloat(document.getElementById('fp-thg-ek').value)||0,
       blockierPreis:parseFloat(document.getElementById('fp-block-preis').value)||0,
-      blockierModus:document.getElementById('fp-block-modus').value||'fix'
+      blockierModus:document.getElementById('fp-block-modus').value||'fix',
+      blockierFrei: parseFloat(document.getElementById('fp-block-frei').value)||0
     });
   });
   grid.appendChild(card);
@@ -260,15 +271,20 @@ function renderFP(m){
   var cPerSess=nSess>0?cogs/nSess:0;
 
   /* Additional – Blockiergebühr
-     TODO: ggf. durch echte Blockierzeit-Kennzahl ersetzen, sobald verfügbar.
-     Proxy: finishingMin (Status "Finishing") als Näherung für Blockierzeit. */
+     Proxy: finishingMin (Status "Finishing") als Näherung für Blockierzeit.
+     blockierFrei = Freiminuten je Session (kostenlose Karenzzeit). */
+  var finMin=m.finishingMin||0;
+  var freeTotalMin=nSess*s.blockierFrei;
+  var billedMin=Math.max(0,finMin-freeTotalMin);
   var blockMenge,blockUnit,blockPreisStr;
   if(s.blockierModus==='stunde'){
-    blockMenge=Math.ceil((m.finishingMin||0)/60); // angefangene Stunden gesamt
+    blockMenge=Math.ceil(billedMin/60);
     blockUnit='h';
     blockPreisStr=fPriceH(s.blockierPreis);
   } else {
-    blockMenge=nSess;
+    /* Pro Session: Sitzung zählt nur wenn avg. Blockierzeit > Freiminuten */
+    var avgBlockPerSess=nSess>0?finMin/nSess:0;
+    blockMenge=avgBlockPerSess>s.blockierFrei?nSess:0;
     blockUnit='Sessions';
     blockPreisStr=fPriceSess(s.blockierPreis);
   }
@@ -368,16 +384,23 @@ function hookElmi(){
   var rt=ELMI.app.TABS.find(function(t){return t.id==='roadmap';});
   if(rt){rt.label='Financial Performance';rt.short='Financial';}
   var domTab=document.querySelector('.tab:last-child');
-  if(domTab)domTab.textContent='10Financial';
+  if(domTab){
+    domTab.textContent='';
+    var numSpan=document.createElement('span');
+    numSpan.className='num';
+    numSpan.textContent='10';
+    domTab.appendChild(numSpan);
+    domTab.appendChild(document.createTextNode('Financial'));
+  }
 
   /* Override roadmap page */
   ELMI.pages.roadmap=function(m){renderFP(m||ELMI.app.metrics());};
 
   /* Hook settings page to inject our card */
   var origInput=ELMI.pages.input;
-  ELMI.pages.input=function(m){
-    origInput.call(this,m);
-    setTimeout(injectSettingsCard,80);
+  ELMI.pages.input=function(){
+    origInput.apply(this,arguments);
+    injectSettingsCard();
   };
 
   /* If already on these tabs, act now */
