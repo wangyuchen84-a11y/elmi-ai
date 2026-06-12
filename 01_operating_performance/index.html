@@ -266,22 +266,32 @@ function updateLangBtns(){
     var b=document.getElementById('elmi-lang-btn-'+l);
     if(!b)return;
     var a=(LANG===l);
-    b.style.background=a?'rgba(255,255,255,0.15)':'transparent';
-    b.style.borderColor=a?'rgba(255,255,255,0.35)':'rgba(255,255,255,0.15)';
-    b.style.color=a?'#fff':'rgba(255,255,255,0.45)';
+    b.style.background=a?'rgba(0,0,0,0.08)':'transparent';
+    b.style.borderColor=a?'rgba(0,0,0,0.35)':'rgba(0,0,0,0.18)';
+    b.style.color=a?'#111':'#666';
     b.style.fontWeight=a?'700':'400';
   });
 }
 
 function injectLangToggle(){
   if(document.getElementById('elmi-lang-toggle'))return;
-  var wrap=mk('div',{id:'elmi-lang-toggle',style:'position:fixed;top:11px;right:16px;z-index:9999;display:flex;align-items:center;gap:4px'});
+  /* Inject into .gbar (right side of appbar, white background) — dark text */
+  var gbar=document.querySelector('.gbar');
+  if(!gbar){
+    var _lp=0,_lpi=setInterval(function(){
+      _lp++;
+      if(document.getElementById('elmi-lang-toggle')||_lp>60){clearInterval(_lpi);return;}
+      var g=document.querySelector('.gbar');
+      if(g){clearInterval(_lpi);injectLangToggle();}
+    },100);
+    return;
+  }
+  var wrap=mk('div',{id:'elmi-lang-toggle',style:'display:flex;align-items:center;justify-content:flex-end;gap:4px;padding:0 12px;height:100%'});
   ['en','de'].forEach(function(lang){
     var btn=mk('button',{
       id:'elmi-lang-btn-'+lang,
-      style:'background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;color:rgba(255,255,255,0.45);transition:all .15s;white-space:nowrap;letter-spacing:.3px'
+      style:'background:transparent;border:1px solid rgba(0,0,0,0.18);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;color:#666;transition:all .15s;white-space:nowrap;letter-spacing:.3px'
     },lang==='en'?'EN':'DE');
-    /* flag spans */
     var flag=mk('span',{style:'margin-right:4px;font-size:14px;line-height:1'},lang==='en'?'🇬🇧':'🇩🇪');
     btn.insertBefore(flag,btn.firstChild);
     btn.addEventListener('click',function(){
@@ -299,7 +309,7 @@ function injectLangToggle(){
     });
     wrap.appendChild(btn);
   });
-  document.body.appendChild(wrap);
+  gbar.appendChild(wrap);
   updateLangBtns();
 }
 
@@ -500,11 +510,14 @@ function hookElmi(){
 
   ELMI.pages.roadmap=function(m){renderFP(m||ELMI.app.metrics());};
 
-  var origInput=ELMI.pages.input;
-  ELMI.pages.input=function(){
-    origInput.apply(this,arguments);
-    injectSettingsCard();
-  };
+  /* Watch #content for the Settings .page appearing — don't wrap origInput (causes bundle error) */
+  var _contentEl=document.getElementById('content');
+  if(_contentEl){
+    var _obs=new MutationObserver(function(){
+      if(location.hash==='#input')injectSettingsCard();
+    });
+    _obs.observe(_contentEl,{childList:true,subtree:true});
+  }
 
   injectLangToggle();
 
