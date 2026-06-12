@@ -283,19 +283,21 @@ function renderFP(m){
 
   /* Additional – Blockiergebühr
      Proxy: finishingMin (Status "Finishing") als Näherung für Blockierzeit.
-     blockierFrei = Freiminuten je Session (kostenlose Karenzzeit). */
+     blockierFrei = Freiminuten je Session (kostenlose Karenzzeit pro Session).
+     billedMin = gesamte Blockierzeit abzgl. Freiminuten über alle Sessions. */
   var finMin=m.finishingMin||0;
-  var freeTotalMin=nSess*s.blockierFrei;
-  var billedMin=Math.max(0,finMin-freeTotalMin);
+  var billedMin=Math.max(0,finMin-nSess*s.blockierFrei);
   var blockMenge,blockUnit,blockPreisStr;
   if(s.blockierModus==='stunde'){
+    /* Abrechenbare Stunden = (Gesamt-Blockierzeit − Freiminuten je Session) / 60, aufgerundet */
     blockMenge=Math.ceil(billedMin/60);
     blockUnit='h';
     blockPreisStr=fPriceH(s.blockierPreis);
   } else {
-    /* Pro Session: Sitzung zählt nur wenn avg. Blockierzeit > Freiminuten */
-    var avgBlockPerSess=nSess>0?finMin/nSess:0;
-    blockMenge=avgBlockPerSess>s.blockierFrei?nSess:0;
+    /* Pro Session: abrechnungsfähige Sessions proportional zu billedMin.
+       Näherung: billedMin / ø Blockierzeit je Session = Anzahl zahlungspflichtiger Sessions. */
+    var avgFinPerSess=nSess>0?finMin/nSess:0;
+    blockMenge=Math.min(nSess,Math.ceil(billedMin/Math.max(1,avgFinPerSess)));
     blockUnit='Sessions';
     blockPreisStr=fPriceSess(s.blockierPreis);
   }
