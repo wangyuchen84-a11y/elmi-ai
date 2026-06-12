@@ -307,7 +307,17 @@ function renderFP(m){
   var addGM=blockWert+thgU-thgC;
   var totalGM=gm+addGM;
 
-  var GREEN='#1a8a4a', RED='#c0392b';
+  var GREEN='#1a8a4a', RED='#c0392b', PROJ='#5A6A7A';
+
+  /* Year projection factor */
+  var periodDays=m.D||(function(){
+    try{var d1=new Date(state.dateFrom),d2=new Date(state.dateTo);
+      return Math.max(1,Math.round((d2-d1)/86400000)+1);}
+    catch(e){return 30;}
+  })();
+  var yf=365/Math.max(1,periodDays);
+  function fEurY(n){return mk('span',{style:'color:'+PROJ+';font-style:italic'},fEur(n*yf));}
+  var YHD='Hochrechnung 365T (EUR)';
 
   /* Build page */
   var page=document.querySelector('.page');
@@ -327,45 +337,35 @@ function renderFP(m){
       mk('h1',null,'Financial Performance'),
       mk('div',{'class':'lead'},
         'Core & Additional CPO Financials · '+state.dateFrom+' – '+state.dateTo+
-        ' · '+nSess+' Sessions')
+        ' · '+nSess+' Sessions · Basis '+periodDays+' Tage')
     )
   ));
 
   /* ---- Table A: Core CPO Financials ---- */
   page.appendChild(mk('div',{'class':'section-title'},'Core CPO Financials'));
   page.appendChild(buildTbl(
-    ['Financials','Energiemenge','Einzelpreis','Wert (EUR)'],
+    ['Financials','Energiemenge','Einzelpreis','Wert (EUR)',YHD],
     [
-      {cells:[{v:'Umsatz'},{v:fKwh(dcKwh)},{v:fPriceKwh(s.stromVerkauf)},{v:fEur(umsatz)}]},
-      {cells:[{v:'COGS'  },{v:fKwh(acKwh)},{v:fPriceKwh(s.stromEinkauf)},{v:fEur(cogs)}]},
+      {cells:[{v:'Umsatz'},{v:fKwh(dcKwh)},{v:fPriceKwh(s.stromVerkauf)},{v:fEur(umsatz)},{v:fEurY(umsatz)}]},
+      {cells:[{v:'COGS'  },{v:fKwh(acKwh)},{v:fPriceKwh(s.stromEinkauf)},{v:fEur(cogs)},{v:fEurY(cogs)}]},
       {bold:true,cells:[
-        {v:'Gross Margin'},{v:''},{v:fDE(gmPct,1)+' %'},
-        {v:fEur(gm),color:gm>=0?GREEN:RED}
+        {v:'Gross Margin'},{v:''},{v:fDE(gmPct,1)+' %'},
+        {v:fEur(gm),color:gm>=0?GREEN:RED},{v:fEurY(gm)}
       ]}
-    ]
-  ));
-
-  /* Per-session rows */
-  page.appendChild(mk('div',{'class':'section-title'},'Core – pro Session'));
-  page.appendChild(buildTbl(
-    ['Financials','','','Wert (EUR/Session)'],
-    [
-      {cells:[{v:'Umsatz / Session'},{v:''},{v:''},{v:fDE(uPerSess,2)+' EUR/Session'}]},
-      {cells:[{v:'COGS / Session'  },{v:''},{v:''},{v:fDE(cPerSess,2)+' EUR/Session'}]}
     ]
   ));
 
   /* ---- Table B: Additional CPO Financials ---- */
   page.appendChild(mk('div',{'class':'section-title'},'Additional CPO Financials'));
   page.appendChild(buildTbl(
-    ['Financials','Energiemenge / Menge','Einzelpreis','Wert (EUR)'],
+    ['Financials','Energiemenge / Menge','Einzelpreis','Wert (EUR)',YHD],
     [
-      {cells:[{v:'Blockiergebühr-Umsatz'},{v:fDE(blockMenge,0)+' '+blockUnit},{v:blockPreisStr},{v:fEur(blockWert)}]},
-      {cells:[{v:'THG-Quote Umsatz'},{v:fKwh(dcKwh)},{v:fPriceKwh(s.thgVerkauf)},{v:fEur(thgU)}]},
-      {cells:[{v:'THG-Quote COGS'  },{v:fKwh(dcKwh)},{v:fPriceKwh(s.thgEinkauf)},{v:fEur(thgC)}]},
+      {cells:[{v:'Blockiergebühr-Umsatz'},{v:fDE(blockMenge,0)+' '+blockUnit},{v:blockPreisStr},{v:fEur(blockWert)},{v:fEurY(blockWert)}]},
+      {cells:[{v:'THG-Quote Umsatz'},{v:fKwh(dcKwh)},{v:fPriceKwh(s.thgVerkauf)},{v:fEur(thgU)},{v:fEurY(thgU)}]},
+      {cells:[{v:'THG-Quote COGS'  },{v:fKwh(dcKwh)},{v:fPriceKwh(s.thgEinkauf)},{v:fEur(thgC)},{v:fEurY(thgC)}]},
       {bold:true,cells:[
         {v:'Additional Gross Margin'},{v:''},{v:''},
-        {v:fEur(addGM),color:addGM>=0?GREEN:RED}
+        {v:fEur(addGM),color:addGM>=0?GREEN:RED},{v:fEurY(addGM)}
       ]}
     ]
   ));
@@ -373,18 +373,26 @@ function renderFP(m){
   /* Total */
   page.appendChild(mk('div',{'class':'section-title'},'Gesamt'));
   page.appendChild(buildTbl(
-    ['Financials','','','Wert (EUR)'],
+    ['Financials','','','Wert (EUR)',YHD],
     [{bold:true,cells:[
       {v:'Total Gross Margin (Core + Additional)'},{v:''},{v:''},
-      {v:fEur(totalGM),color:totalGM>=0?GREEN:RED}
+      {v:fEur(totalGM),color:totalGM>=0?GREEN:RED},{v:fEurY(totalGM)}
     ]}]
+  ));
+
+  /* Per-session -- nach Gesamt */
+  page.appendChild(mk('div',{'class':'section-title'},'Core – pro Session'));
+  page.appendChild(buildTbl(
+    ['Financials','Wert (EUR/Session)','Hochrechnung 365T'],
+    [
+      {cells:[{v:'Umsatz / Session'},{v:fDE(uPerSess,2)+' EUR/Session'},{v:mk('span',{style:'color:'+PROJ+';font-style:italic'},fEur(uPerSess*nSess*yf))}]},
+      {cells:[{v:'COGS / Session'  },{v:fDE(cPerSess,2)+' EUR/Session'},{v:mk('span',{style:'color:'+PROJ+';font-style:italic'},fEur(cPerSess*nSess*yf))}]}
+    ]
   ));
 
   /* Note */
   page.appendChild(mk('div',{'class':'note',style:'margin-top:16px;font-size:12px;color:#4A4A55'},
-    'Blockierzeit-Proxy: Status „Finishing“ (finishingMin). '+
-    'THG-Quote bezieht sich auf DC-Output. '+
-    'Zeitraum gemäß Settings.'
+    'Hochrechnung: '+periodDays+' Tage, Faktor '+fDE(yf,2)+'. Blockierzeit-Proxy: Status Finishing. THG-Quote: DC-Output.'
   ));
 }
 
