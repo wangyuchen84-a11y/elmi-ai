@@ -140,31 +140,87 @@
 </script>
 
 <script>
-/* ============================================================
-   ELMI Financial Performance Extension
-   Adds: Financial Performance tab (replaces KPI Roadmap),
-         new settings fields (prices, blocking fee, THG),
-         two financial tables (Core + Additional CPO Financials)
-   ============================================================ */
+/* ELMI Financial Performance Extension v2 – i18n */
 (function(){
 'use strict';
 
-var LS_KEY='elmi_fp_v1';
+/* ---------- Language ---------- */
+var LANG=localStorage.getItem('elmi_lang')||'en';
 
+var T={
+  en:{
+    tabLabel:'Financial',
+    eyebrow:'Page 10 · Financial',pageTitle:'Financial Performance',
+    pageLead:'Core & Additional CPO Financials',
+    basisDays:'Basis',days:'days',sessions:'Sessions',
+    hFinancials:'Financials',hEnergyVol:'Energy / Volume',
+    hUnitPrice:'Unit Price',hValue:'Value (EUR)',
+    hProjection:'Projection 365d (EUR)',hPerSess:'Value (EUR/session)',hProj:'Projection 365d',
+    sCore:'Core CPO Financials',sAdditional:'Additional CPO Financials',
+    sTotal:'Total',sPerSession:'Core – per Session',
+    revenue:'Revenue',cogs:'COGS',grossMargin:'Gross Margin',
+    blockingRevenue:'Blocking Fee Revenue',
+    thgRevenue:'THG Certificate Revenue',thgCogs:'THG Certificate COGS',
+    additionalGM:'Additional Gross Margin',
+    totalGM:'Total Gross Margin (Core + Additional)',
+    revenuePerSess:'Revenue / Session',cogsPerSess:'COGS / Session',
+    settingsTitle:'Financial Performance Settings',
+    electricitySell:'Electricity Selling Price (EUR/kWh)',
+    electricityBuy:'Electricity Purchase Price (EUR/kWh)',
+    thgSell:'THG Certificate Selling Price (EUR/kWh)',
+    thgBuy:'THG Certificate Purchase Price (EUR/kWh)',
+    blockingPrice:'Blocking Fee Price',blockingMode:'Blocking Fee Mode',
+    modeFix:'flat / one-time (EUR/session)',modeHour:'per started hour (EUR/h)',
+    freeMin:'Free Minutes per Session (min)',
+    save:'Save',saved:'Saved',
+    noteTemplate:'Projection: {d} days x factor {f}. Blocking time proxy: "Finishing" status. THG: DC output.'
+  },
+  de:{
+    tabLabel:'Financial',
+    eyebrow:'Seite 10 · Finanzen',pageTitle:'Financial Performance',
+    pageLead:'Core & Additional CPO Financials',
+    basisDays:'Basis',days:'Tage',sessions:'Sessions',
+    hFinancials:'Kennzahl',hEnergyVol:'Energiemenge / Menge',
+    hUnitPrice:'Einzelpreis',hValue:'Wert (EUR)',
+    hProjection:'Hochrechnung 365T (EUR)',hPerSess:'Wert (EUR/Session)',hProj:'Hochrechnung 365T',
+    sCore:'Core CPO Financials',sAdditional:'Additional CPO Financials',
+    sTotal:'Gesamt',sPerSession:'Core – pro Session',
+    revenue:'Umsatz',cogs:'COGS',grossMargin:'Gross Margin',
+    blockingRevenue:'Blockiergebühr-Umsatz',
+    thgRevenue:'THG-Quote Umsatz',thgCogs:'THG-Quote COGS',
+    additionalGM:'Additional Gross Margin',
+    totalGM:'Total Gross Margin (Core + Additional)',
+    revenuePerSess:'Umsatz / Session',cogsPerSess:'COGS / Session',
+    settingsTitle:'Financial Performance Settings',
+    electricitySell:'Stromverkaufspreis (EUR/kWh)',
+    electricityBuy:'Stromeinkaufspreis (EUR/kWh)',
+    thgSell:'THG-Quote Verkaufspreis (EUR/kWh)',
+    thgBuy:'THG-Quote COGS (EUR/kWh)',
+    blockingPrice:'Blockiergebühr-Preis',blockingMode:'Blockiergebühr-Modus',
+    modeFix:'fix / einmalig (EUR/Session)',modeHour:'pro angefangener Stunde (EUR/h)',
+    freeMin:'Freiminuten je Session (min)',
+    save:'Speichern',saved:'Gespeichert',
+    noteTemplate:'Hochrechnung: {d} Tage x Faktor {f}. Blockierzeit-Proxy: Status "Finishing". THG: DC-Output.'
+  }
+};
+function t(key){return(T[LANG]||T.en)[key]||key;}
+
+/* ---------- Storage ---------- */
+var LS_KEY='elmi_fp_v1';
 function getS(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'{}');}catch(e){return {};}}
 function saveS(o){localStorage.setItem(LS_KEY,JSON.stringify(o));}
 function def(){return{stromVerkauf:0.30,stromEinkauf:0.20,thgVerkauf:0.00,thgEinkauf:0.00,blockierPreis:0.00,blockierModus:'fix',blockierFrei:0};}
 function cfg(){return Object.assign({},def(),getS());}
 
-/* -- number formatting -- */
-function fDE(n,d){if(n==null||isNaN(n))return'–';return n.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});}
-function fKwh(n){return fDE(n,0)+' kWh';}
-function fEur(n){return fDE(n,2)+' EUR';}
-function fPriceKwh(n){return fDE(n,3)+' EUR/kWh';}
-function fPriceSess(n){return fDE(n,2)+' EUR/Session';}
-function fPriceH(n){return fDE(n,2)+' EUR/h';}
+/* ---------- Number formatting ---------- */
+function fDE(n,d){if(n==null||isNaN(n))return'--';return n.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function fKwh(n){return fDE(n,0)+' kWh';}
+function fEur(n){return fDE(n,2)+' EUR';}
+function fPriceKwh(n){return fDE(n,3)+' EUR/kWh';}
+function fPriceSess(n){return fDE(n,2)+' EUR/session';}
+function fPriceH(n){return fDE(n,2)+' EUR/h';}
 
-/* -- DOM helper -- */
+/* ---------- DOM helpers ---------- */
 function mk(tag,attrs){
   var e=document.createElement(tag);
   if(attrs)Object.entries(attrs).forEach(function(kv){
@@ -181,7 +237,6 @@ function mk(tag,attrs){
   return e;
 }
 
-/* -- table builder -- */
 function buildTbl(headers,rows){
   var thead=mk('thead',null,mk('tr',null));
   headers.forEach(function(h){thead.firstChild.appendChild(mk('th',null,h));});
@@ -190,7 +245,8 @@ function buildTbl(headers,rows){
     var tr=mk('tr',row.cls?{'class':row.cls}:null);
     row.cells.forEach(function(c,i){
       var td=mk('td',{style:{textAlign:i===0?'left':'right',fontWeight:row.bold?'700':'',color:c.color||''}});
-      td.textContent=c.v!=null?c.v:c;
+      if(c.v&&typeof c.v==='object')td.appendChild(c.v);
+      else td.textContent=c.v!=null?c.v:c;
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
@@ -198,12 +254,54 @@ function buildTbl(headers,rows){
   return mk('div',{'class':'tbl-wrap'},mk('table',{'class':'tbl'},thead,tbody));
 }
 
-/* -- settings card injection into #input page -- */
+/* ---------- Language toggle button ---------- */
+function updateLangBtns(){
+  ['en','de'].forEach(function(l){
+    var b=document.getElementById('elmi-lang-btn-'+l);
+    if(!b)return;
+    var a=(LANG===l);
+    b.style.background=a?'rgba(255,255,255,0.15)':'transparent';
+    b.style.borderColor=a?'rgba(255,255,255,0.35)':'rgba(255,255,255,0.15)';
+    b.style.color=a?'#fff':'rgba(255,255,255,0.45)';
+    b.style.fontWeight=a?'700':'400';
+  });
+}
+
+function injectLangToggle(){
+  if(document.getElementById('elmi-lang-toggle'))return;
+  var wrap=mk('div',{id:'elmi-lang-toggle',style:'position:fixed;top:11px;right:16px;z-index:9999;display:flex;align-items:center;gap:4px'});
+  ['en','de'].forEach(function(lang){
+    var btn=mk('button',{
+      id:'elmi-lang-btn-'+lang,
+      style:'background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;color:rgba(255,255,255,0.45);transition:all .15s;white-space:nowrap;letter-spacing:.3px'
+    },lang==='en'?'EN':'DE');
+    /* flag spans */
+    var flag=mk('span',{style:'margin-right:4px;font-size:14px;line-height:1'},lang==='en'?'🇬🇧':'🇩🇪');
+    btn.insertBefore(flag,btn.firstChild);
+    btn.addEventListener('click',function(){
+      if(LANG===lang)return;
+      LANG=lang;
+      localStorage.setItem('elmi_lang',lang);
+      updateLangBtns();
+      var h=location.hash;
+      if(h==='#roadmap')renderFP(window.ELMI.app.metrics());
+      if(h==='#input'){
+        var card=document.getElementById('elmi-fp-card');
+        if(card){card.parentNode.removeChild(card);}
+        injectSettingsCard();
+      }
+    });
+    wrap.appendChild(btn);
+  });
+  document.body.appendChild(wrap);
+  updateLangBtns();
+}
+
+/* ---------- Settings card ---------- */
 function injectSettingsCard(){
   if(document.getElementById('elmi-fp-card'))return;
   var grid=document.querySelector('.input-grid');
   if(!grid){
-    /* .input-grid not yet rendered — poll up to 3s */
     var _poll=0,_pi=setInterval(function(){
       _poll++;
       if(document.getElementById('elmi-fp-card')||_poll>30){clearInterval(_pi);return;}
@@ -220,22 +318,27 @@ function injectSettingsCard(){
   }
 
   var modus=mk('select',{id:'fp-block-modus'},
-    mk('option',{value:'fix'},'fix / einmalig (EUR/Session)'),
-    mk('option',{value:'stunde'},'pro angefangener Stunde (EUR/h)')
+    mk('option',{value:'fix'},t('modeFix')),
+    mk('option',{value:'stunde'},t('modeHour'))
   );
   modus.value=s.blockierModus;
 
   var inner=mk('div',{style:'display:grid;grid-template-columns:1fr 1fr;gap:0 24px'},
-    numF('fp-strom-vk','Stromverkaufspreis (EUR/kWh)',s.stromVerkauf,'0.001'),
-    numF('fp-strom-ek','Stromeinkaufspreis (EUR/kWh)',s.stromEinkauf,'0.001'),
-    numF('fp-thg-vk','THG-Quote Verkaufspreis (EUR/kWh)',s.thgVerkauf,'0.001'),
-    numF('fp-thg-ek','THG-Quote COGS (EUR/kWh)',s.thgEinkauf,'0.001'),
-    numF('fp-block-preis','Blockiergebühr-Preis',s.blockierPreis,'0.01'),
-    mk('div',{'class':'field'},mk('label',null,'Blockiergebühr-Modus'),modus),
-    numF('fp-block-frei','Freiminuten je Session (min)',s.blockierFrei,'1')
+    numF('fp-strom-vk',t('electricitySell'),s.stromVerkauf,'0.001'),
+    numF('fp-strom-ek',t('electricityBuy'),s.stromEinkauf,'0.001'),
+    numF('fp-thg-vk',t('thgSell'),s.thgVerkauf,'0.001'),
+    numF('fp-thg-ek',t('thgBuy'),s.thgEinkauf,'0.001'),
+    numF('fp-block-preis',t('blockingPrice'),s.blockierPreis,'0.01'),
+    mk('div',{'class':'field'},mk('label',null,t('blockingMode')),modus),
+    numF('fp-block-frei',t('freeMin'),s.blockierFrei,'1')
   );
 
-  function doSave(){
+  var saveBtn=mk('button',{
+    type:'button',
+    style:'margin-top:16px;padding:8px 20px;border:none;border-radius:8px;background:#E32028;color:#fff;font-weight:700;cursor:pointer;font-size:14px'
+  },t('save'));
+
+  saveBtn.addEventListener('click',function(){
     saveS({
       stromVerkauf: parseFloat(document.getElementById('fp-strom-vk').value)||0,
       stromEinkauf: parseFloat(document.getElementById('fp-strom-ek').value)||0,
@@ -245,27 +348,19 @@ function injectSettingsCard(){
       blockierModus:document.getElementById('fp-block-modus').value||'fix',
       blockierFrei: parseFloat(document.getElementById('fp-block-frei').value)||0
     });
-    saveBtn.textContent='✓ Gespeichert';
+    saveBtn.textContent='✓ '+t('saved');
     saveBtn.style.background='#1a8a4a';
-    setTimeout(function(){saveBtn.textContent='Speichern';saveBtn.style.background='';},1800);
-  }
-
-  var saveBtn=mk('button',{
-    type:'button',
-    style:'margin-top:16px;padding:8px 20px;border:none;border-radius:8px;background:#E32028;color:#fff;font-weight:700;cursor:pointer;font-size:14px'
-  },'Speichern');
-  saveBtn.addEventListener('click',doSave);
+    setTimeout(function(){saveBtn.textContent=t('save');saveBtn.style.background='#E32028';},1800);
+  });
 
   var card=mk('div',{'class':'card card-pad','id':'elmi-fp-card'},
-    mk('div',{'class':'section-title',style:'margin-top:0'},'Financial Performance Settings'),
-    inner,
-    saveBtn
+    mk('div',{'class':'section-title',style:'margin-top:0'},t('settingsTitle')),
+    inner,saveBtn
   );
-
   grid.appendChild(card);
 }
 
-/* -- Financial Performance page renderer -- */
+/* ---------- Financial Performance renderer ---------- */
 function renderFP(m){
   var s=cfg();
   var state=window.ELMI.app.state();
@@ -273,7 +368,6 @@ function renderFP(m){
   var acKwh=m.acKwh||0;
   var nSess=(m.sessDur||[]).length;
 
-  /* Core */
   var umsatz=dcKwh*s.stromVerkauf;
   var cogs=acKwh*s.stromEinkauf;
   var gm=umsatz-cogs;
@@ -281,24 +375,17 @@ function renderFP(m){
   var uPerSess=nSess>0?umsatz/nSess:0;
   var cPerSess=nSess>0?cogs/nSess:0;
 
-  /* Additional – Blockiergebühr
-     Proxy: finishingMin (Status "Finishing") als Näherung für Blockierzeit.
-     blockierFrei = Freiminuten je Session (kostenlose Karenzzeit pro Session).
-     billedMin = gesamte Blockierzeit abzgl. Freiminuten über alle Sessions. */
   var finMin=m.finishingMin||0;
   var billedMin=Math.max(0,finMin-nSess*s.blockierFrei);
   var blockMenge,blockUnit,blockPreisStr;
   if(s.blockierModus==='stunde'){
-    /* Abrechenbare Stunden = (Gesamt-Blockierzeit − Freiminuten je Session) / 60, aufgerundet */
     blockMenge=Math.ceil(billedMin/60);
     blockUnit='h';
     blockPreisStr=fPriceH(s.blockierPreis);
   } else {
-    /* Pro Session: abrechnungsfähige Sessions proportional zu billedMin.
-       Näherung: billedMin / ø Blockierzeit je Session = Anzahl zahlungspflichtiger Sessions. */
     var avgFinPerSess=nSess>0?finMin/nSess:0;
     blockMenge=Math.min(nSess,Math.ceil(billedMin/Math.max(1,avgFinPerSess)));
-    blockUnit='Sessions';
+    blockUnit='sessions';
     blockPreisStr=fPriceSess(s.blockierPreis);
   }
   var blockWert=blockMenge*s.blockierPreis;
@@ -307,9 +394,8 @@ function renderFP(m){
   var addGM=blockWert+thgU-thgC;
   var totalGM=gm+addGM;
 
-  var GREEN='#1a8a4a', RED='#c0392b', PROJ='#5A6A7A';
+  var GREEN='#1a8a4a',RED='#c0392b',PROJ='#5A6A7A';
 
-  /* Year projection factor */
   var periodDays=m.D||(function(){
     try{var d1=new Date(state.dateFrom),d2=new Date(state.dateTo);
       return Math.max(1,Math.round((d2-d1)/86400000)+1);}
@@ -317,9 +403,8 @@ function renderFP(m){
   })();
   var yf=365/Math.max(1,periodDays);
   function fEurY(n){return mk('span',{style:'color:'+PROJ+';font-style:italic'},fEur(n*yf));}
-  var YHD='Hochrechnung 365T (EUR)';
+  var YHD=t('hProjection');
 
-  /* Build page */
   var page=document.querySelector('.page');
   if(!page){
     page=document.createElement('div');
@@ -330,79 +415,71 @@ function renderFP(m){
   }
   page.replaceChildren();
 
-  /* Header */
   page.appendChild(mk('div',{'class':'page-head'},
     mk('div',{'class':'ph-l'},
-      mk('div',{'class':'eyebrow'},'Page 10 · Financial'),
-      mk('h1',null,'Financial Performance'),
+      mk('div',{'class':'eyebrow'},t('eyebrow')),
+      mk('h1',null,t('pageTitle')),
       mk('div',{'class':'lead'},
-        'Core & Additional CPO Financials · '+state.dateFrom+' – '+state.dateTo+
-        ' · '+nSess+' Sessions · Basis '+periodDays+' Tage')
+        t('pageLead')+' · '+state.dateFrom+' - '+state.dateTo+
+        ' · '+nSess+' '+t('sessions')+' · '+t('basisDays')+' '+periodDays+' '+t('days'))
     )
   ));
 
-  /* ---- Table A: Core CPO Financials ---- */
-  page.appendChild(mk('div',{'class':'section-title'},'Core CPO Financials'));
+  page.appendChild(mk('div',{'class':'section-title'},t('sCore')));
   page.appendChild(buildTbl(
-    ['Financials','Energiemenge','Einzelpreis','Wert (EUR)',YHD],
+    [t('hFinancials'),t('hEnergyVol'),t('hUnitPrice'),t('hValue'),YHD],
     [
-      {cells:[{v:'Umsatz'},{v:fKwh(dcKwh)},{v:fPriceKwh(s.stromVerkauf)},{v:fEur(umsatz)},{v:fEurY(umsatz)}]},
-      {cells:[{v:'COGS'  },{v:fKwh(acKwh)},{v:fPriceKwh(s.stromEinkauf)},{v:fEur(cogs)},{v:fEurY(cogs)}]},
+      {cells:[{v:t('revenue')},{v:fKwh(dcKwh)},{v:fPriceKwh(s.stromVerkauf)},{v:fEur(umsatz)},{v:fEurY(umsatz)}]},
+      {cells:[{v:t('cogs')},{v:fKwh(acKwh)},{v:fPriceKwh(s.stromEinkauf)},{v:fEur(cogs)},{v:fEurY(cogs)}]},
       {bold:true,cells:[
-        {v:'Gross Margin'},{v:''},{v:fDE(gmPct,1)+' %'},
+        {v:t('grossMargin')},{v:''},{v:fDE(gmPct,1)+' %'},
         {v:fEur(gm),color:gm>=0?GREEN:RED},{v:fEurY(gm)}
       ]}
     ]
   ));
 
-  /* ---- Table B: Additional CPO Financials ---- */
-  page.appendChild(mk('div',{'class':'section-title'},'Additional CPO Financials'));
+  page.appendChild(mk('div',{'class':'section-title'},t('sAdditional')));
   page.appendChild(buildTbl(
-    ['Financials','Energiemenge / Menge','Einzelpreis','Wert (EUR)',YHD],
+    [t('hFinancials'),t('hEnergyVol'),t('hUnitPrice'),t('hValue'),YHD],
     [
-      {cells:[{v:'Blockiergebühr-Umsatz'},{v:fDE(blockMenge,0)+' '+blockUnit},{v:blockPreisStr},{v:fEur(blockWert)},{v:fEurY(blockWert)}]},
-      {cells:[{v:'THG-Quote Umsatz'},{v:fKwh(dcKwh)},{v:fPriceKwh(s.thgVerkauf)},{v:fEur(thgU)},{v:fEurY(thgU)}]},
-      {cells:[{v:'THG-Quote COGS'  },{v:fKwh(dcKwh)},{v:fPriceKwh(s.thgEinkauf)},{v:fEur(thgC)},{v:fEurY(thgC)}]},
+      {cells:[{v:t('blockingRevenue')},{v:fDE(blockMenge,0)+' '+blockUnit},{v:blockPreisStr},{v:fEur(blockWert)},{v:fEurY(blockWert)}]},
+      {cells:[{v:t('thgRevenue')},{v:fKwh(dcKwh)},{v:fPriceKwh(s.thgVerkauf)},{v:fEur(thgU)},{v:fEurY(thgU)}]},
+      {cells:[{v:t('thgCogs')},{v:fKwh(dcKwh)},{v:fPriceKwh(s.thgEinkauf)},{v:fEur(thgC)},{v:fEurY(thgC)}]},
       {bold:true,cells:[
-        {v:'Additional Gross Margin'},{v:''},{v:''},
+        {v:t('additionalGM')},{v:''},{v:''},
         {v:fEur(addGM),color:addGM>=0?GREEN:RED},{v:fEurY(addGM)}
       ]}
     ]
   ));
 
-  /* Total */
-  page.appendChild(mk('div',{'class':'section-title'},'Gesamt'));
+  page.appendChild(mk('div',{'class':'section-title'},t('sTotal')));
   page.appendChild(buildTbl(
-    ['Financials','','','Wert (EUR)',YHD],
+    [t('hFinancials'),'','',t('hValue'),YHD],
     [{bold:true,cells:[
-      {v:'Total Gross Margin (Core + Additional)'},{v:''},{v:''},
+      {v:t('totalGM')},{v:''},{v:''},
       {v:fEur(totalGM),color:totalGM>=0?GREEN:RED},{v:fEurY(totalGM)}
     ]}]
   ));
 
-  /* Per-session -- nach Gesamt */
-  page.appendChild(mk('div',{'class':'section-title'},'Core – pro Session'));
+  page.appendChild(mk('div',{'class':'section-title'},t('sPerSession')));
   page.appendChild(buildTbl(
-    ['Financials','Wert (EUR/Session)','Hochrechnung 365T'],
+    [t('hFinancials'),t('hPerSess'),t('hProj')],
     [
-      {cells:[{v:'Umsatz / Session'},{v:fDE(uPerSess,2)+' EUR/Session'},{v:mk('span',{style:'color:'+PROJ+';font-style:italic'},fEur(uPerSess*nSess*yf))}]},
-      {cells:[{v:'COGS / Session'  },{v:fDE(cPerSess,2)+' EUR/Session'},{v:mk('span',{style:'color:'+PROJ+';font-style:italic'},fEur(cPerSess*nSess*yf))}]}
+      {cells:[{v:t('revenuePerSess')},{v:fDE(uPerSess,2)+' EUR/session'},{v:mk('span',{style:'color:'+PROJ+';font-style:italic'},fEur(uPerSess*nSess*yf))}]},
+      {cells:[{v:t('cogsPerSess')},{v:fDE(cPerSess,2)+' EUR/session'},{v:mk('span',{style:'color:'+PROJ+';font-style:italic'},fEur(cPerSess*nSess*yf))}]}
     ]
   ));
 
-  /* Note */
-  page.appendChild(mk('div',{'class':'note',style:'margin-top:16px;font-size:12px;color:#4A4A55'},
-    'Hochrechnung: '+periodDays+' Tage, Faktor '+fDE(yf,2)+'. Blockierzeit-Proxy: Status Finishing. THG-Quote: DC-Output.'
-  ));
+  var noteText=t('noteTemplate').replace('{d}',periodDays).replace('{f}',fDE(yf,2));
+  page.appendChild(mk('div',{'class':'note',style:'margin-top:16px;font-size:12px;color:#4A4A55'},noteText));
 }
 
-/* -- hook into ELMI app -- */
+/* ---------- Hook into ELMI app ---------- */
 function hookElmi(){
   var ELMI=window.ELMI;
   if(!ELMI||!ELMI.app||!ELMI.pages)return false;
 
-  /* Rename KPI Roadmap -> Financial Performance */
-  var rt=ELMI.app.TABS.find(function(t){return t.id==='roadmap';});
+  var rt=ELMI.app.TABS.find(function(tb){return tb.id==='roadmap';});
   if(rt){rt.label='Financial Performance';rt.short='Financial';}
   var domTab=document.querySelector('.tab:last-child');
   if(domTab){
@@ -414,24 +491,22 @@ function hookElmi(){
     domTab.appendChild(document.createTextNode('Financial'));
   }
 
-  /* Override roadmap page */
   ELMI.pages.roadmap=function(m){renderFP(m||ELMI.app.metrics());};
 
-  /* Hook settings page to inject our card */
   var origInput=ELMI.pages.input;
   ELMI.pages.input=function(){
     origInput.apply(this,arguments);
     injectSettingsCard();
   };
 
-  /* If already on these tabs, act now */
+  injectLangToggle();
+
   if(location.hash==='#input')setTimeout(injectSettingsCard,100);
   if(location.hash==='#roadmap')renderFP(ELMI.app.metrics());
 
   return true;
 }
 
-/* Poll until ELMI is ready */
 var _attempts=0;
 var _iv=setInterval(function(){
   _attempts++;
