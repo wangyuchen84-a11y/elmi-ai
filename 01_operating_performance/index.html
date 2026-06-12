@@ -58,18 +58,38 @@
 <script>
 (function(){
   const KEY="elmi_auth_37910", PWD="***REMOVED***";
-  if(sessionStorage.getItem(KEY)===PWD) document.getElementById("elmiLoginOverlay").style.display="none";
-  window.elmiCheckLogin=function(){
-    const v=document.getElementById("elmiLoginPwd").value;
-    if(v===PWD){
+
+  function doLogin(){
+    const inp=document.getElementById("elmiLoginPwd");
+    const overlay=document.getElementById("elmiLoginOverlay");
+    if(!inp||!overlay) return;
+    if(inp.value===PWD){
       sessionStorage.setItem(KEY,PWD);
-      document.getElementById("elmiLoginOverlay").style.display="none";
+      overlay.style.display="none";
     } else {
-      document.getElementById("elmiLoginErr").textContent="Incorrect password.";
-      document.getElementById("elmiLoginPwd").value="";
-      document.getElementById("elmiLoginPwd").focus();
+      const err=document.getElementById("elmiLoginErr");
+      if(err) err.textContent="Incorrect password.";
+      inp.value=""; inp.focus();
     }
-  };
+  }
+
+  // Lock elmiCheckLogin so bundle scripts cannot overwrite it
+  Object.defineProperty(window,"elmiCheckLogin",{
+    get:function(){return doLogin;},
+    set:function(){},
+    configurable:false
+  });
+
+  function checkSession(){
+    if(sessionStorage.getItem(KEY)===PWD){
+      const o=document.getElementById("elmiLoginOverlay");
+      if(o) o.style.display="none";
+    }
+  }
+  checkSession();
+  // Re-check after bundle replaces DOM
+  setTimeout(checkSession,500);
+  setTimeout(checkSession,2000);
 })();
 </script>
 
