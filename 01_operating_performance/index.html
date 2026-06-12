@@ -282,7 +282,13 @@ function renderFP(m){
 
   /* Build page */
   var page=document.querySelector('.page');
-  if(!page)return;
+  if(!page){
+    page=document.createElement('div');
+    page.className='page';
+    var cnt=document.getElementById('content');
+    if(!cnt)return;
+    cnt.appendChild(page);
+  }
   page.replaceChildren();
 
   /* Header */
