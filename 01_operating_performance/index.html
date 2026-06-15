@@ -549,6 +549,239 @@ var _iv=setInterval(function(){
 })();
 </script>
 
+<script>
+/* ELMI Dashboard i18n – Main Tabs Extension v1
+   Translates nav buttons, KPI cards, section headers, card titles,
+   chart labels and upload-page strings between EN (default) and DE.
+   Depends on `elmi_lang` in localStorage, written by the Financial tab script above.
+*/
+(function(){
+'use strict';
+
+var MLANG = localStorage.getItem('elmi_lang') || 'en';
+
+/* ── Navigation labels (keyed by data-view) ── */
+var NAV_EN = {settings:'Settings',executive:'Executive',energy:'Energy',
+  sessions:'Sessions',utilization:'Utilization',battery:'Battery',
+  opmode:'Op. Mode',socday:'SoC / Day'};
+var NAV_DE = {settings:'Einstellungen',executive:'Überblick',energy:'Energie',
+  sessions:'Ladesessions',utilization:'Auslastung',battery:'Batterie',
+  opmode:'Betriebsmodus',socday:'SoC / Tag'};
+
+/* ── Chart dataset / legend labels ── */
+var CHART_DE = {
+  'Ø AC kW':'Ø AC kW','Gun 1':'LP 1','Gun 2':'LP 2',
+  'AC kWh/day':'AC kWh/Tag','Sessions':'Sessions','Sessions/day':'Sessions/Tag',
+  'Idle':'Leerlauf','Single Charging':'Einzelladen','Parallel Charging':'Parallelladen',
+  'Battery SoC %':'Batterie-SoC %','AC kW':'AC kW',
+  'Gun 1 kW':'LP 1 kW','Gun 2 kW':'LP 2 kW'
+};
+var CHART_EN = {};
+Object.keys(CHART_DE).forEach(function(k){CHART_EN[CHART_DE[k]]=k;});
+
+/* ── Full text replacement map: EN → DE (for DOM text nodes) ── */
+var TEXT_DE = {
+  // header
+  'CPO · Ladesessions · Energieanalyse':'CPO · Ladesessions · Energieanalyse',// keep as-is in DE
+  // section headers
+  'Energy Analysis':'Energieanalyse','Session Analysis':'Sessionanalyse',
+  'Battery Analysis':'Batterieanalyse',
+  'Battery SoC & Power per Day':'Batterie-SoC & Leistung pro Tag',
+  'Energy KPIs':'Energie-Kennzahlen','Session KPIs':'Session-Kennzahlen',
+  'Utilization KPIs':'Auslastungs-Kennzahlen','Battery KPIs':'Batterie-Kennzahlen',
+  'Operating Mode Distribution':'Betriebsmodus-Verteilung',
+  'Battery SoC Summary':'Batterie-SoC-Übersicht',
+  'Performance & Utilization':'Leistung & Auslastung',
+  // upload / settings page
+  'Upload Raw Excel Data':'Excel-Rohdaten hochladen',
+  'Load Demo Dataset (7 days embedded)':'Demo-Datensatz laden (7 Tage)',
+  'Load Data':'Daten laden',
+  'Source':'Quelle','Station SN':'Stations-SN','Period':'Zeitraum',
+  'Days':'Tage','Data Points':'Datenpunkte',
+  // card titles
+  'DC Source Split':'DC-Quellaufteilung',
+  'Gun 1 vs. Gun 2 energy share':'LP 1 vs. LP 2 Energieanteil',
+  'Energy per Day':'Energie pro Tag',
+  'AC input (kWh) by day · meter delta':'AC-Einspeisung (kWh) pro Tag',
+  'Session Energy Histogram':'Session-Energie-Histogramm',
+  'kWh per session':'kWh pro Session',
+  'Sessions per Day':'Sessions pro Tag',
+  'Gun 1 + Gun 2 combined':'LP 1 + LP 2 kombiniert',
+  'Mode Distribution':'Modus-Verteilung',
+  'Idle · Single · Parallel share':'Leerlauf · Einzel · Parallel',
+  'Battery SoC & Power':'Batterie-SoC & Leistung',
+  'Purple: Battery SoC · Orange: AC kW · Dashed: Gun 1/2 kW':
+    'Lila: Batterie-SoC · Orange: AC kW · Gestrichelt: LP 1/2 kW',
+  // KPI labels
+  'AC Input':'AC-Einspeisung','Total DC Output':'DC-Ausgabe gesamt',
+  'DC Output':'DC-Ausgabe','Efficiency':'Effizienz',
+  'DC · Gun 1':'DC · LP 1','DC · Gun 2':'DC · LP 2',
+  'Avg Sessions / Day':'Ø Sessions / Tag',
+  'Avg Energy / Session':'Ø Energie / Session',
+  'Median Energy':'Median-Energie',
+  'Connection Time Util.':'Verbindungszeit-Auslastung',
+  'DC Energy Util.':'DC-Energie-Auslastung',
+  'Avg Battery SoC':'Ø Batterie-SoC',
+  'Battery Throughput':'Batterie-Durchsatz',
+  'Battery Charging':'Batterie-Laden','Idle':'Leerlauf',
+  // KPI sub-text
+  'Meter delta (exact)':'Zählerdelta (exakt)',
+  'Gun 1 + Gun 2 meter':'LP 1 + LP 2 Zähler',
+  'DC kWh ÷ AC kWh':'DC kWh ÷ AC kWh',
+  'Charging point 1':'Ladepunkt 1','Charging point 2':'Ladepunkt 2',
+  'Detected (≥2 min)':'Erkannt (≥2 Min.)',
+  'Daily average':'Tagesdurchschnitt','Mean':'Mittelwert',
+  '50th percentile':'50. Perzentil',
+  'Charging time ÷ scope time':'Ladezeit ÷ Gesamtzeit',
+  'DC kWh ÷ theoretical maximum':'DC kWh ÷ Theor. Maximum',
+  'vs. (240+peak)×2×scope h':'vs. (240+Spitze)×2×Zeitraum h',
+  'Scope average (all bat_soc > 0)':'Durchschnitt (bat_soc > 0)',
+  'Discharged from storage':'Aus Speicher entladen',
+  'Charged from grid/PV (bat_kw > 0)':'Geladen aus Netz/PV',
+  'Minutes without active charging':'Minuten ohne aktives Laden',
+  // data-info-label (short caps labels in settings bar)
+  'Source ':'Quelle ',  // with trailing space (CSS uppercase)
+  // button texts
+  'Unpacking...':'Entpacken...'
+};
+
+/* Build reverse map DE→EN for when switching back to English */
+var TEXT_EN = {};
+Object.keys(TEXT_DE).forEach(function(enStr){
+  var deStr = TEXT_DE[enStr];
+  if (deStr !== enStr) TEXT_EN[deStr] = enStr;
+});
+/* Also add the German header-sub → English */
+TEXT_EN['CPO · Ladesessions · Energieanalyse'] = 'CPO · Charging Sessions · Energy Analysis';
+
+/* ── Apply text-node replacements ── */
+function replaceTextNodes(root, map) {
+  if (!root) return;
+  var sortedKeys = Object.keys(map).sort(function(a,b){return b.length-a.length;});
+  var walker = document.createTreeWalker(root, 1|4, {
+    acceptNode: function(n) {
+      if (n.nodeType === 1) {
+        var tag = n.tagName;
+        if (tag==='SCRIPT'||tag==='STYLE'||tag==='NOSCRIPT') return 2; // skip
+        return 1; // check children
+      }
+      if (n.nodeType === 3 && n.textContent.trim()) return 1;
+      return 3;
+    }
+  }, false);
+  var nodes = [];
+  var n;
+  while ((n = walker.nextNode())) {
+    if (n.nodeType === 3) nodes.push(n);
+  }
+  nodes.forEach(function(node) {
+    var orig = node.textContent;
+    var changed = orig;
+    sortedKeys.forEach(function(k) {
+      if (changed.indexOf(k) !== -1) {
+        changed = changed.split(k).join(map[k]);
+      }
+    });
+    if (changed !== orig) node.textContent = changed;
+  });
+}
+
+/* ── Translate nav buttons ── */
+function translateNav() {
+  var labels = (MLANG === 'de') ? NAV_DE : NAV_EN;
+  document.querySelectorAll('.nav-btn[data-view]').forEach(function(btn) {
+    var view = btn.getAttribute('data-view');
+    if (!labels[view]) return;
+    for (var i = btn.childNodes.length - 1; i >= 0; i--) {
+      var nd = btn.childNodes[i];
+      if (nd.nodeType === 3 && nd.textContent.trim()) {
+        nd.textContent = ' ' + labels[view];
+        break;
+      }
+    }
+  });
+}
+
+/* ── Patch Chart.js instances ── */
+var CHART_IDS = ['opd-c-hourly','opd-c-split','opd-c-daily',
+  'opd-c-seshist','opd-c-sesday','opd-c-mode','opd-c-soc'];
+
+function patchCharts() {
+  if (typeof Chart === 'undefined') return;
+  var map = (MLANG === 'de') ? CHART_DE : CHART_EN;
+  CHART_IDS.forEach(function(id) {
+    var canvas = document.getElementById(id);
+    if (!canvas) return;
+    var chart = Chart.getChart ? Chart.getChart(canvas) : canvas._chart;
+    if (!chart) return;
+    var changed = false;
+    (chart.data.labels || []).forEach(function(l, i) {
+      if (map[l]) { chart.data.labels[i] = map[l]; changed = true; }
+    });
+    (chart.data.datasets || []).forEach(function(ds) {
+      if (map[ds.label]) { ds.label = map[ds.label]; changed = true; }
+    });
+    if (changed) { try { chart.update('none'); } catch(e){} }
+  });
+}
+
+/* ── Translate header sub (only element outside #content with German text) ── */
+function translateHeaderSub() {
+  var el = document.querySelector('.header-sub');
+  if (!el) return;
+  if (MLANG === 'de') {
+    el.textContent = 'CPO · Ladesessions · Energieanalyse';
+  } else {
+    el.textContent = 'CPO · Charging Sessions · Energy Analysis';
+  }
+}
+
+/* ── Master apply ── */
+function applyMainTranslations() {
+  MLANG = localStorage.getItem('elmi_lang') || 'en';
+  var map = (MLANG === 'de') ? TEXT_DE : TEXT_EN;
+  translateNav();
+  translateHeaderSub();
+  var content = document.getElementById('content');
+  replaceTextNodes(content || document.body, map);
+  patchCharts();
+}
+
+/* ── Monkey-patch localStorage.setItem to react to lang changes ── */
+var _origSetItem = Storage.prototype.setItem;
+Storage.prototype.setItem = function(key, val) {
+  _origSetItem.call(this, key, val);
+  if (key === 'elmi_lang' && this === localStorage) {
+    MLANG = val;
+    setTimeout(applyMainTranslations, 80);
+  }
+};
+
+/* ── Hook into ELMI.pages to re-apply after each page render ── */
+function hookMainPages() {
+  var ELMI = window.ELMI;
+  if (!ELMI || !ELMI.pages) return false;
+  Object.keys(ELMI.pages).forEach(function(key) {
+    if (key === 'roadmap') return; // handled by Financial script
+    var orig = ELMI.pages[key];
+    ELMI.pages[key] = function() {
+      var r = orig.apply(this, arguments);
+      setTimeout(applyMainTranslations, 60);
+      return r;
+    };
+  });
+  setTimeout(applyMainTranslations, 600);
+  return true;
+}
+
+var _mhi = 0, _mhiv = setInterval(function() {
+  _mhi++;
+  if (hookMainPages() || _mhi > 60) clearInterval(_mhiv);
+}, 200);
+
+})();
+</script>
+
   <div id="__bundler_thumbnail">
 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 <rect width="100" height="100" rx="18" fill="#0E0E14"></rect>
