@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive · CPO Sales Center AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; padding: 72px 16px 64px; }
+    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 200; }
+    .back-btn:hover { background: #2a2a35; }
+    .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; gap: 6px; z-index: 200; }
+    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: rgba(255,255,255,.45); transition: all .15s; display: flex; align-items: center; gap: 4px; }
+    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
+    .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
+    h1 { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 24px; }
+    .page-wrap { max-width: 1100px; margin: 0 auto; }
+    .notice { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 14px 18px; font-size: 13px; color: #6B6B76; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .notice a { color: #9B59B6; text-decoration: none; }
+    /* KPI tiles */
+    .kpi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
+    @media(max-width:560px) { .kpi-grid { grid-template-columns: 1fr; } }
+    .kpi-card { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 18px 20px; }
+    .kpi-label { font-size: 11px; font-weight: 600; color: #6B6B76; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; }
+    .kpi-value { font-size: 32px; font-weight: 800; }
+    .kpi-value.ac  { color: #C39BD3; }
+    .kpi-value.dc  { color: #9B59B6; }
+    .kpi-value.hpc { color: #6D2A99; }
+    .kpi-sub { font-size: 11px; color: #6B6B76; margin-top: 4px; }
+    /* Map + donut row */
+    .main-row { display: grid; grid-template-columns: 1fr 360px; gap: 16px; margin-bottom: 20px; }
+    @media(max-width:800px) { .main-row { grid-template-columns: 1fr; } }
+    .map-card { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; overflow: hidden; min-height: 400px; position: relative; }
+    #map { height: 420px; background: #0E0E14; }
+    .map-no-coords { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #6B6B76; font-size: 13px; text-align: center; padding: 24px; }
+    .map-no-coords a { color: #9B59B6; text-decoration: none; font-weight: 600; }
+    .side-col { display: flex; flex-direction: column; gap: 14px; }
+    .card { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 20px; }
+    .card-title { font-size: 13px; font-weight: 800; color: #9B59B6; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 14px; }
+    .betreiber-count { font-size: 40px; font-weight: 800; color: #fff; }
+    .betreiber-label { font-size: 12px; color: #6B6B76; margin-top: 4px; }
+    .donut-wrap { position: relative; max-width: 220px; margin: 0 auto; }
+    .chart-legend { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #ccc; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .data-stand { font-size: 11px; color: #3A3A3C; margin-top: 10px; }
+    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #3A3A3C; }
+    /* Leaflet dark override */
+    .leaflet-tile { filter: brightness(.7) invert(1) contrast(3) hue-rotate(200deg) saturate(.3) brightness(.7); }
+    .leaflet-container { background: #0E0E14; }
+  </style>
+</head>
+<body>
+  <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
+  <div class="lang-toggle">
+    <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
+    <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
+  </div>
+
+  <div class="page-wrap">
+    <h1>🗺️ Executive</h1>
+    <div class="notice" id="data-notice" style="display:none"></div>
+
+    <!-- KPI tiles -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">HPC Ladepunkte im Radius</div>
+        <div class="kpi-value hpc" id="kpi-hpc">–</div>
+        <div class="kpi-sub" id="kpi-hpc-sub">an – Standorten</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">DC Ladepunkte im Radius</div>
+        <div class="kpi-value dc" id="kpi-dc">–</div>
+        <div class="kpi-sub" id="kpi-dc-sub">an – Standorten</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">AC Ladepunkte im Radius</div>
+        <div class="kpi-value ac" id="kpi-ac">–</div>
+        <div class="kpi-sub" id="kpi-ac-sub">an – Standorten</div>
+      </div>
+    </div>
+
+    <div class="main-row">
+      <!-- Map -->
+      <div class="map-card">
+        <div id="map-no-coords" class="map-no-coords" style="display:none">
+          <div style="font-size:32px;">📍</div>
+          <div>Kein Standort konfiguriert.<br>Bitte erst <a href="settings.html">Settings</a> ausfüllen.</div>
+        </div>
+        <div id="map"></div>
+      </div>
+
+      <!-- Side col -->
+      <div class="side-col">
+        <div class="card">
+          <div class="card-title">Wettbewerber im Radius</div>
+          <div class="betreiber-count" id="betreiber-count">–</div>
+          <div class="betreiber-label" id="betreiber-label">distinkte Betreiber</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Preisstrategie-Cluster</div>
+          <div class="donut-wrap"><canvas id="donut-chart" height="200"></canvas></div>
+          <div class="chart-legend" id="donut-legend"></div>
+          <div class="data-stand" id="data-stand"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
+
+  <script src="js/db.js"></script>
+  <script>
+  (function(){
+    const lang = ELMI_DB.getLang();
+    ELMI_DB.applyLangButtons(lang);
+    window.setLang = ELMI_DB.setLang;
+    document.getElementById('back-label').textContent = lang === 'en' ? 'Back' : 'Zurück';
+    document.getElementById('footer-text').textContent = lang === 'en' ? 'ELMI Power GmbH · Internal use only' : 'ELMI Power GmbH · Interne Nutzung';
+
+    const KATEGORIE_COLORS = {
+      'Premium Ad-hoc':               '#6D2A99',
+      'Tarif-/App-basiert mit Rabatt':'#9B59B6',
+      'Flatrate/Abo':                  '#C39BD3',
+      'Penetration/Markteinstieg':     '#F39A3A',
+      'Dynamisch/Zeitabhängig':        '#E32028',
+      'Unbekannt':                     '#3A3A3C'
+    };
+
+    let map = null, donutChart = null;
+
+    async function init() {
+      const [settings, wettData] = await Promise.all([
+        ELMI_DB.loadSettings(),
+        ELMI_DB.loadWettbewerberDaten()
+      ]);
+
+      const { standorte, betreiber, meta, source, fetchError } = wettData;
+
+      // Notice
+      const notice = document.getElementById('data-notice');
+      if (source === 'none') {
+        notice.style.display = 'flex';
+        notice.textContent = '⚠ Wettbewerberdaten noch nicht verfügbar. Visualisierungen werden leer angezeigt.';
+      } else if (source === 'cache') {
+        notice.style.display = 'flex';
+        notice.innerHTML = `📴 Offline – Daten vom <strong>${meta.analyse_datum}</strong> (aus Cache)`;
+      }
+
+      const overrides = await ELMI_DB.dbGetAll('wettbewerberOverrides');
+      const joined    = ELMI_DB.joinWettbewerber(standorte, betreiber, overrides, settings);
+
+      renderKPIs(joined);
+      renderMap(settings, joined);
+      renderDonut(joined, meta);
+    }
+
+    function renderKPIs(joined) {
+      ['HPC','DC','AC'].forEach(t => {
+        const subset = joined.filter(s => s.ladetyp === t);
+        const total  = subset.reduce((a, s) => a + (s.ladepunkte || 0), 0);
+        document.getElementById('kpi-' + t.toLowerCase()).textContent = total.toLocaleString('de');
+        document.getElementById('kpi-' + t.toLowerCase() + '-sub').textContent = `an ${subset.length} Standorten`;
+      });
+    }
+
+    function renderMap(settings, joined) {
+      const { lat, lng } = settings.standort || {};
+      const radius = (settings.radiusKm || 10) * 1000;
+
+      if (!lat || !lng) {
+        document.getElementById('map-no-coords').style.display = 'flex';
+        document.getElementById('map').style.display = 'none';
+        return;
+      }
+
+      map = L.map('map', { zoomControl: true }).setView([lat, lng], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+
+      // Radius circle
+      L.circle([lat, lng], { radius, color: '#9B59B6', weight: 1.5, fillOpacity: .06 }).addTo(map);
+
+      // Own location marker
+      L.circleMarker([lat, lng], { radius: 10, color: '#F39A3A', fillColor: '#F39A3A', fillOpacity: 1, weight: 2 })
+        .addTo(map).bindPopup('Eigener Standort');
+
+      const TYPE_COLOR = { AC: '#C39BD3', DC: '#9B59B6', HPC: '#4A1A6E' };
+
+      joined.forEach(s => {
+        if (!s.lat || !s.lng) return;
+        const r = Math.max(5, Math.min(18, (s.ladepunkte || 1) * 2));
+        L.circleMarker([s.lat, s.lng], {
+          radius: r,
+          color: TYPE_COLOR[s.ladetyp] || '#6B6B76',
+          fillColor: TYPE_COLOR[s.ladetyp] || '#6B6B76',
+          fillOpacity: .55, weight: 1
+        }).addTo(map).bindPopup(
+          `<strong>${s.betreiber}</strong><br>${s.ladetyp} · ${s.ladepunkte} LP<br>${s.strasse} ${s.hausnummer}, ${s.ort}<br>${s.distanzKm} km`
+        );
+      });
+    }
+
+    function renderDonut(joined, meta) {
+      const counts = {};
+      joined.forEach(s => {
+        const k = s.preisstrategie_kategorie || 'Unbekannt';
+        counts[k] = (counts[k] || 0) + 1;
+      });
+
+      const labels = Object.keys(counts);
+      const values = labels.map(l => counts[l]);
+      const colors = labels.map(l => KATEGORIE_COLORS[l] || '#3A3A3C');
+
+      if (donutChart) donutChart.destroy();
+      const ctx = document.getElementById('donut-chart').getContext('2d');
+      if (!labels.length) {
+        ctx.fillStyle = '#3A3A3C';
+        ctx.font = '12px Maven Pro';
+        ctx.textAlign = 'center';
+        ctx.fillText('Keine Daten', 110, 100);
+        return;
+      }
+
+      donutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+        options: {
+          cutout: '65%',
+          plugins: { legend: { display: false }, tooltip: {
+            callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}` }
+          }},
+          animation: { duration: 600 }
+        }
+      });
+
+      const legend = document.getElementById('donut-legend');
+      legend.innerHTML = labels.map((l, i) =>
+        `<div class="legend-item"><div class="legend-dot" style="background:${colors[i]}"></div>${l} (${values[i]})</div>`
+      ).join('');
+
+      if (meta) {
+        document.getElementById('data-stand').textContent = `Preisdaten Stand ${meta.analyse_datum}`;
+      }
+    }
+
+    init().catch(console.error);
+  })();
+  </script>
+</body>
+</html>

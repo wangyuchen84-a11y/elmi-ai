@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings · CPO Sales Center AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; padding: 72px 16px 64px; }
+    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 100; }
+    .back-btn:hover { background: #2a2a35; }
+    .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; gap: 6px; z-index: 100; }
+    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: rgba(255,255,255,.45); transition: all .15s; display: flex; align-items: center; gap: 4px; }
+    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
+    .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
+    h1 { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 24px; }
+    .page-wrap { max-width: 840px; margin: 0 auto; }
+    .section { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+    .section-title { font-size: 14px; font-weight: 800; color: #9B59B6; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 18px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+    .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media(max-width:560px) { .form-grid-3 { grid-template-columns: 1fr; } }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 11px; font-weight: 600; color: #6B6B76; letter-spacing: .4px; text-transform: uppercase; }
+    input[type=text], input[type=number], select {
+      background: #0E0E14; border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
+      color: #fff; font: 400 14px 'Maven Pro', system-ui, sans-serif; padding: 9px 12px;
+      width: 100%; transition: border-color .15s;
+    }
+    input:focus, select:focus { outline: none; border-color: #6D2A99; }
+    input::placeholder { color: #3A3A3C; }
+    .addr-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+    .addr-row2 { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 14px; margin-top: 14px; }
+    @media(max-width:560px) { .addr-grid { grid-template-columns: 1fr; } .addr-row2 { grid-template-columns: 1fr; } }
+    .geo-result { margin-top: 12px; font-size: 12px; color: #6B6B76; min-height: 18px; }
+    .geo-result.ok  { color: #4CAF50; }
+    .geo-result.err { color: #E32028; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font: 700 13px 'Maven Pro', system-ui, sans-serif; transition: opacity .15s; }
+    .btn-primary { background: linear-gradient(135deg, #6D2A99, #9B59B6); color: #fff; }
+    .btn-secondary { background: #2a2a35; color: #ccc; border: 1px solid rgba(255,255,255,.1); }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    .upload-zone { border: 2px dashed rgba(109,42,153,.4); border-radius: 12px; padding: 28px; text-align: center; cursor: pointer; transition: border-color .2s; background: rgba(109,42,153,.04); }
+    .upload-zone:hover, .upload-zone.dragover { border-color: #9B59B6; background: rgba(109,42,153,.08); }
+    .upload-zone p { font-size: 13px; color: #6B6B76; margin-top: 8px; }
+    .upload-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .upload-item { background: #0E0E14; border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .upload-item-info { font-size: 13px; }
+    .upload-item-info small { display: block; color: #6B6B76; font-size: 11px; margin-top: 2px; }
+    .btn-del { background: transparent; border: 1px solid rgba(227,32,40,.3); border-radius: 6px; color: #E32028; font: 600 11px 'Maven Pro', system-ui, sans-serif; padding: 4px 10px; cursor: pointer; }
+    .btn-del:hover { background: rgba(227,32,40,.1); }
+    .preis-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+    .preis-group { display: flex; flex-direction: column; gap: 10px; }
+    .preis-group .group-label { font-size: 11px; font-weight: 800; color: #9B59B6; text-transform: uppercase; letter-spacing: .5px; }
+    .status-strip { background: #0E0E14; border: 1px solid rgba(255,255,255,.06); border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #6B6B76; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #3A3A3C; flex-shrink: 0; }
+    .dot.ok { background: #4CAF50; }
+    .dot.warn { background: #F39A3A; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #2a2a35; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 12px 20px; font-size: 13px; color: #fff; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
+    .toast.show { opacity: 1; }
+    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #3A3A3C; }
+    .progress-bar { height: 4px; background: rgba(109,42,153,.2); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #6D2A99, #9B59B6); border-radius: 2px; transition: width .3s; }
+  </style>
+</head>
+<body>
+  <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
+  <div class="lang-toggle">
+    <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
+    <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
+  </div>
+
+  <div class="page-wrap">
+    <h1>⚙️ Settings</h1>
+
+    <!-- 1.1 Preise -->
+    <div class="section">
+      <div class="section-title">💰 Eigene Verkaufspreise (€/kWh)</div>
+      <div class="form-grid-3">
+        <div class="field">
+          <label>AC</label>
+          <input type="number" id="preis-ac" step="0.01" min="0" max="5" placeholder="0.45">
+        </div>
+        <div class="field">
+          <label>DC</label>
+          <input type="number" id="preis-dc" step="0.01" min="0" max="5" placeholder="0.55">
+        </div>
+        <div class="field">
+          <label>HPC</label>
+          <input type="number" id="preis-hpc" step="0.01" min="0" max="5" placeholder="0.65">
+        </div>
+      </div>
+    </div>
+
+    <!-- 1.2 Standort & Radius -->
+    <div class="section">
+      <div class="section-title">📍 Eigener Standort & Betrachtungsradius</div>
+      <div class="addr-grid">
+        <div class="field">
+          <label>Straße</label>
+          <input type="text" id="addr-strasse" placeholder="Musterstraße">
+        </div>
+        <div class="field">
+          <label>Hausnummer</label>
+          <input type="text" id="addr-hnr" placeholder="1">
+        </div>
+      </div>
+      <div class="addr-row2">
+        <div class="field">
+          <label>PLZ</label>
+          <input type="text" id="addr-plz" placeholder="12345">
+        </div>
+        <div class="field">
+          <label>Ort</label>
+          <input type="text" id="addr-ort" placeholder="Musterstadt">
+        </div>
+        <div class="field">
+          <label>Land</label>
+          <input type="text" id="addr-land" placeholder="Deutschland">
+        </div>
+      </div>
+      <div style="margin-top:14px;" class="field">
+        <label>Landkreis (auto-ermittelt)</label>
+        <input type="text" id="addr-landkreis" placeholder="Wird per Geocoding ermittelt">
+      </div>
+      <div class="geo-result" id="geo-result"></div>
+      <div style="margin-top:14px;" class="field">
+        <label>Betrachtungsradius</label>
+        <select id="radius-select">
+          <option value="1">1 km</option>
+          <option value="2">2 km</option>
+          <option value="5">5 km</option>
+          <option value="10" selected>10 km</option>
+          <option value="15">15 km</option>
+          <option value="20">20 km</option>
+          <option value="30">30 km</option>
+          <option value="50">50 km</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 1.4 Preisstrategie -->
+    <div class="section">
+      <div class="section-title">📐 Preisstrategie-Parameter</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Auslastungsschwelle (%)</label>
+          <input type="number" id="ps-schwelle" step="1" min="0" max="100" placeholder="50">
+        </div>
+        <div class="field">
+          <label>Preisschritt pro 10 %-Punkte (%)</label>
+          <input type="number" id="ps-schritt" step="0.5" min="0" placeholder="5">
+        </div>
+        <div class="field">
+          <label>Gewicht Auslastung (0–1)</label>
+          <input type="number" id="ps-wAusl" step="0.05" min="0" max="1" placeholder="0.5">
+        </div>
+        <div class="field">
+          <label>Gewicht Wettbewerb (0–1)</label>
+          <input type="number" id="ps-wWett" step="0.05" min="0" max="1" placeholder="0.5">
+        </div>
+      </div>
+      <div style="margin-top:18px;">
+        <div style="font-size:12px;color:#6B6B76;margin-bottom:12px;font-weight:600;">Preis-Min/Max je Ladetyp (€/kWh)</div>
+        <div class="preis-grid">
+          <div class="preis-group">
+            <div class="group-label">AC</div>
+            <div class="field"><label>Min</label><input type="number" id="ps-min-ac" step="0.01" placeholder="0.35"></div>
+            <div class="field"><label>Max</label><input type="number" id="ps-max-ac" step="0.01" placeholder="0.65"></div>
+          </div>
+          <div class="preis-group">
+            <div class="group-label">DC</div>
+            <div class="field"><label>Min</label><input type="number" id="ps-min-dc" step="0.01" placeholder="0.45"></div>
+            <div class="field"><label>Max</label><input type="number" id="ps-max-dc" step="0.01" placeholder="0.79"></div>
+          </div>
+          <div class="preis-group">
+            <div class="group-label">HPC</div>
+            <div class="field"><label>Min</label><input type="number" id="ps-min-hpc" step="0.01" placeholder="0.55"></div>
+            <div class="field"><label>Max</label><input type="number" id="ps-max-hpc" step="0.01" placeholder="0.89"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1.5 Datenquelle-Status -->
+    <div class="section">
+      <div class="section-title">🌐 Wettbewerberdaten</div>
+      <div class="status-strip">
+        <div class="dot" id="wett-dot"></div>
+        <span id="wett-status">Wird geladen …</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btn-refresh" onclick="refreshWettbewerber()">🔄 Jetzt aktualisieren</button>
+      </div>
+    </div>
+
+    <!-- 1.3 Upload -->
+    <div class="section">
+      <div class="section-title">📁 Eigene Ladedaten (1-Minuten-Rohdaten, xlsx/csv)</div>
+      <div class="upload-zone" id="upload-zone">
+        <div style="font-size:28px;">📂</div>
+        <p>Dateien hier ablegen oder klicken zum Auswählen<br><small style="font-size:11px;color:#3A3A3C;">xlsx / csv · mehrere Dateien möglich</small></p>
+        <input type="file" id="file-input" accept=".xlsx,.csv" multiple style="display:none">
+        <div class="progress-bar" id="progress-bar" style="display:none"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+      <div class="upload-list" id="upload-list"></div>
+    </div>
+
+    <!-- Save button -->
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-save" onclick="saveAll()">💾 Einstellungen speichern</button>
+    </div>
+  </div>
+
+  <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
+  <div class="toast" id="toast"></div>
+
+  <script src="js/db.js"></script>
+  <script>
+  (function(){
+    const lang = ELMI_DB.getLang();
+    ELMI_DB.applyLangButtons(lang);
+    window.setLang = ELMI_DB.setLang;
+    document.getElementById('back-label').textContent = lang === 'en' ? 'Back' : 'Zurück';
+    document.getElementById('footer-text').textContent = lang === 'en' ? 'ELMI Power GmbH · Internal use only' : 'ELMI Power GmbH · Interne Nutzung';
+
+    let settings = null;
+    let eigeneLadedaten = {};
+
+    // --- Load saved settings ---
+    async function init() {
+      settings = await ELMI_DB.loadSettings();
+      fillForm(settings);
+      await loadUploadList();
+      await updateWettStatus();
+    }
+
+    function fillForm(s) {
+      document.getElementById('preis-ac').value  = s.preise.AC;
+      document.getElementById('preis-dc').value  = s.preise.DC;
+      document.getElementById('preis-hpc').value = s.preise.HPC;
+
+      const st = s.standort;
+      document.getElementById('addr-strasse').value   = st.strasse || '';
+      document.getElementById('addr-hnr').value        = st.hausnummer || '';
+      document.getElementById('addr-plz').value        = st.plz || '';
+      document.getElementById('addr-ort').value        = st.ort || '';
+      document.getElementById('addr-land').value       = st.land || 'Deutschland';
+      document.getElementById('addr-landkreis').value  = st.landkreis || '';
+
+      document.getElementById('radius-select').value = s.radiusKm || 10;
+
+      const ps = s.preisstrategie;
+      document.getElementById('ps-schwelle').value = ps.auslastungSchwelle;
+      document.getElementById('ps-schritt').value  = ps.auslastungSchritt;
+      document.getElementById('ps-wAusl').value    = ps.auslastungsGewicht;
+      document.getElementById('ps-wWett').value    = ps.wettbewerbsGewicht;
+      document.getElementById('ps-min-ac').value   = ps.preisMin.AC;
+      document.getElementById('ps-min-dc').value   = ps.preisMin.DC;
+      document.getElementById('ps-min-hpc').value  = ps.preisMin.HPC;
+      document.getElementById('ps-max-ac').value   = ps.preisMax.AC;
+      document.getElementById('ps-max-dc').value   = ps.preisMax.DC;
+      document.getElementById('ps-max-hpc').value  = ps.preisMax.HPC;
+    }
+
+    // --- Save ---
+    window.saveAll = async function() {
+      const btn = document.getElementById('btn-save');
+      btn.disabled = true;
+
+      const newStandort = {
+        strasse:    document.getElementById('addr-strasse').value.trim(),
+        hausnummer: document.getElementById('addr-hnr').value.trim(),
+        plz:        document.getElementById('addr-plz').value.trim(),
+        ort:        document.getElementById('addr-ort').value.trim(),
+        land:       document.getElementById('addr-land').value.trim() || 'Deutschland',
+        lat:        settings.standort.lat,
+        lng:        settings.standort.lng,
+        landkreis:  document.getElementById('addr-landkreis').value.trim()
+      };
+
+      // Check if address changed → re-geocode
+      const prev = settings.standort;
+      const addrChanged = prev.strasse !== newStandort.strasse ||
+                          prev.hausnummer !== newStandort.hausnummer ||
+                          prev.plz !== newStandort.plz ||
+                          prev.ort !== newStandort.ort ||
+                          prev.land !== newStandort.land;
+
+      if (addrChanged && newStandort.strasse && newStandort.ort) {
+        const geoResult = document.getElementById('geo-result');
+        geoResult.className = 'geo-result';
+        geoResult.textContent = '🔍 Geocoding …';
+        try {
+          const geo = await ELMI_DB.geocode(newStandort.strasse, newStandort.hausnummer, newStandort.plz, newStandort.ort, newStandort.land);
+          if (geo) {
+            newStandort.lat = geo.lat;
+            newStandort.lng = geo.lng;
+            if (geo.landkreis && !newStandort.landkreis) {
+              newStandort.landkreis = geo.landkreis;
+              document.getElementById('addr-landkreis').value = geo.landkreis;
+            }
+            geoResult.className = 'geo-result ok';
+            geoResult.textContent = `✓ Koordinaten: ${geo.lat.toFixed(5)}, ${geo.lng.toFixed(5)} · Landkreis: ${newStandort.landkreis || '(nicht ermittelt)'}`;
+          } else {
+            geoResult.className = 'geo-result err';
+            geoResult.textContent = '⚠ Geocoding fehlgeschlagen – bitte Landkreis manuell eingeben';
+          }
+        } catch(e) {
+          geoResult.className = 'geo-result err';
+          geoResult.textContent = '⚠ Geocoding-Fehler: ' + e.message;
+        }
+      }
+
+      settings.preise = {
+        AC:  parseFloat(document.getElementById('preis-ac').value)  || 0,
+        DC:  parseFloat(document.getElementById('preis-dc').value)  || 0,
+        HPC: parseFloat(document.getElementById('preis-hpc').value) || 0
+      };
+      settings.standort = newStandort;
+      settings.radiusKm = parseInt(document.getElementById('radius-select').value);
+      settings.preisstrategie = {
+        auslastungSchwelle:  parseFloat(document.getElementById('ps-schwelle').value) || 50,
+        auslastungSchritt:   parseFloat(document.getElementById('ps-schritt').value)  || 5,
+        auslastungsGewicht:  parseFloat(document.getElementById('ps-wAusl').value)    || 0.5,
+        wettbewerbsGewicht:  parseFloat(document.getElementById('ps-wWett').value)    || 0.5,
+        preisMin: {
+          AC:  parseFloat(document.getElementById('ps-min-ac').value)  || 0,
+          DC:  parseFloat(document.getElementById('ps-min-dc').value)  || 0,
+          HPC: parseFloat(document.getElementById('ps-min-hpc').value) || 0
+        },
+        preisMax: {
+          AC:  parseFloat(document.getElementById('ps-max-ac').value)  || 99,
+          DC:  parseFloat(document.getElementById('ps-max-dc').value)  || 99,
+          HPC: parseFloat(document.getElementById('ps-max-hpc').value) || 99
+        }
+      };
+
+      await ELMI_DB.saveSettings(settings);
+      btn.disabled = false;
+      showToast('✓ Einstellungen gespeichert');
+    };
+
+    // --- Wettbewerber status ---
+    async function updateWettStatus(forceRefresh = false) {
+      const dot  = document.getElementById('wett-dot');
+      const text = document.getElementById('wett-status');
+      const btn  = document.getElementById('btn-refresh');
+      btn.disabled = true;
+      text.textContent = 'Wird geladen …';
+      try {
+        const { meta, source } = await ELMI_DB.loadWettbewerberDaten(forceRefresh);
+        if (source === 'network' && meta) {
+          dot.className = 'dot ok';
+          text.textContent = `Stand: ${meta.analyse_datum} · Register: ${meta.register_datum} · ${(meta.anzahl_standorte||0).toLocaleString('de')} Standorte · ${meta.anzahl_betreiber_tier_a || 0} Betreiber (Tier A) mit Preisdaten`;
+        } else if (source === 'cache' && meta) {
+          dot.className = 'dot warn';
+          text.textContent = `Offline – Daten vom ${meta.analyse_datum} (aus Cache)`;
+        } else {
+          dot.className = 'dot';
+          text.textContent = 'Wettbewerberdaten noch nicht verfügbar';
+        }
+      } catch(e) {
+        dot.className = 'dot';
+        text.textContent = 'Fehler beim Laden: ' + e.message;
+      }
+      btn.disabled = false;
+    }
+
+    window.refreshWettbewerber = () => updateWettStatus(true);
+
+    // --- File upload ---
+    const zone  = document.getElementById('upload-zone');
+    const input = document.getElementById('file-input');
+
+    zone.addEventListener('click', () => input.click());
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      handleFiles(Array.from(e.dataTransfer.files));
+    });
+    input.addEventListener('change', () => handleFiles(Array.from(input.files)));
+
+    async function handleFiles(files) {
+      const bar  = document.getElementById('progress-bar');
+      const fill = document.getElementById('progress-fill');
+      bar.style.display = 'block';
+      for (let i = 0; i < files.length; i++) {
+        fill.style.width = Math.round((i / files.length) * 100) + '%';
+        await processFile(files[i]);
+      }
+      fill.style.width = '100%';
+      setTimeout(() => { bar.style.display = 'none'; fill.style.width = '0%'; }, 800);
+      await loadUploadList();
+      showToast(`✓ ${files.length} Datei(en) verarbeitet`);
+    }
+
+    async function processFile(file) {
+      const name = file.name;
+      const data = await file.arrayBuffer();
+      let rows = [];
+
+      if (name.endsWith('.csv')) {
+        const text = new TextDecoder('utf-8').decode(data);
+        rows = text.split('\n').map(r => r.split(/[;,\t]/));
+        if (rows[0] && isNaN(rows[0][0])) rows.shift(); // skip header
+      } else {
+        const wb = XLSX.read(data, { type: 'array', cellDates: true });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, dateNF: 'YYYY-MM-DD HH:mm:ss' });
+        if (rows[0] && isNaN(rows[0][0])) rows.shift();
+      }
+
+      rows = rows.filter(r => r.length >= 14 && r[1]);
+      if (!rows.length) return;
+
+      rows.sort((a, b) => new Date(a[1]) - new Date(b[1]));
+
+      const stationSN = String(rows[0][0] || '').trim();
+      const timestamps = rows.map(r => new Date(r[1]));
+      const tMin = timestamps[0], tMax = timestamps[timestamps.length - 1];
+      const tageImZeitraum = Math.max(1, (tMax - tMin) / 86400000);
+
+      for (const gunIdx of [1, 2]) {
+        const meterCol  = gunIdx === 1 ? 6  : 10; // G=6, K=10 (0-indexed)
+        const powerCol  = gunIdx === 1 ? 8  : 12; // I=8, M=12
+        const statusCol = gunIdx === 1 ? 9  : 13; // J=9, N=13
+
+        let sessions = 0, totalEnergy = 0;
+        let sessionStartMeter = null, prevStatus = null;
+        let maxPower = 0;
+
+        for (let ri = 0; ri < rows.length; ri++) {
+          const row    = rows[ri];
+          const status = String(row[statusCol] || '').trim();
+          const meter  = parseFloat(row[meterCol]) || 0;
+          const power  = parseFloat(row[powerCol]) || 0;
+          if (power > maxPower) maxPower = power;
+
+          if (status !== 'Available' && prevStatus === 'Available') {
+            sessionStartMeter = meter;
+          }
+          if (status === 'Available' && prevStatus !== 'Available' && prevStatus !== null) {
+            if (sessionStartMeter !== null) {
+              const delta = meter - sessionStartMeter;
+              if (delta > 0) { sessions++; totalEnergy += delta; }
+              sessionStartMeter = null;
+            }
+          }
+          prevStatus = status;
+        }
+        // Close open session at end of file
+        if (sessionStartMeter !== null) {
+          const lastMeter = parseFloat(rows[rows.length - 1][meterCol]) || 0;
+          const delta = lastMeter - sessionStartMeter;
+          if (delta > 0) { sessions++; totalEnergy += delta; }
+        }
+
+        const ladetyp = maxPower > 149 ? 'HPC' : maxPower > 21 ? 'DC' : 'AC';
+        const key = stationSN + '_Gun' + gunIdx;
+
+        await ELMI_DB.dbPut('eigeneLadedaten', {
+          key, stationSN, gun: gunIdx, ladetyp,
+          tageImZeitraum: Math.round(tageImZeitraum * 10) / 10,
+          ladevorgaenge: sessions,
+          gesamtEnergieKwh: Math.round(totalEnergy * 100) / 100,
+          dateiname: name,
+          zeitraumVon: tMin.toISOString().slice(0, 10),
+          zeitraumBis: tMax.toISOString().slice(0, 10)
+        });
+      }
+    }
+
+    async function loadUploadList() {
+      const list  = document.getElementById('upload-list');
+      const items = await ELMI_DB.dbGetAll('eigeneLadedaten');
+      if (!items.length) { list.innerHTML = ''; return; }
+      list.innerHTML = items.map(it => `
+        <div class="upload-item">
+          <div class="upload-item-info">
+            <strong>${it.stationSN} – Gun ${it.gun} (${it.ladetyp})</strong>
+            <small>${it.dateiname} · ${it.zeitraumVon} – ${it.zeitraumBis} · ${it.tageImZeitraum} Tage · ${it.ladevorgaenge} Ladevorgänge · ${it.gesamtEnergieKwh.toLocaleString('de')} kWh</small>
+          </div>
+          <button class="btn-del" onclick="deleteEintrag('${it.key}')">✕ Löschen</button>
+        </div>
+      `).join('');
+    }
+
+    window.deleteEintrag = async function(key) {
+      const db = await ELMI_DB.openDB();
+      await new Promise((res, rej) => {
+        const tx  = db.transaction('eigeneLadedaten', 'readwrite');
+        const req = tx.objectStore('eigeneLadedaten').delete(key);
+        req.onsuccess = res; req.onerror = e => rej(e.target.error);
+      });
+      await loadUploadList();
+    };
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    init();
+  })();
+  </script>
+</body>
+</html>

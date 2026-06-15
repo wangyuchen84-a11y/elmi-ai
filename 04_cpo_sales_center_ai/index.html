@@ -8,20 +8,31 @@
   <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; }
-    .logo { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #F39A3A, #E32028, #6D2A99); display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 20px; }
-    .brand { font-size: 13px; font-weight: 600; color: #6B6B76; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
-    h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 24px; text-align: center; }
-    .placeholder { background: #1B1B22; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 32px 40px; text-align: center; max-width: 480px; width: 100%; }
-    .placeholder-icon { font-size: 40px; margin-bottom: 16px; }
-    .placeholder-text { font-size: 15px; color: #6B6B76; line-height: 1.6; }
-    footer { margin-top: 64px; font-size: 12px; color: #3A3A3C; }
-    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 13px/1 'Maven Pro', system-ui, sans-serif; font-weight: 600; text-decoration: none; transition: background .2s; z-index: 100; }
+    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; padding: 80px 16px 48px; }
+    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 100; }
     .back-btn:hover { background: #2a2a35; }
-    .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; align-items: center; gap: 6px; z-index: 100; }
-    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font-size: 12px; font-family: 'Maven Pro', system-ui, sans-serif; font-weight: 600; color: rgba(255,255,255,.45); letter-spacing: .3px; line-height: 1.4; transition: all .15s; display: flex; align-items: center; gap: 4px; }
+    .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; gap: 6px; z-index: 100; }
+    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: rgba(255,255,255,.45); transition: all .15s; display: flex; align-items: center; gap: 4px; }
     .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
     .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
+    .header { text-align: center; margin-bottom: 48px; }
+    .logo { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #F39A3A, #E32028, #6D2A99); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px; }
+    .brand { font-size: 13px; font-weight: 600; color: #6B6B76; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+    h1 { font-size: 28px; font-weight: 800; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .nav-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; max-width: 960px; margin: 0 auto; }
+    .nav-card { display: flex; align-items: center; gap: 16px; background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 20px 24px; text-decoration: none; color: #fff; transition: border-color .2s, background .2s; }
+    .nav-card:hover { border-color: rgba(109,42,153,.5); background: #20202c; }
+    .nav-card:hover .nav-arrow { color: #9B59B6; }
+    .nav-icon { font-size: 28px; flex-shrink: 0; width: 48px; text-align: center; }
+    .nav-content { flex: 1; min-width: 0; }
+    .nav-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+    .nav-desc { font-size: 12px; color: #6B6B76; line-height: 1.4; }
+    .nav-arrow { margin-left: auto; color: #3A3A3C; font-size: 18px; flex-shrink: 0; transition: color .2s; }
+    .status-bar { max-width: 960px; margin: 32px auto 0; background: #1B1B22; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 12px 20px; font-size: 12px; color: #6B6B76; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #3A3A3C; flex-shrink: 0; }
+    .status-dot.ok { background: #4CAF50; }
+    .status-dot.warn { background: #F39A3A; }
+    footer { text-align: center; margin-top: 48px; font-size: 12px; color: #3A3A3C; }
   </style>
 </head>
 <body>
@@ -30,30 +41,131 @@
     <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
     <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
   </div>
-  <div class="logo">🔌</div>
-  <div class="brand">ELMI AI</div>
-  <h1>CPO Sales Center AI</h1>
-  <div class="placeholder">
-    <div class="placeholder-icon">🚧</div>
-    <p class="placeholder-text" id="placeholder-text">Dieses Modul wird gerade aufgebaut.</p>
+
+  <div class="header">
+    <div class="logo">🔌</div>
+    <div class="brand">ELMI AI</div>
+    <h1>CPO Sales Center AI</h1>
   </div>
+
+  <div class="nav-grid">
+    <a class="nav-card" href="settings.html">
+      <div class="nav-icon">⚙️</div>
+      <div class="nav-content">
+        <div class="nav-title" data-i18n="nav_settings">Settings</div>
+        <div class="nav-desc" data-i18n="nav_settings_desc">Standort, Preise, Radius, Daten-Upload</div>
+      </div>
+      <div class="nav-arrow">›</div>
+    </a>
+    <a class="nav-card" href="executive.html">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-content">
+        <div class="nav-title" data-i18n="nav_executive">Executive</div>
+        <div class="nav-desc" data-i18n="nav_executive_desc">Karte, KPIs, Wettbewerber-Cluster</div>
+      </div>
+      <div class="nav-arrow">›</div>
+    </a>
+    <a class="nav-card" href="wettbewerber-details.html">
+      <div class="nav-icon">🏢</div>
+      <div class="nav-content">
+        <div class="nav-title" data-i18n="nav_wett">Wettbewerber-Details</div>
+        <div class="nav-desc" data-i18n="nav_wett_desc">Tabelle aller Wettbewerber im Radius</div>
+      </div>
+      <div class="nav-arrow">›</div>
+    </a>
+    <a class="nav-card" href="standort-vs-wettbewerber.html">
+      <div class="nav-icon">📊</div>
+      <div class="nav-content">
+        <div class="nav-title" data-i18n="nav_standort">Standort vs. Wettbewerber</div>
+        <div class="nav-desc" data-i18n="nav_standort_desc">Auslastungsvergleich eigener Standort</div>
+      </div>
+      <div class="nav-arrow">›</div>
+    </a>
+    <a class="nav-card" href="preisstrategie.html">
+      <div class="nav-icon">💡</div>
+      <div class="nav-content">
+        <div class="nav-title" data-i18n="nav_preis">Preisstrategie</div>
+        <div class="nav-desc" data-i18n="nav_preis_desc">KI-gestützte Preisempfehlung</div>
+      </div>
+      <div class="nav-arrow">›</div>
+    </a>
+    <a class="nav-card" href="auslastungsrate.html">
+      <div class="nav-icon">⚡</div>
+      <div class="nav-content">
+        <div class="nav-title" data-i18n="nav_auslastung">Auslastungsrate</div>
+        <div class="nav-desc" data-i18n="nav_auslastung_desc">Power-BI Live-Report</div>
+      </div>
+      <div class="nav-arrow">›</div>
+    </a>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Wettbewerberdaten werden geladen …</span>
+  </div>
+
   <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
+
+  <script src="js/db.js"></script>
   <script>
   (function(){
-    var STRINGS = {
-      de: { back: 'Zurück', placeholder: 'Dieses Modul wird gerade aufgebaut.', footer: 'ELMI Power GmbH · Interne Nutzung' },
-      en: { back: 'Back',   placeholder: 'This module is currently under construction.', footer: 'ELMI Power GmbH · Internal use only' }
+    const S = {
+      de: {
+        back: 'Zurück', footer: 'ELMI Power GmbH · Interne Nutzung',
+        nav_settings: 'Settings', nav_settings_desc: 'Standort, Preise, Radius, Daten-Upload',
+        nav_executive: 'Executive', nav_executive_desc: 'Karte, KPIs, Wettbewerber-Cluster',
+        nav_wett: 'Wettbewerber-Details', nav_wett_desc: 'Tabelle aller Wettbewerber im Radius',
+        nav_standort: 'Standort vs. Wettbewerber', nav_standort_desc: 'Auslastungsvergleich eigener Standort',
+        nav_preis: 'Preisstrategie', nav_preis_desc: 'KI-gestützte Preisempfehlung',
+        nav_auslastung: 'Auslastungsrate', nav_auslastung_desc: 'Power-BI Live-Report',
+        loading: 'Wettbewerberdaten werden geladen …',
+        ok: (m) => `Wettbewerberdaten: ${m.anzahl_standorte?.toLocaleString('de')} Standorte, Stand ${m.analyse_datum}`,
+        offline: (m) => `Offline – Daten vom ${m.analyse_datum} (aus Cache)`,
+        none: 'Wettbewerberdaten noch nicht verfügbar'
+      },
+      en: {
+        back: 'Back', footer: 'ELMI Power GmbH · Internal use only',
+        nav_settings: 'Settings', nav_settings_desc: 'Location, prices, radius, data upload',
+        nav_executive: 'Executive', nav_executive_desc: 'Map, KPIs, competitor cluster',
+        nav_wett: 'Competitor Details', nav_wett_desc: 'All competitors within radius',
+        nav_standort: 'Location vs. Competitors', nav_standort_desc: 'Utilisation comparison',
+        nav_preis: 'Pricing Strategy', nav_preis_desc: 'AI-based price recommendation',
+        nav_auslastung: 'Utilisation Rate', nav_auslastung_desc: 'Power-BI live report',
+        loading: 'Loading competitor data …',
+        ok: (m) => `Competitor data: ${m.anzahl_standorte?.toLocaleString('de')} locations, as of ${m.analyse_datum}`,
+        offline: (m) => `Offline – data from ${m.analyse_datum} (from cache)`,
+        none: 'Competitor data not yet available'
+      }
     };
-    function applyLang(lang) {
-      var s = STRINGS[lang] || STRINGS.de;
-      document.getElementById('back-label').textContent       = s.back;
-      document.getElementById('placeholder-text').textContent = s.placeholder;
-      document.getElementById('footer-text').textContent      = s.footer;
-      document.documentElement.lang = lang;
-      ['de','en'].forEach(function(l){ var b = document.getElementById('lbtn-'+l); if (b) b.classList.toggle('active', l === lang); });
-    }
-    window.setLang = function(lang) { localStorage.setItem('elmi_lang', lang); applyLang(lang); };
-    applyLang(localStorage.getItem('elmi_lang') || 'de');
+
+    const lang = ELMI_DB.getLang();
+    const s = S[lang] || S.de;
+    document.getElementById('back-label').textContent = s.back;
+    document.getElementById('footer-text').textContent = s.footer;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (s[key]) el.textContent = s[key];
+    });
+    ELMI_DB.applyLangButtons(lang);
+    window.setLang = ELMI_DB.setLang;
+
+    // Status check
+    ELMI_DB.loadWettbewerberDaten().then(({ meta, source }) => {
+      const dot  = document.getElementById('status-dot');
+      const text = document.getElementById('status-text');
+      if (source === 'network' && meta) {
+        dot.className  = 'status-dot ok';
+        text.textContent = s.ok(meta);
+      } else if (source === 'cache' && meta) {
+        dot.className  = 'status-dot warn';
+        text.textContent = s.offline(meta);
+      } else {
+        dot.className  = 'status-dot';
+        text.textContent = s.none;
+      }
+    }).catch(() => {
+      document.getElementById('status-text').textContent = S[lang].none;
+    });
   })();
   </script>
 </body>

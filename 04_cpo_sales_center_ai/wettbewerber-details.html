@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wettbewerber-Details · CPO Sales Center AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; padding: 72px 16px 64px; }
+    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 100; }
+    .back-btn:hover { background: #2a2a35; }
+    .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; gap: 6px; z-index: 100; }
+    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: rgba(255,255,255,.45); transition: all .15s; display: flex; align-items: center; gap: 4px; }
+    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
+    .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
+    h1 { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; }
+    .page-wrap { max-width: 1200px; margin: 0 auto; }
+    .notice { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 12px 18px; font-size: 13px; color: #6B6B76; margin-bottom: 16px; }
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .filter-bar select, .filter-bar input { background: #1B1B22; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #fff; font: 400 13px 'Maven Pro', system-ui, sans-serif; padding: 8px 12px; }
+    .filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: #6D2A99; }
+    .filter-bar label { font-size: 11px; color: #6B6B76; font-weight: 600; text-transform: uppercase; }
+    .count-label { font-size: 12px; color: #6B6B76; margin-left: auto; }
+    .table-wrap { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #6B6B76; text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid rgba(255,255,255,.06); cursor: pointer; white-space: nowrap; user-select: none; }
+    thead th:hover { color: #9B59B6; }
+    thead th .sort-icon { margin-left: 4px; opacity: .4; }
+    thead th.sorted .sort-icon { opacity: 1; color: #9B59B6; }
+    tbody tr { border-bottom: 1px solid rgba(255,255,255,.04); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(109,42,153,.06); }
+    td { padding: 10px 14px; vertical-align: middle; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .badge-hpc { background: rgba(109,42,153,.3); color: #C39BD3; }
+    .badge-dc  { background: rgba(155,89,182,.25); color: #9B59B6; }
+    .badge-ac  { background: rgba(195,155,211,.15); color: #C39BD3; }
+    .badge-ov  { background: rgba(243,154,58,.15); color: #F39A3A; font-size: 10px; margin-left: 4px; }
+    .override-row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .ov-input { background: #0E0E14; border: 1px solid rgba(255,255,255,.1); border-radius: 6px; color: #fff; font: 400 12px 'Maven Pro', system-ui, sans-serif; padding: 5px 8px; width: 90px; }
+    .ov-select { background: #0E0E14; border: 1px solid rgba(255,255,255,.1); border-radius: 6px; color: #fff; font: 400 12px 'Maven Pro', system-ui, sans-serif; padding: 5px 8px; }
+    .ov-btn { background: rgba(109,42,153,.3); border: 1px solid #6D2A99; border-radius: 6px; color: #C39BD3; font: 600 11px 'Maven Pro', system-ui, sans-serif; padding: 5px 10px; cursor: pointer; }
+    .ov-btn:hover { background: rgba(109,42,153,.5); }
+    .ov-reset { background: transparent; border: 1px solid rgba(227,32,40,.3); border-radius: 6px; color: #E32028; font: 600 11px 'Maven Pro', system-ui, sans-serif; padding: 5px 10px; cursor: pointer; }
+    .ov-reset:hover { background: rgba(227,32,40,.1); }
+    .no-data { padding: 40px; text-align: center; color: #6B6B76; font-size: 14px; }
+    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #3A3A3C; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #2a2a35; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 12px 20px; font-size: 13px; color: #fff; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
+    .toast.show { opacity: 1; }
+    .preis-cell { font-weight: 600; }
+    .preis-null { color: #3A3A3C; font-style: italic; }
+  </style>
+</head>
+<body>
+  <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
+  <div class="lang-toggle">
+    <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
+    <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
+  </div>
+
+  <div class="page-wrap">
+    <h1>🏢 Wettbewerber-Details</h1>
+    <div class="notice" id="data-notice" style="display:none"></div>
+
+    <div class="filter-bar">
+      <div>
+        <label>Ladetyp</label><br>
+        <select id="filter-typ">
+          <option value="">Alle</option>
+          <option value="HPC">HPC</option>
+          <option value="DC">DC</option>
+          <option value="AC">AC</option>
+        </select>
+      </div>
+      <div>
+        <label>Kategorie</label><br>
+        <select id="filter-kat">
+          <option value="">Alle</option>
+          <option>Premium Ad-hoc</option>
+          <option>Tarif-/App-basiert mit Rabatt</option>
+          <option>Flatrate/Abo</option>
+          <option>Penetration/Markteinstieg</option>
+          <option>Dynamisch/Zeitabhängig</option>
+          <option>Unbekannt</option>
+        </select>
+      </div>
+      <div>
+        <label>Betreiber</label><br>
+        <input type="text" id="filter-betreiber" placeholder="Suchen …" style="width:180px">
+      </div>
+      <div class="count-label" id="count-label"></div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="main-table">
+        <thead>
+          <tr>
+            <th data-col="betreiber">Betreiber <span class="sort-icon">↕</span></th>
+            <th data-col="ladetyp">Typ <span class="sort-icon">↕</span></th>
+            <th data-col="ladepunkte">LP <span class="sort-icon">↕</span></th>
+            <th data-col="adresse">Adresse</th>
+            <th data-col="distanzKm">Dist. km <span class="sort-icon">↕</span></th>
+            <th data-col="preis_aktuell">Preis €/kWh <span class="sort-icon">↕</span></th>
+            <th data-col="preisstrategie_kategorie">Kategorie <span class="sort-icon">↕</span></th>
+            <th data-col="recherche_datum">Stand <span class="sort-icon">↕</span></th>
+            <th>Override</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div class="no-data" id="no-data" style="display:none">Keine Wettbewerber im konfigurierten Radius gefunden.</div>
+    </div>
+  </div>
+
+  <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
+  <div class="toast" id="toast"></div>
+
+  <script src="js/db.js"></script>
+  <script>
+  (function(){
+    const lang = ELMI_DB.getLang();
+    ELMI_DB.applyLangButtons(lang);
+    window.setLang = ELMI_DB.setLang;
+    document.getElementById('back-label').textContent = lang === 'en' ? 'Back' : 'Zurück';
+    document.getElementById('footer-text').textContent = lang === 'en' ? 'ELMI Power GmbH · Internal use only' : 'ELMI Power GmbH · Interne Nutzung';
+
+    const KATEGORIEN = ['Premium Ad-hoc','Tarif-/App-basiert mit Rabatt','Flatrate/Abo','Penetration/Markteinstieg','Dynamisch/Zeitabhängig','Unbekannt'];
+
+    let allRows = [];
+    let sortCol = 'distanzKm', sortAsc = true;
+    let overrideMap = {};
+
+    async function init() {
+      const [settings, wettData] = await Promise.all([
+        ELMI_DB.loadSettings(),
+        ELMI_DB.loadWettbewerberDaten()
+      ]);
+      const { standorte, betreiber, meta, source } = wettData;
+
+      const notice = document.getElementById('data-notice');
+      if (source === 'none') {
+        notice.style.display = 'block';
+        notice.textContent = '⚠ Wettbewerberdaten noch nicht verfügbar.';
+      } else if (source === 'cache' && meta) {
+        notice.style.display = 'block';
+        notice.textContent = `📴 Offline – Daten vom ${meta.analyse_datum}`;
+      }
+
+      if (!settings.standort || settings.standort.lat == null) {
+        notice.style.display = 'block';
+        notice.textContent = '⚠ Kein Standort konfiguriert – bitte zuerst Settings ausfüllen.';
+      }
+
+      const overrides = await ELMI_DB.dbGetAll('wettbewerberOverrides');
+      overrides.forEach(o => { overrideMap[o.key] = o; });
+
+      allRows = ELMI_DB.joinWettbewerber(standorte, betreiber, overrides, settings);
+      render();
+      bindFilters();
+      bindSort();
+    }
+
+    function getFiltered() {
+      const typ  = document.getElementById('filter-typ').value;
+      const kat  = document.getElementById('filter-kat').value;
+      const name = document.getElementById('filter-betreiber').value.toLowerCase();
+      return allRows.filter(r =>
+        (!typ  || r.ladetyp === typ) &&
+        (!kat  || r.preisstrategie_kategorie === kat) &&
+        (!name || r.betreiber.toLowerCase().includes(name))
+      );
+    }
+
+    function getSorted(rows) {
+      return [...rows].sort((a, b) => {
+        let av = a[sortCol], bv = b[sortCol];
+        if (av == null) av = sortAsc ? Infinity : -Infinity;
+        if (bv == null) bv = sortAsc ? Infinity : -Infinity;
+        if (typeof av === 'string') return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+        return sortAsc ? av - bv : bv - av;
+      });
+    }
+
+    function render() {
+      const filtered = getSorted(getFiltered());
+      const tbody = document.getElementById('table-body');
+      const noData = document.getElementById('no-data');
+      document.getElementById('count-label').textContent = `${filtered.length} Einträge`;
+
+      if (!filtered.length) {
+        tbody.innerHTML = '';
+        noData.style.display = 'block';
+        return;
+      }
+      noData.style.display = 'none';
+
+      tbody.innerHTML = filtered.map((r, idx) => {
+        const key = r.betreiber + '___' + r.ladetyp;
+        const ov  = overrideMap[key] || {};
+        const hasOv = Object.keys(ov).length > 0;
+        const typBadge = `<span class="badge badge-${r.ladetyp.toLowerCase()}">${r.ladetyp}</span>`;
+        const ovBadge  = hasOv ? '<span class="badge badge-ov">✏ manuell</span>' : '';
+        const preisDisplay = r.preis_aktuell != null
+          ? `<span class="preis-cell">${r.preis_aktuell.toFixed(2)} €</span>`
+          : `<span class="preis-null">–</span>`;
+
+        const selectOpts = KATEGORIEN.map(k =>
+          `<option value="${k}" ${r.preisstrategie_kategorie === k ? 'selected' : ''}>${k}</option>`
+        ).join('');
+
+        return `<tr>
+          <td>${r.betreiber}${ovBadge}</td>
+          <td>${typBadge}</td>
+          <td>${r.ladepunkte}</td>
+          <td style="white-space:nowrap">${r.strasse || ''} ${r.hausnummer || ''}<br><small style="color:#6B6B76">${r.plz || ''} ${r.ort || ''}</small></td>
+          <td>${r.distanzKm}</td>
+          <td>${preisDisplay}</td>
+          <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.preisstrategie_kategorie}</td>
+          <td style="white-space:nowrap;color:#6B6B76;font-size:11px">${r.recherche_datum || '–'}</td>
+          <td>
+            <div class="override-row">
+              <input class="ov-input" type="number" step="0.01" placeholder="Preis" value="${ov.preis_aktuell != null ? ov.preis_aktuell : ''}" id="ov-preis-${idx}">
+              <select class="ov-select" id="ov-kat-${idx}">${selectOpts}</select>
+              <button class="ov-btn" onclick="saveOverride(${idx},'${escKey(key)}')">✓</button>
+              ${hasOv ? `<button class="ov-reset" onclick="resetOverride(${idx},'${escKey(key)}')">↺</button>` : ''}
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+
+      // store row data for override saves
+      window._filteredRows = filtered;
+    }
+
+    function escKey(k) { return k.replace(/'/g, "\\'"); }
+
+    window.saveOverride = async function(idx, key) {
+      const preisVal = document.getElementById('ov-preis-' + idx).value;
+      const katVal   = document.getElementById('ov-kat-' + idx).value;
+      const ov = { key, preis_aktuell: preisVal !== '' ? parseFloat(preisVal) : undefined, preisstrategie_kategorie: katVal };
+      if (ov.preis_aktuell === undefined) delete ov.preis_aktuell;
+      await ELMI_DB.dbPut('wettbewerberOverrides', ov);
+      overrideMap[key] = ov;
+      // update allRows
+      allRows = allRows.map(r => {
+        if (r.betreiber + '___' + r.ladetyp === key) {
+          return { ...r,
+            preis_aktuell: ov.preis_aktuell !== undefined ? ov.preis_aktuell : r.preis_aktuell,
+            preisstrategie_kategorie: katVal,
+            _override: true
+          };
+        }
+        return r;
+      });
+      render();
+      showToast('✓ Override gespeichert');
+    };
+
+    window.resetOverride = async function(idx, key) {
+      const db = await ELMI_DB.openDB();
+      await new Promise((res, rej) => {
+        const tx = db.transaction('wettbewerberOverrides', 'readwrite');
+        tx.objectStore('wettbewerberOverrides').delete(key);
+        tx.oncomplete = res; tx.onerror = e => rej(e.target.error);
+      });
+      delete overrideMap[key];
+      // reload original data
+      const wettData = await ELMI_DB.loadWettbewerberDaten();
+      const settings = await ELMI_DB.loadSettings();
+      const overrides = await ELMI_DB.dbGetAll('wettbewerberOverrides');
+      allRows = ELMI_DB.joinWettbewerber(wettData.standorte, wettData.betreiber, overrides, settings);
+      render();
+      showToast('↺ Override zurückgesetzt');
+    };
+
+    function bindFilters() {
+      ['filter-typ','filter-kat','filter-betreiber'].forEach(id =>
+        document.getElementById(id).addEventListener('input', render)
+      );
+    }
+
+    function bindSort() {
+      document.querySelectorAll('thead th[data-col]').forEach(th => {
+        th.addEventListener('click', () => {
+          const col = th.getAttribute('data-col');
+          if (sortCol === col) sortAsc = !sortAsc;
+          else { sortCol = col; sortAsc = true; }
+          document.querySelectorAll('thead th').forEach(t => t.classList.remove('sorted'));
+          th.classList.add('sorted');
+          th.querySelector('.sort-icon').textContent = sortAsc ? '↑' : '↓';
+          render();
+        });
+      });
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    init().catch(console.error);
+  })();
+  </script>
+</body>
+</html>

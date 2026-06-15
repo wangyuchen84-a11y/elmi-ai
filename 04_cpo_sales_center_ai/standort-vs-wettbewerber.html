@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Standort vs. Wettbewerber · CPO Sales Center AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; padding: 72px 16px 64px; }
+    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 100; }
+    .back-btn:hover { background: #2a2a35; }
+    .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; gap: 6px; z-index: 100; }
+    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: rgba(255,255,255,.45); transition: all .15s; display: flex; align-items: center; gap: 4px; }
+    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
+    .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
+    h1 { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; }
+    .page-wrap { max-width: 1000px; margin: 0 auto; }
+    .notice { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 12px 18px; font-size: 13px; color: #6B6B76; margin-bottom: 16px; line-height: 1.5; }
+    .notice a { color: #9B59B6; }
+    .section { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 22px; margin-bottom: 18px; }
+    .section-title { font-size: 13px; font-weight: 800; color: #9B59B6; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 16px; }
+    .chart-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    @media(max-width:700px) { .chart-row { grid-template-columns: 1fr; } }
+    .chart-card { background: #0E0E14; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 14px; }
+    .chart-label { font-size: 11px; font-weight: 700; color: #6B6B76; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
+    canvas { max-height: 200px; }
+    .legend-row { display: flex; justify-content: center; gap: 16px; margin-top: 12px; }
+    .leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #ccc; }
+    .leg-box { width: 12px; height: 12px; border-radius: 3px; }
+    .leg-box.outline { background: transparent; border: 2px solid; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #6B6B76; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,.06); }
+    tbody td { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,.04); }
+    tbody tr:last-child td { border-bottom: none; }
+    .diff-pos { color: #4CAF50; font-weight: 700; }
+    .diff-neg { color: #E32028; font-weight: 700; }
+    .diff-neutral { color: #6B6B76; }
+    .badge-ladetyp { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 10px; font-weight: 800; }
+    .badge-AC  { background: rgba(195,155,211,.15); color: #C39BD3; }
+    .badge-DC  { background: rgba(155,89,182,.25);  color: #9B59B6; }
+    .badge-HPC { background: rgba(109,42,153,.3);   color: #C39BD3; }
+    .no-data { color: #3A3A3C; font-style: italic; }
+    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #3A3A3C; }
+    .hint { font-size: 11px; color: #3A3A3C; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
+  <div class="lang-toggle">
+    <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
+    <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
+  </div>
+
+  <div class="page-wrap">
+    <h1>📊 Standort vs. Wettbewerber</h1>
+    <div class="notice" id="top-notice"></div>
+
+    <!-- Charts -->
+    <div class="section">
+      <div class="section-title">Ladevorgänge pro Tag pro Ladepunkt</div>
+      <div class="chart-row">
+        <div class="chart-card"><div class="chart-label">AC</div><canvas id="chart-sessions-ac"></canvas></div>
+        <div class="chart-card"><div class="chart-label">DC</div><canvas id="chart-sessions-dc"></canvas></div>
+        <div class="chart-card"><div class="chart-label">HPC</div><canvas id="chart-sessions-hpc"></canvas></div>
+      </div>
+      <div class="legend-row">
+        <div class="leg-item"><div class="leg-box" style="background:#6D2A99"></div>Eigener Standort</div>
+        <div class="leg-item"><div class="leg-box outline" style="border-color:#9B59B6"></div>Wettbewerber (Ø Landkreis)</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Energie pro Tag pro Ladepunkt (kWh)</div>
+      <div class="chart-row">
+        <div class="chart-card"><div class="chart-label">AC</div><canvas id="chart-energy-ac"></canvas></div>
+        <div class="chart-card"><div class="chart-label">DC</div><canvas id="chart-energy-dc"></canvas></div>
+        <div class="chart-card"><div class="chart-label">HPC</div><canvas id="chart-energy-hpc"></canvas></div>
+      </div>
+      <div class="legend-row">
+        <div class="leg-item"><div class="leg-box" style="background:#6D2A99"></div>Eigener Standort</div>
+        <div class="leg-item"><div class="leg-box outline" style="border-color:#9B59B6"></div>Wettbewerber (Ø Landkreis)</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Belegdauer pro Tag pro Ladepunkt (Minuten)</div>
+      <div class="chart-row">
+        <div class="chart-card"><div class="chart-label">AC</div><canvas id="chart-beleg-ac"></canvas></div>
+        <div class="chart-card"><div class="chart-label">DC</div><canvas id="chart-beleg-dc"></canvas></div>
+        <div class="chart-card"><div class="chart-label">HPC</div><canvas id="chart-beleg-hpc"></canvas></div>
+      </div>
+      <div class="legend-row">
+        <div class="leg-item"><div class="leg-box" style="background:#6D2A99"></div>Eigener Standort</div>
+        <div class="leg-item"><div class="leg-box outline" style="border-color:#9B59B6"></div>Wettbewerber (Ø Landkreis)</div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="section">
+      <div class="section-title">Detailtabelle</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Ladetyp</th>
+            <th>Kennzahl</th>
+            <th>Eigener Standort</th>
+            <th>Wettbewerber-Ø</th>
+            <th>Abweichung</th>
+          </tr>
+        </thead>
+        <tbody id="detail-table"></tbody>
+      </table>
+      <div class="hint" id="data-hint"></div>
+    </div>
+  </div>
+
+  <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
+
+  <script src="js/db.js"></script>
+  <script>
+  (function(){
+    const lang = ELMI_DB.getLang();
+    ELMI_DB.applyLangButtons(lang);
+    window.setLang = ELMI_DB.setLang;
+    document.getElementById('back-label').textContent = lang === 'en' ? 'Back' : 'Zurück';
+    document.getElementById('footer-text').textContent = lang === 'en' ? 'ELMI Power GmbH · Internal use only' : 'ELMI Power GmbH · Interne Nutzung';
+
+    const TYPES = ['AC','DC','HPC'];
+    const TYPE_COLOR = { AC: '#C39BD3', DC: '#9B59B6', HPC: '#6D2A99' };
+
+    async function init() {
+      const [settings, wettData, eigeneLadedaten] = await Promise.all([
+        ELMI_DB.loadSettings(),
+        ELMI_DB.loadWettbewerberDaten(),
+        ELMI_DB.dbGetAll('eigeneLadedaten')
+      ]);
+
+      const { standorte, betreiber, kennzahlen, meta, source } = wettData;
+      const overrides = await ELMI_DB.dbGetAll('wettbewerberOverrides');
+      const joined    = ELMI_DB.joinWettbewerber(standorte, betreiber, overrides, settings);
+
+      // --- Eigene Kennzahlen je Ladetyp ---
+      const eigenByType = {};
+      TYPES.forEach(t => {
+        const guns = eigeneLadedaten.filter(e => e.ladetyp === t);
+        if (!guns.length) { eigenByType[t] = null; return; }
+        const avgSessions = guns.reduce((s, e) => s + e.ladevorgaenge / e.tageImZeitraum, 0) / guns.length;
+        const avgKwh      = guns.reduce((s, e) => s + e.gesamtEnergieKwh / e.tageImZeitraum, 0) / guns.length;
+        eigenByType[t] = { sessionsPerDay: avgSessions, kwhPerDay: avgKwh, beleg: null };
+      });
+
+      // --- Wettbewerber-Benchmark aus auslastungsKennzahlen ---
+      // Determine landkreise from standorteImRadius
+      const landkreiseEigen = [...new Set(joined.map(s => s.landkreis).filter(Boolean))];
+      let usedDefault = false;
+
+      function getBenchmark(ladetyp) {
+        // Try matching landkreise
+        if (landkreiseEigen.length) {
+          const matches = kennzahlen.filter(k => k.ladetyp === ladetyp && landkreiseEigen.includes(k.landkreis));
+          if (matches.length) {
+            const avg = f => matches.reduce((s, k) => s + (k[f] || 0), 0) / matches.length;
+            return {
+              sessions: avg('avg_ladevorgaenge_taeglich'),
+              kwh:      avg('avg_energie_taeglich_kwh'),
+              beleg:    avg('avg_belegdauer_taeglich_min'),
+              isDefault: false
+            };
+          }
+        }
+        // Fall back to default
+        const def = kennzahlen.filter(k => k.ladetyp === ladetyp && k.ist_default);
+        usedDefault = true;
+        if (!def.length) return null;
+        const avg = f => def.reduce((s, k) => s + (k[f] || 0), 0) / def.length;
+        return {
+          sessions: avg('avg_ladevorgaenge_taeglich'),
+          kwh:      avg('avg_energie_taeglich_kwh'),
+          beleg:    avg('avg_belegdauer_taeglich_min'),
+          isDefault: true
+        };
+      }
+
+      const wettByType = {};
+      TYPES.forEach(t => { wettByType[t] = getBenchmark(t); });
+
+      // Build notice
+      const noticeEl = document.getElementById('top-notice');
+      const notices = [];
+      if (source === 'none') notices.push('⚠ Wettbewerberdaten noch nicht verfügbar – Benchmark-Spalte leer.');
+      else if (source === 'cache' && meta) notices.push(`📴 Offline – Daten vom ${meta.analyse_datum}`);
+      if (!eigeneLadedaten.length) notices.push('ℹ Noch keine eigenen Ladedaten hochgeladen – bitte in den <a href="settings.html">Settings</a> importieren.');
+      if (!notices.length) noticeEl.style.display = 'none';
+      else noticeEl.innerHTML = notices.join('<br>');
+
+      // Render charts
+      TYPES.forEach(t => {
+        const e  = eigenByType[t];
+        const w  = wettByType[t];
+        const tc = TYPE_COLOR[t];
+        const tl = t.toLowerCase();
+
+        renderBarChart(`chart-sessions-${tl}`, e?.sessionsPerDay, w?.sessions, tc);
+        renderBarChart(`chart-energy-${tl}`,   e?.kwhPerDay,      w?.kwh,      tc);
+        renderBarChart(`chart-beleg-${tl}`,    e?.beleg,          w?.beleg,    tc);
+      });
+
+      // Render table
+      renderTable(eigenByType, wettByType, meta, usedDefault);
+
+      // Hint
+      const hint = [];
+      if (meta) hint.push(`Benchmark-Daten Stand ${meta.analyse_datum}`);
+      if (usedDefault) hint.push('* Kein Landkreis-Match gefunden – Bundes-Defaultwerte verwendet');
+      if (landkreiseEigen.length) hint.push(`Landkreise im Radius: ${landkreiseEigen.slice(0,5).join(', ')}${landkreiseEigen.length > 5 ? ' …' : ''}`);
+      document.getElementById('data-hint').textContent = hint.join(' · ');
+    }
+
+    function renderBarChart(canvasId, eigenVal, wettVal, color) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      const labels = ['Eigen', 'Wettbewerber'];
+      const data   = [
+        eigenVal != null ? Math.round(eigenVal * 100) / 100 : null,
+        wettVal  != null ? Math.round(wettVal  * 100) / 100 : null
+      ];
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: [color, 'transparent'],
+            borderColor:     [color, color],
+            borderWidth:     [0, 2],
+            borderDash:      [[], [5,3]]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { display: false }, tooltip: {
+            callbacks: { label: c => c.raw != null ? ` ${c.raw}` : ' Keine Daten' }
+          }},
+          scales: {
+            x: { ticks: { color: '#6B6B76', font: { size: 11 } }, grid: { display: false } },
+            y: { ticks: { color: '#6B6B76', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,.05)' }, beginAtZero: true }
+          },
+          animation: { duration: 600 }
+        }
+      });
+    }
+
+    function renderTable(eigenByType, wettByType, meta, usedDefault) {
+      const tbody = document.getElementById('detail-table');
+      const rows  = [];
+      const METRICS = [
+        { key: 'sessions', label: 'Ladevorgänge/Tag/LP', eigenFn: e => e?.sessionsPerDay, wettFn: w => w?.sessions },
+        { key: 'kwh',      label: 'Energie kWh/Tag/LP',  eigenFn: e => e?.kwhPerDay,       wettFn: w => w?.kwh },
+        { key: 'beleg',    label: 'Belegdauer Min/Tag/LP',eigenFn: e => e?.beleg,           wettFn: w => w?.beleg }
+      ];
+
+      TYPES.forEach(t => {
+        const e = eigenByType[t];
+        const w = wettByType[t];
+        METRICS.forEach(m => {
+          const ev = m.eigenFn(e);
+          const wv = m.wettFn(w);
+          let diff = '';
+          if (ev != null && wv != null && wv !== 0) {
+            const pct = ((ev - wv) / wv * 100).toFixed(1);
+            const cls = parseFloat(pct) > 0 ? 'diff-pos' : parseFloat(pct) < 0 ? 'diff-neg' : 'diff-neutral';
+            diff = `<span class="${cls}">${parseFloat(pct) > 0 ? '+' : ''}${pct} %</span>`;
+          } else if (ev == null && wv == null) {
+            diff = '<span class="no-data">–</span>';
+          }
+          rows.push(`<tr>
+            <td><span class="badge-ladetyp badge-${t}">${t}</span></td>
+            <td>${m.label}${usedDefault && m.key !== 'beleg' ? ' *' : ''}</td>
+            <td>${ev != null ? ev.toFixed(2) : '<span class="no-data">Keine Daten</span>'}</td>
+            <td>${wv != null ? wv.toFixed(2) : '<span class="no-data">–</span>'}</td>
+            <td>${diff}</td>
+          </tr>`);
+        });
+      });
+      tbody.innerHTML = rows.join('');
+    }
+
+    init().catch(console.error);
+  })();
+  </script>
+</body>
+</html>
