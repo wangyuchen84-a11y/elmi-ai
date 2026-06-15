@@ -1,0 +1,2612 @@
+[
+  {
+    "betreiber": "EnBW mobility+ AG und Co.KG",
+    "ladepunkte_gesamt": 10897,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "E.ON Drive GmbH",
+    "ladepunkte_gesamt": 3882,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Tesla Germany GmbH",
+    "ladepunkte_gesamt": 3657,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "EWE Go GmbH",
+    "ladepunkte_gesamt": 3118,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "BP Europa SE",
+    "ladepunkte_gesamt": 2980,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Mercedes-Benz AG",
+    "ladepunkte_gesamt": 2665,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Allego GmbH",
+    "ladepunkte_gesamt": 2546,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Pfalzwerke AG",
+    "ladepunkte_gesamt": 2400,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Shell Deutschland GmbH",
+    "ladepunkte_gesamt": 2226,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Team-Emobility GmbH",
+    "ladepunkte_gesamt": 2151,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Lidl Dienstleistung GmbH & Co. KG",
+    "ladepunkte_gesamt": 2136,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Hamburger Energiewerke Mobil GmbH",
+    "ladepunkte_gesamt": 2104,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mer Germany GmbH",
+    "ladepunkte_gesamt": 1920,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Westenergie Metering GmbH",
+    "ladepunkte_gesamt": 1874,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "TankE GmbH",
+    "ladepunkte_gesamt": 1859,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "eze.network GmbH",
+    "ladepunkte_gesamt": 1836,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ALDI SÜD Immobilienverwaltungs-GmbH & Co. oHG",
+    "ladepunkte_gesamt": 1754,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "N-ERGIE Aktiengesellschaft",
+    "ladepunkte_gesamt": 1750,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "enercity AG",
+    "ladepunkte_gesamt": 1634,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Robert Bosch GmbH",
+    "ladepunkte_gesamt": 1628,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Berliner Stadtwerke KommunalPartner GmbH",
+    "ladepunkte_gesamt": 1617,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Wirelane Public I GmbH",
+    "ladepunkte_gesamt": 1572,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Qwello Deutschland GmbH",
+    "ladepunkte_gesamt": 1537,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Audi AG",
+    "ladepunkte_gesamt": 1469,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Claus Heinemann Elektroanlagen GmbH",
+    "ladepunkte_gesamt": 1425,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Energie Südbayern GmbH",
+    "ladepunkte_gesamt": 1421,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Düsseldorf AG",
+    "ladepunkte_gesamt": 1415,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "IONITY GmbH",
+    "ladepunkte_gesamt": 1406,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "SWM Versorgungs GmbH",
+    "ladepunkte_gesamt": 1391,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ubitricity Gesellschaft für verteilte Energiesysteme mbH",
+    "ladepunkte_gesamt": 1390,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "E.ON Drive Infrastructure GmbH",
+    "ladepunkte_gesamt": 1343,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Citywatt GmbH",
+    "ladepunkte_gesamt": 1147,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Vattenfall Smarter Living GmbH",
+    "ladepunkte_gesamt": 1130,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Energielösung GmbH",
+    "ladepunkte_gesamt": 1130,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Kaufland Dienstleistung GmbH & Co. KG",
+    "ladepunkte_gesamt": 1128,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "TEAG Mobil GmbH",
+    "ladepunkte_gesamt": 1091,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "deer GmbH",
+    "ladepunkte_gesamt": 1061,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ESWE Versorgungs AG",
+    "ladepunkte_gesamt": 1049,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Westfalen Weser Ladeservice GmbH",
+    "ladepunkte_gesamt": 1026,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "TotalEnergies Charging Solutions Deutschland GmbH",
+    "ladepunkte_gesamt": 988,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Stuttgart GmbH",
+    "ladepunkte_gesamt": 987,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "NEW Niederrhein Energie und Wasser GmbH",
+    "ladepunkte_gesamt": 874,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Regioladen+ GmbH & Co.KG",
+    "ladepunkte_gesamt": 865,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EnBW Ostwürttemberg DonauRies AG",
+    "ladepunkte_gesamt": 848,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "naturenergie hochrhein AG",
+    "ladepunkte_gesamt": 830,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Leipzig GmbH",
+    "ladepunkte_gesamt": 813,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "REWAG KG",
+    "ladepunkte_gesamt": 758,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SachsenEnergie AG",
+    "ladepunkte_gesamt": 758,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "GP Joule Connect GmbH",
+    "ladepunkte_gesamt": 752,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energie- und Wasserversorgung Bonn/Rhein-Sieg GmbH",
+    "ladepunkte_gesamt": 719,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Entega Plus GmbH",
+    "ladepunkte_gesamt": 717,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mainova AG",
+    "ladepunkte_gesamt": 672,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EDEKA-MIHA Charge GmbH",
+    "ladepunkte_gesamt": 672,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Comfortcharge GmbH",
+    "ladepunkte_gesamt": 671,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Energieservice Rhein-Main GmbH",
+    "ladepunkte_gesamt": 656,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "HOCHTIEF Ladepartner GmbH",
+    "ladepunkte_gesamt": 640,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "STAWAG - Stadt- und Städteregionswerke Aachen AG",
+    "ladepunkte_gesamt": 626,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Wattif Europe GmbH",
+    "ladepunkte_gesamt": 596,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Parkraumgesellschaft Baden-Württemberg GmbH",
+    "ladepunkte_gesamt": 586,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Dortmunder Energie- und Wasserversorgung GmbH",
+    "ladepunkte_gesamt": 579,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Tesla Manufacturing Brandenburg SE",
+    "ladepunkte_gesamt": 567,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Stadtwerke Lübeck Energie GmbH",
+    "ladepunkte_gesamt": 564,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "BS|ENERGY, Braunschweiger Versorgungs-AG & Co. KG",
+    "ladepunkte_gesamt": 562,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "RhönEnergie Fulda GmbH",
+    "ladepunkte_gesamt": 542,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Volkswagen AG - Werk Wolfsburg",
+    "ladepunkte_gesamt": 541,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Duisburg AG",
+    "ladepunkte_gesamt": 492,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Georg Jos. Kaes GmbH",
+    "ladepunkte_gesamt": 491,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "MVV Energie AG",
+    "ladepunkte_gesamt": 488,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Fraunhofer-Gesellschaft e. V.",
+    "ladepunkte_gesamt": 478,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Servipark Deutschland GmbH",
+    "ladepunkte_gesamt": 478,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Circle K Deutschland GmbH",
+    "ladepunkte_gesamt": 471,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "HomE of Mobility GmbH",
+    "ladepunkte_gesamt": 469,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "LEW Natur GmbH",
+    "ladepunkte_gesamt": 467,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "GLS Mobility GmbH",
+    "ladepunkte_gesamt": 460,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "amperio GmbH",
+    "ladepunkte_gesamt": 444,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "smopi® - Multi Chargepoint Solution GmbH",
+    "ladepunkte_gesamt": 418,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "envia Mitteldeutsche Energie AG",
+    "ladepunkte_gesamt": 400,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Q-Park Recharge Germany GmbH",
+    "ladepunkte_gesamt": 387,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "SWU Energie GmbH",
+    "ladepunkte_gesamt": 383,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Flughafen München GmbH",
+    "ladepunkte_gesamt": 375,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SMATRICS GmbH & Co KG",
+    "ladepunkte_gesamt": 370,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "amba operations GmbH",
+    "ladepunkte_gesamt": 366,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SWLB Mobilität GmbH",
+    "ladepunkte_gesamt": 366,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EAM Natur Energie GmbH",
+    "ladepunkte_gesamt": 366,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Stadtwerke Würzburg AG",
+    "ladepunkte_gesamt": 365,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "VIOCON GmbH",
+    "ladepunkte_gesamt": 358,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "GETEC mobility solutions GmbH",
+    "ladepunkte_gesamt": 357,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "badenova AG & Co. KG",
+    "ladepunkte_gesamt": 353,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Osnabrücker Parkstätten-Betriebsgesellschaft mbH",
+    "ladepunkte_gesamt": 352,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "infra fürth service gmbh",
+    "ladepunkte_gesamt": 350,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Bochum GmbH",
+    "ladepunkte_gesamt": 349,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Emscher Lippe Energie GmbH",
+    "ladepunkte_gesamt": 346,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Backcharge GmbH",
+    "ladepunkte_gesamt": 337,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ecowerk e-charge GmbH",
+    "ladepunkte_gesamt": 331,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Heidelberg Energie GmbH",
+    "ladepunkte_gesamt": 331,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Fastned Deutschland GmbH & Co. KG",
+    "ladepunkte_gesamt": 326,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Ladestationen Südwest GmbH & Co. KG",
+    "ladepunkte_gesamt": 319,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ALDI Nord Deutschland Stiftung & Co. KG",
+    "ladepunkte_gesamt": 317,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Bilkraft GmbH",
+    "ladepunkte_gesamt": 314,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Energieversorgung Oberhausen AG",
+    "ladepunkte_gesamt": 307,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "APCOA Deutschland GmbH",
+    "ladepunkte_gesamt": 303,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Städtische Werke AG",
+    "ladepunkte_gesamt": 300,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "inno2grid GmbH",
+    "ladepunkte_gesamt": 295,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "nonoxx pro GmbH",
+    "ladepunkte_gesamt": 287,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Pluq Assets BV",
+    "ladepunkte_gesamt": 286,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Volkswagen AG, Werk Hannover",
+    "ladepunkte_gesamt": 283,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Heilbronn GmbH",
+    "ladepunkte_gesamt": 278,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Adolf Würth GmbH & Co. KG",
+    "ladepunkte_gesamt": 274,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Oberhessische Versorgungsbetriebe AG",
+    "ladepunkte_gesamt": 267,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mark-E Aktiengesellschaft",
+    "ladepunkte_gesamt": 266,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Zweckverband Region Schwäbische Alb",
+    "ladepunkte_gesamt": 259,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Avacon AG",
+    "ladepunkte_gesamt": 257,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Westfalen AG",
+    "ladepunkte_gesamt": 250,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "WEMAG AG",
+    "ladepunkte_gesamt": 247,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ÜZ Mainfranken eG",
+    "ladepunkte_gesamt": 246,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Vonovia Energie GmbH",
+    "ladepunkte_gesamt": 241,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "team energie GmbH & Co. KG",
+    "ladepunkte_gesamt": 240,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "LSW Energie GmbH & Co. KG",
+    "ladepunkte_gesamt": 237,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Autostrom plus GmbH",
+    "ladepunkte_gesamt": 231,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Energieversorgung Mittelrhein AG",
+    "ladepunkte_gesamt": 231,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Süwag Vertrieb AG & Co. KG",
+    "ladepunkte_gesamt": 230,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Q1 Energie AG",
+    "ladepunkte_gesamt": 229,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "STADTWERK MOBILITY PLUS GmbH & Co. KG",
+    "ladepunkte_gesamt": 228,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Cut! Energy GmbH",
+    "ladepunkte_gesamt": 225,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Ladegrün! eG",
+    "ladepunkte_gesamt": 223,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Reload-Solution GmbH",
+    "ladepunkte_gesamt": 219,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Schwerter Strom Management-GmbH",
+    "ladepunkte_gesamt": 218,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Kiel AG",
+    "ladepunkte_gesamt": 217,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "e-con AG",
+    "ladepunkte_gesamt": 216,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "OMS Prüfservice GmbH",
+    "ladepunkte_gesamt": 214,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "E-Merge Mobility GmbH",
+    "ladepunkte_gesamt": 214,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SWP Stadtwerke Pforzheim GmbH&Co.KG",
+    "ladepunkte_gesamt": 212,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energie- und Wasserversorgung Bruchsal GmbH",
+    "ladepunkte_gesamt": 210,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Münster GmbH",
+    "ladepunkte_gesamt": 210,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Bielefeld GmbH",
+    "ladepunkte_gesamt": 209,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Gruppen-Gas- und Elektrizitätswerk Bergstraße AG",
+    "ladepunkte_gesamt": 207,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Göttingen AG",
+    "ladepunkte_gesamt": 204,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EWV Energie- und Wasser-Versorgung GmbH",
+    "ladepunkte_gesamt": 204,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EWE Go HOCHTIEF Ladepartner GmbH & Co. KG",
+    "ladepunkte_gesamt": 200,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Albwerk Elektro- und Kommunikationstechnik GmbH",
+    "ladepunkte_gesamt": 199,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Neuss Energie und Wasser GmbH",
+    "ladepunkte_gesamt": 198,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Präg Energiedienstleistungen GmbH & Co. KG",
+    "ladepunkte_gesamt": 197,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "HanseWerk AG",
+    "ladepunkte_gesamt": 196,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mercedes-Benz High-Power Charging Europe GmbH",
+    "ladepunkte_gesamt": 192,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Enni Energie & Umwelt Niederrhein GmbH",
+    "ladepunkte_gesamt": 192,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "17er Oberlandenergie GmbH",
+    "ladepunkte_gesamt": 191,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Eulektro GmbH",
+    "ladepunkte_gesamt": 190,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke SH GmbH & Co. KG",
+    "ladepunkte_gesamt": 190,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Wirelane GmbH",
+    "ladepunkte_gesamt": 188,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Jolt Energy GmbH",
+    "ladepunkte_gesamt": 188,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Erneuerbare für Marburg-Biedenkopf GmbH & Co. KG",
+    "ladepunkte_gesamt": 187,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Rüsselsheim GmbH",
+    "ladepunkte_gesamt": 186,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "JET Tankstellen Deutschland GmbH",
+    "ladepunkte_gesamt": 184,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "IKEA Deutschland GmbH & Co.KG",
+    "ladepunkte_gesamt": 183,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Haller Mobilität und Wärme GmbH",
+    "ladepunkte_gesamt": 183,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Konstanz Mobil GmbH",
+    "ladepunkte_gesamt": 183,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Elektrizitätswerk Mittelbaden AG & Co. KG",
+    "ladepunkte_gesamt": 181,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Witten Energielösungen GmbH",
+    "ladepunkte_gesamt": 177,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mainzer Stadtwerke AG",
+    "ladepunkte_gesamt": 176,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "MAINGAU Energie GmbH",
+    "ladepunkte_gesamt": 176,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "MAHLE chargeBIG",
+    "ladepunkte_gesamt": 175,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "EnergieZukunft Hildesheim GmbH",
+    "ladepunkte_gesamt": 174,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "e-regio GmbH & Co. KG",
+    "ladepunkte_gesamt": 173,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Solingen GmbH",
+    "ladepunkte_gesamt": 173,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "StromSpeicherMarkt GmbH",
+    "ladepunkte_gesamt": 172,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Aachener Parkhaus GmbH",
+    "ladepunkte_gesamt": 170,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Fraport AG",
+    "ladepunkte_gesamt": 170,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Stadtwerke Castrop-Rauxel GmbH",
+    "ladepunkte_gesamt": 170,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Volkswagen AG, Standort Braunschweig",
+    "ladepunkte_gesamt": 168,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "eins energie in sachsen GmbH & Co. KG",
+    "ladepunkte_gesamt": 167,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "WSW Energie & Wasser AG",
+    "ladepunkte_gesamt": 165,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Iserlohn GmbH",
+    "ladepunkte_gesamt": 162,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "IP Innovative Power GmbH",
+    "ladepunkte_gesamt": 161,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "NürnbergMesse GmbH",
+    "ladepunkte_gesamt": 161,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Düren GmbH",
+    "ladepunkte_gesamt": 161,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Husum GmbH",
+    "ladepunkte_gesamt": 158,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "cocharge gmbh",
+    "ladepunkte_gesamt": 157,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Volkswagen Sachsen GmbH, Werk Zwickau",
+    "ladepunkte_gesamt": 157,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SWS Energie GmbH",
+    "ladepunkte_gesamt": 154,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Electra Germany GmbH",
+    "ladepunkte_gesamt": 152,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "EA EnergieArchitektur Dresden GmbH",
+    "ladepunkte_gesamt": 152,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Plenitude On The Road  S.r.l.",
+    "ladepunkte_gesamt": 151,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "swb Vertrieb Bremen GmbH",
+    "ladepunkte_gesamt": 151,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Allgäuer Überlandwerk GmbH",
+    "ladepunkte_gesamt": 150,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "B+B Parkhaus GmbH & Co.KG",
+    "ladepunkte_gesamt": 149,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Orange Charging B.V.",
+    "ladepunkte_gesamt": 148,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "energis GmbH",
+    "ladepunkte_gesamt": 148,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Chargeforce GmbH & CO. KG",
+    "ladepunkte_gesamt": 147,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Volkswagen AG, Zweigniederlassung Werk Kassel",
+    "ladepunkte_gesamt": 146,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Goch Energie GmbH",
+    "ladepunkte_gesamt": 146,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Park One GmbH",
+    "ladepunkte_gesamt": 145,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "BayWa Mobility Solutions GmbH",
+    "ladepunkte_gesamt": 144,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Technische Werke Schussental GmbH & Co. KG",
+    "ladepunkte_gesamt": 141,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Soest Energiedienstleistungs GmbH",
+    "ladepunkte_gesamt": 140,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EM1 GmbH",
+    "ladepunkte_gesamt": 139,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energieversorgung Gera GmbH",
+    "ladepunkte_gesamt": 138,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Stendal GmbH",
+    "ladepunkte_gesamt": 137,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Energie Jena-Pößneck GmbH",
+    "ladepunkte_gesamt": 137,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Bamberg Verkehrs- und Park GmbH",
+    "ladepunkte_gesamt": 136,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "iSATT-GmbH",
+    "ladepunkte_gesamt": 136,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "SWN Stadtwerke Neumünster GmbH",
+    "ladepunkte_gesamt": 135,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EMB Energie Brandenburg GmbH",
+    "ladepunkte_gesamt": 134,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "BREPARK GmbH",
+    "ladepunkte_gesamt": 134,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "SÜC GmbH",
+    "ladepunkte_gesamt": 133,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Ladesonne GmbH & Co. KG",
+    "ladepunkte_gesamt": 133,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Leitungstiefbau Dithmarschen GmbH",
+    "ladepunkte_gesamt": 133,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Universitätsklinikum Heidelberg Anstalt öffentlichen Rechts",
+    "ladepunkte_gesamt": 132,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SI Energy GmbH",
+    "ladepunkte_gesamt": 128,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "GFC mbH",
+    "ladepunkte_gesamt": 126,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "nvb smart GmbH",
+    "ladepunkte_gesamt": 125,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Volkswagen AG, Werk Salzgitter",
+    "ladepunkte_gesamt": 124,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EMERGY Führungs- und Servicegesellschaft mbH",
+    "ladepunkte_gesamt": 124,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Bidirex GmbH",
+    "ladepunkte_gesamt": 123,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EW Eichsfeldgas GmbH",
+    "ladepunkte_gesamt": 123,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EDEKA RR Stiftung & Co. KG",
+    "ladepunkte_gesamt": 123,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EWR AG",
+    "ladepunkte_gesamt": 122,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Flughafen Stuttgart GmbH",
+    "ladepunkte_gesamt": 121,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Energie und Wasser Potsdam GmbH",
+    "ladepunkte_gesamt": 121,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ESEL.CAB GmbH",
+    "ladepunkte_gesamt": 120,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SWE Energie GmbH",
+    "ladepunkte_gesamt": 120,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "AreaCharge GmbH",
+    "ladepunkte_gesamt": 119,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Daimler Truck AG",
+    "ladepunkte_gesamt": 118,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "TotalEnergies Marketing Deutschland GmbH",
+    "ladepunkte_gesamt": 117,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Ingolstadt Energie GmbH",
+    "ladepunkte_gesamt": 117,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Rostock AG",
+    "ladepunkte_gesamt": 116,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mercedes- Benz AG - Niederlassung Rhein-Ruhr",
+    "ladepunkte_gesamt": 116,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "mwenergy GmbH",
+    "ladepunkte_gesamt": 116,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Pariamus GmbH",
+    "ladepunkte_gesamt": 114,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "FairEnergie GmbH",
+    "ladepunkte_gesamt": 113,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Gronau GmbH",
+    "ladepunkte_gesamt": 113,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "öPA Verkehrsgesellschaft mbh",
+    "ladepunkte_gesamt": 113,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Charge Construct GmbH",
+    "ladepunkte_gesamt": 111,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Tank & Rast Entwicklungsgesellschaft mbH",
+    "ladepunkte_gesamt": 110,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Stadtwerke Hamm GmbH",
+    "ladepunkte_gesamt": 110,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "go2zero charging solutions gmbh",
+    "ladepunkte_gesamt": 108,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Barnimer Energiebeteiligungsgesellschaft mbH (BEBG)",
+    "ladepunkte_gesamt": 108,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Neue Energien GmbH",
+    "ladepunkte_gesamt": 108,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Fred Pfennings GmbH & Co. KG",
+    "ladepunkte_gesamt": 106,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Vereinigte Stadtwerke GmbH",
+    "ladepunkte_gesamt": 106,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "mblty GmbH",
+    "ladepunkte_gesamt": 105,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "SCHARR WÄRME GmbH & Co. KG",
+    "ladepunkte_gesamt": 105,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Swarco Traffic Systems GmbH",
+    "ladepunkte_gesamt": 105,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Bocholter Energie- und Wasserversorgung GmbH",
+    "ladepunkte_gesamt": 105,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Glinicke Energie+Service GmbH",
+    "ladepunkte_gesamt": 104,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Rheinenergie AG",
+    "ladepunkte_gesamt": 104,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Sonnenstrom Saarpfalz OHG",
+    "ladepunkte_gesamt": 104,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Neue Energien Hilden GmbH",
+    "ladepunkte_gesamt": 103,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Verkehrsbetriebe Speyer GmbH",
+    "ladepunkte_gesamt": 103,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Netto Marken-Discount Stiftung & Co. KG",
+    "ladepunkte_gesamt": 102,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "VWEW Kommunal GmbH",
+    "ladepunkte_gesamt": 101,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Neumarkt i.d.OPf. Freizeit & Leben KU",
+    "ladepunkte_gesamt": 100,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Hahn Automobile GmbH & Co. KG",
+    "ladepunkte_gesamt": 99,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "symCharge GmbH",
+    "ladepunkte_gesamt": 99,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energie Service Bietigheim Bissingen GmbH",
+    "ladepunkte_gesamt": 98,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "energie schwaben gmbh",
+    "ladepunkte_gesamt": 98,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Remscheid GmbH",
+    "ladepunkte_gesamt": 98,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Inselwerke eG",
+    "ladepunkte_gesamt": 97,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "E.DIS AG",
+    "ladepunkte_gesamt": 96,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Dayser Deutschland GmbH",
+    "ladepunkte_gesamt": 95,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stark Energy GmbH",
+    "ladepunkte_gesamt": 94,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Stadtwerke Leinfelden-Echterdingen",
+    "ladepunkte_gesamt": 94,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Oberschwabenklinik gGmbH",
+    "ladepunkte_gesamt": 94,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "STERNPARTNER SE + Co.KG",
+    "ladepunkte_gesamt": 94,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Evry Operations GmbH",
+    "ladepunkte_gesamt": 94,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Gütersloh GmbH",
+    "ladepunkte_gesamt": 94,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Wissenschaftspark Kiel GmbH",
+    "ladepunkte_gesamt": 94,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energieversorgung Landsberg GmbH & Co. KG",
+    "ladepunkte_gesamt": 93,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "eliso GmbH",
+    "ladepunkte_gesamt": 92,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "EDEKA Südbayern Handels Stiftung & Co KG",
+    "ladepunkte_gesamt": 92,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Augsburg Energie GmbH",
+    "ladepunkte_gesamt": 92,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "medl GmbH",
+    "ladepunkte_gesamt": 92,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EDE - Energiedienst Erlangen GmbH",
+    "ladepunkte_gesamt": 91,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Schweinfurt GmbH",
+    "ladepunkte_gesamt": 91,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Greenman Energy Operations GmbH & Co. KG",
+    "ladepunkte_gesamt": 90,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Numbat Schnellladenetz GmbH & Co. KG",
+    "ladepunkte_gesamt": 90,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Abfallwirtschaft und Stadtreinigung Freiburg GmbH",
+    "ladepunkte_gesamt": 90,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Chargemaker GmbH",
+    "ladepunkte_gesamt": 90,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Autohaus Bernds GmbH",
+    "ladepunkte_gesamt": 90,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Steinburg GmbH",
+    "ladepunkte_gesamt": 90,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "AVU AG",
+    "ladepunkte_gesamt": 89,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Ladelösungen Fürstenfeldbruck GmbH",
+    "ladepunkte_gesamt": 88,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "FAMIS GmbH",
+    "ladepunkte_gesamt": 88,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Parkgaragengesellschaft Baden-Baden mbH",
+    "ladepunkte_gesamt": 87,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "AggerEnergie GmbH",
+    "ladepunkte_gesamt": 87,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EG Elektromobilität GmbH & Co KG",
+    "ladepunkte_gesamt": 87,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Köthen Energie GmBH",
+    "ladepunkte_gesamt": 87,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ZEAG Energie AG",
+    "ladepunkte_gesamt": 86,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Langenfeld GmbH",
+    "ladepunkte_gesamt": 86,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Hymes Energy GmbH",
+    "ladepunkte_gesamt": 85,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "BIGGE ENERGIE GmbH & Co. KG",
+    "ladepunkte_gesamt": 85,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "On Charge GmbH",
+    "ladepunkte_gesamt": 84,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Dachau",
+    "ladepunkte_gesamt": 84,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "NEG Neue Energien Mainfranken GmbH",
+    "ladepunkte_gesamt": 84,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mercedes- Benz AG - Niederlassung Hannover",
+    "ladepunkte_gesamt": 84,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Regionalwerk Bodensee GmbH & Co. KG",
+    "ladepunkte_gesamt": 83,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "RMG, Rems-Murr-Gesundheits GmbH & Co. KG",
+    "ladepunkte_gesamt": 83,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "reon Infrastruktur GmbH & Co. KG",
+    "ladepunkte_gesamt": 83,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ServiceSTADTwerke GmbH & Co. KG",
+    "ladepunkte_gesamt": 83,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Burger Schloz Automobile GmbH & Co. KG",
+    "ladepunkte_gesamt": 82,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Versorgungsservice Main-Kinzig GmbH",
+    "ladepunkte_gesamt": 82,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Servicewerke Westfalen GmbH & Co. KG",
+    "ladepunkte_gesamt": 82,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Elmshorn",
+    "ladepunkte_gesamt": 82,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energie und Wasser Wahlstedt/Bad Segeberg GmbH & Co.KG",
+    "ladepunkte_gesamt": 82,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "MOA Group GmbH",
+    "ladepunkte_gesamt": 81,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "BRAWO GE Solution LIS GmbH",
+    "ladepunkte_gesamt": 80,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Freisinger Stadtwerke Versorgungs-GmbH",
+    "ladepunkte_gesamt": 80,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Elektrizitätswerk Tegernsee Vertriebs- und Service-KG",
+    "ladepunkte_gesamt": 80,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Flughafen Köln/Bonn GmbH",
+    "ladepunkte_gesamt": 80,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Olching GmbH",
+    "ladepunkte_gesamt": 78,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Bad Homburg",
+    "ladepunkte_gesamt": 78,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Nachhaltige Energielösungen Waiblingen GmbH",
+    "ladepunkte_gesamt": 77,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Bürger-Energie Genossenschaft Freisinger Land eG",
+    "ladepunkte_gesamt": 77,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mercedes- Benz AG - Niederlassung Berlin",
+    "ladepunkte_gesamt": 77,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Eisenacher Versorgungs-Betriebe GmbH",
+    "ladepunkte_gesamt": 77,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energiedienste der Landeshauptstadt Stuttgart GmbH",
+    "ladepunkte_gesamt": 76,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mercedes- Benz AG - Niederlassung Hamburg und Lübeck",
+    "ladepunkte_gesamt": 76,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Lingen GmbH",
+    "ladepunkte_gesamt": 76,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "rhenag Rheinische Energie Aktiengesellschaft",
+    "ladepunkte_gesamt": 75,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "City Concept E-Ladestationen GmbH",
+    "ladepunkte_gesamt": 74,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Langen GmbH",
+    "ladepunkte_gesamt": 74,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "L. Stroetmann Unternehmensgruppe",
+    "ladepunkte_gesamt": 74,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Elektro Wilmes",
+    "ladepunkte_gesamt": 74,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "RheiNet GmbH",
+    "ladepunkte_gesamt": 74,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Tecklenburger Land GmbH & Co. KG",
+    "ladepunkte_gesamt": 74,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Flughafen Düsseldorf GmbH",
+    "ladepunkte_gesamt": 74,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Völklingen Vertrieb GmbH",
+    "ladepunkte_gesamt": 74,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Forchheim GmbH",
+    "ladepunkte_gesamt": 73,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Jacob Sönnichsen AG",
+    "ladepunkte_gesamt": 73,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "next step mobility GmbH",
+    "ladepunkte_gesamt": 72,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ZukunftsEnergie Nordostbayern",
+    "ladepunkte_gesamt": 72,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Stade GmbH",
+    "ladepunkte_gesamt": 72,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Numbat GmbH",
+    "ladepunkte_gesamt": 71,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Stadtwerke Detmold GmbH",
+    "ladepunkte_gesamt": 71,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "BEG Kraichgau eG",
+    "ladepunkte_gesamt": 70,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "IFG Ingolstadt AöR",
+    "ladepunkte_gesamt": 70,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Volkswagen Immobilien GmbH",
+    "ladepunkte_gesamt": 70,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Wesel GmbH",
+    "ladepunkte_gesamt": 70,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Lindau GmbH & Co. KG",
+    "ladepunkte_gesamt": 69,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Neuruppin GmbH",
+    "ladepunkte_gesamt": 69,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Sindelfingen Mobility GmbH",
+    "ladepunkte_gesamt": 68,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Polarstern Erzeugung GmbH",
+    "ladepunkte_gesamt": 68,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Oberkirch GmbH",
+    "ladepunkte_gesamt": 68,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Überlandwerk Erding GmbH & Co KG",
+    "ladepunkte_gesamt": 68,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Schwedt",
+    "ladepunkte_gesamt": 68,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SWBV Versorgungs-GmbH",
+    "ladepunkte_gesamt": 68,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SVO Vertrieb GmbH",
+    "ladepunkte_gesamt": 68,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Neustadt a. Rbge. GmbH",
+    "ladepunkte_gesamt": 68,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "AlbatrosServiceGesellschaft mbH",
+    "ladepunkte_gesamt": 68,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ib company GmbH",
+    "ladepunkte_gesamt": 67,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Filderstadtwerke",
+    "ladepunkte_gesamt": 66,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Union Investment Real Estate Digital GmbH",
+    "ladepunkte_gesamt": 66,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "OUTLETCITY AG",
+    "ladepunkte_gesamt": 65,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Herzo Energie GmbH",
+    "ladepunkte_gesamt": 65,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Lippstädter Ladesäulen GmbH",
+    "ladepunkte_gesamt": 65,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "IKT Regio Netzwerk GmbH & Co. KG",
+    "ladepunkte_gesamt": 65,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Weimar Stadtversorgungs-GmbH",
+    "ladepunkte_gesamt": 65,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtverwaltung Schwäbisch Gmünd",
+    "ladepunkte_gesamt": 64,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Stadtwerke Weinheim GmbH",
+    "ladepunkte_gesamt": 64,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Sortimo Innovationspark Zusmarshausen GmbH",
+    "ladepunkte_gesamt": 64,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EBERwerk GmbH & Co. KG",
+    "ladepunkte_gesamt": 64,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Allgäuer Kraftwerke GmbH",
+    "ladepunkte_gesamt": 64,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "WEVG Salzgitter GmbH &Co. KG",
+    "ladepunkte_gesamt": 64,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Pirna GmbH",
+    "ladepunkte_gesamt": 64,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Walter Fritz deutsche Gesellschaft für Energieversorgung mbH",
+    "ladepunkte_gesamt": 63,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energie SaarLorLux AG",
+    "ladepunkte_gesamt": 63,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Volkswagen AG, Zweigniederlassung Konzern Aftersales Kassel",
+    "ladepunkte_gesamt": 62,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "DVV Dessauer Versorgungs- und Verkehrsgesellschaft mbH",
+    "ladepunkte_gesamt": 62,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "KIWI Tower GmbH",
+    "ladepunkte_gesamt": 62,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Thüga Energie GmbH",
+    "ladepunkte_gesamt": 61,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Deggendorf GmbH",
+    "ladepunkte_gesamt": 61,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "StWB Stadtwerke Brandenburg GmbH & Co. KG",
+    "ladepunkte_gesamt": 61,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energieversorgung Offenbach AG",
+    "ladepunkte_gesamt": 61,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Heidenheim AG",
+    "ladepunkte_gesamt": 60,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Aschaffenburg",
+    "ladepunkte_gesamt": 60,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EnKL GmbH",
+    "ladepunkte_gesamt": 60,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Buchholz Digital GmbH",
+    "ladepunkte_gesamt": 60,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "LPZ Parken & Energie GmbH",
+    "ladepunkte_gesamt": 60,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Capgemini Deutschland GmbH",
+    "ladepunkte_gesamt": 59,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Gesellschaft für Beteiligungen und Parken in Bad Kreuznach m",
+    "ladepunkte_gesamt": 59,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energieversorgung Rudolstadt Gmb",
+    "ladepunkte_gesamt": 59,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Deutsche Primärenergie GmbH",
+    "ladepunkte_gesamt": 58,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Gemeindewerke Kiefersfelden",
+    "ladepunkte_gesamt": 58,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "HEOS Object GmbH & Co. KG",
+    "ladepunkte_gesamt": 58,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Rhegio Natur GmbH",
+    "ladepunkte_gesamt": 58,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Technische Werke Ludwigshafen am Rhein AG",
+    "ladepunkte_gesamt": 58,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "KEW Kommunale Energie- und Wasserversorgung AG",
+    "ladepunkte_gesamt": 58,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Blankenburg GmbH",
+    "ladepunkte_gesamt": 58,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "LadeNetz BinaVils GmbH",
+    "ladepunkte_gesamt": 57,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Elektro Jahn GmbH & Co.KG",
+    "ladepunkte_gesamt": 57,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke EVB Huntetal GmbH",
+    "ladepunkte_gesamt": 57,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Nordfriesland GmbH",
+    "ladepunkte_gesamt": 57,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Streck Transportges.mbH",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Weinstadt",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ecoSWITCH AG",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Amberg Bäder und Park GmbH",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SolarLoader+ GmbH",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energieversorgung Rodau GmbH",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Harz Energie GmbH & Co.KG",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Nienburg Energie GmbH",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Buxtehude GmbH",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energieversorgung Leverkusen GmbH & CO.KG",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Northtec GmbH & Co.KG",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ancora Marina GmbH & Co. KG",
+    "ladepunkte_gesamt": 56,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Nürtingen Beteiligung GmbH",
+    "ladepunkte_gesamt": 55,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Bühl GmbH",
+    "ladepunkte_gesamt": 55,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Bayreuth Holding GmbH",
+    "ladepunkte_gesamt": 55,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Charge Green OnSite GmbH",
+    "ladepunkte_gesamt": 55,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Wirtschaftsbetriebe Bad Salzuflen GmbH",
+    "ladepunkte_gesamt": 55,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Harpen Immobilien GmbH",
+    "ladepunkte_gesamt": 55,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Stadtwerke Ettlingen GmbH",
+    "ladepunkte_gesamt": 54,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Mühlacker GmbH",
+    "ladepunkte_gesamt": 54,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "UNI ELEKTRO Fachgroßhandel GmbH & Co. KG",
+    "ladepunkte_gesamt": 54,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Volkswagen AG, Werk Emden",
+    "ladepunkte_gesamt": 54,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Erkrath GmbH",
+    "ladepunkte_gesamt": 54,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Hertener Energiehandelsgesellschaft mbH",
+    "ladepunkte_gesamt": 54,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mercedes- Benz AG - Niederlassung Köln / Leverkusen",
+    "ladepunkte_gesamt": 54,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "GreenVesting GmbH & Co. KG",
+    "ladepunkte_gesamt": 53,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Bad Aibling",
+    "ladepunkte_gesamt": 53,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "BEW Bergische Energie und Wasser GmbH",
+    "ladepunkte_gesamt": 53,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Ostmünsterland GmbH & Co. KG",
+    "ladepunkte_gesamt": 53,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Midorion  GmbH & Co. KG",
+    "ladepunkte_gesamt": 52,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Neue Energie Fellbach GmbH",
+    "ladepunkte_gesamt": 52,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mercedes-Benz AG - Niederlassung Mannheim-Heidelberg-Landau",
+    "ladepunkte_gesamt": 52,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mercedes- Benz AG - Niederlassung Nürnberg",
+    "ladepunkte_gesamt": 52,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "StWL Mobilität und Infrastruktur GmbH",
+    "ladepunkte_gesamt": 52,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Justus Grosse Energie GmbH",
+    "ladepunkte_gesamt": 52,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Überlandwerk Groß-Gerau GmbH",
+    "ladepunkte_gesamt": 52,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Neubrandenburger Wohnungsgesellschaft mbH",
+    "ladepunkte_gesamt": 52,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Brose Sitech GmbH",
+    "ladepunkte_gesamt": 52,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Geesthacht GmbH",
+    "ladepunkte_gesamt": 52,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Bad Säckingen GmbH",
+    "ladepunkte_gesamt": 51,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Geldern GmbH",
+    "ladepunkte_gesamt": 51,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mercedes- Benz AG - Niederlassung Stuttgart",
+    "ladepunkte_gesamt": 50,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Autohaus Heermann und Rhein GmbH",
+    "ladepunkte_gesamt": 50,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Milence Germany GmbH",
+    "ladepunkte_gesamt": 50,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Mercedes- Benz AG - Niederlassung München",
+    "ladepunkte_gesamt": 50,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Eichberger Schiffservice GmbH",
+    "ladepunkte_gesamt": 50,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Berndt Hartmann",
+    "ladepunkte_gesamt": 50,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SWT Parken GmbH",
+    "ladepunkte_gesamt": 50,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Neuwied GmbH",
+    "ladepunkte_gesamt": 50,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Flensburger Ladeinfrastrukturgesellschaft mbH",
+    "ladepunkte_gesamt": 50,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "LAN1 Hotspots GmbH",
+    "ladepunkte_gesamt": 49,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Rastatt Service GmbH",
+    "ladepunkte_gesamt": 49,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "DB Energie GmbH",
+    "ladepunkte_gesamt": 49,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Salvia Group GmbH",
+    "ladepunkte_gesamt": 49,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Gemeinde Unterföhring",
+    "ladepunkte_gesamt": 49,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Gemeindewerke Wendelstein Breitband GmbH",
+    "ladepunkte_gesamt": 49,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Ensev GmbH",
+    "ladepunkte_gesamt": 49,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Celle GmbH",
+    "ladepunkte_gesamt": 49,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Winsen (Luhe) GmbH",
+    "ladepunkte_gesamt": 49,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Senger NEO GmbH",
+    "ladepunkte_gesamt": 49,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Lemgo GmbH",
+    "ladepunkte_gesamt": 49,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EDV- und Elektrotechnik Hardy Barth",
+    "ladepunkte_gesamt": 48,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "KLING Charging Solutions GmbH",
+    "ladepunkte_gesamt": 48,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Airbus Helicopters Deutschland GmbH",
+    "ladepunkte_gesamt": 48,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Kommunalunternehmen Stadtwerke Pfaffenhofen a. d. Ilm",
+    "ladepunkte_gesamt": 48,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Strausberg GmbH",
+    "ladepunkte_gesamt": 48,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Norderney GmbH",
+    "ladepunkte_gesamt": 48,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Franke & Werner GmbH",
+    "ladepunkte_gesamt": 48,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Rheinisch-Westfälische Technische Hochschule (RWTH) Aachen",
+    "ladepunkte_gesamt": 48,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Freizeit Ressort Lenneberg GmbH & Co. KG",
+    "ladepunkte_gesamt": 48,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Holsteiner Energieversorgungs GmbH",
+    "ladepunkte_gesamt": 48,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Überlandwerk Schäftersheim GmbH & Co. KG",
+    "ladepunkte_gesamt": 47,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "illwerke vkw AG",
+    "ladepunkte_gesamt": 47,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Uelzen GmbH",
+    "ladepunkte_gesamt": 47,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "SWK ENERGIE GmbH",
+    "ladepunkte_gesamt": 47,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Schwarzenberg GmbH",
+    "ladepunkte_gesamt": 47,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Emil Löffelhardt GmbH & Co. KG",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Christ Investment GmbH",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "vigoris Handels GmbH",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Jöchle Mobility GmbH",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Trossingen GmbH",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Bauer Energietechnik e.K.",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "BMW AG",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "energielenker service GmbH",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "TUI AG",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Stadtwerke Lüdenscheid GmbH",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Dinslaken GmbH",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SWT Anstalt des öffentlichen Rechts der Stadt Trier",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Saarlouis GmbH",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SWM Mobilität GmbH",
+    "ladepunkte_gesamt": 46,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Autohaus Staiger GmbH",
+    "ladepunkte_gesamt": 45,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Alexander Bürkle GmbH & Co. KG",
+    "ladepunkte_gesamt": 45,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Mann Naturenergie GmbH & Co. KG",
+    "ladepunkte_gesamt": 45,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Wirtschaftsbetriebe Emden GmbH",
+    "ladepunkte_gesamt": 45,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energiegenossenschaft für Wittmund eG",
+    "ladepunkte_gesamt": 45,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Ladefix Wolfram Cüppers Einzelunternehmen",
+    "ladepunkte_gesamt": 45,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "EGT Energy Solutions GmbH",
+    "ladepunkte_gesamt": 44,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SimplyCharge GmbH",
+    "ladepunkte_gesamt": 44,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "SVG Straßenverkehrsgenossenschaft Süd eG",
+    "ladepunkte_gesamt": 44,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "ECE Energy GmbH & Co. KG",
+    "ladepunkte_gesamt": 44,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Martha-Maria Krankenhaus gGmbH",
+    "ladepunkte_gesamt": 44,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Hann. Münden Energien GmbH",
+    "ladepunkte_gesamt": 44,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Osterholzer Stadtwerke GmbH & Co. KG",
+    "ladepunkte_gesamt": 44,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Rinteln GmbH",
+    "ladepunkte_gesamt": 44,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Fröndenberg Wickede GmbH",
+    "ladepunkte_gesamt": 44,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Lutherstadt Eisleben GmbH",
+    "ladepunkte_gesamt": 44,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Orange  Charging B.V.",
+    "ladepunkte_gesamt": 43,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energieservice-Ratingen GmbH",
+    "ladepunkte_gesamt": 43,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "e-jIn GmbH",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "Augustinum Energiemanagement GmbH",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Minera Kraftstoffe - Mineraloelwerk Rempel GmbH",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "HPC"
+  },
+  {
+    "betreiber": "InAS - Infrastruktur Amberg-Sulzbach GmbH",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Richter+Frenzel GmbH + Co. KG",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Häusler Automobil GmbH & Co. KG",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "RangauWerke GmbH",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Schratt GmbH & CO.KG",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Forst GmbH",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Erneuerbare Energien Rheingau-Taunus GmbH",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Schubert Motors GmbH",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Procar Automobile GmbH",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "hallewestfalen.net GmbH",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Flächenentwicklungsgesellschaft Haltern am See mbH",
+    "ladepunkte_gesamt": 42,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "STADTWERKE KELHEIM GmbH & Co KG",
+    "ladepunkte_gesamt": 41,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Frankfurter Volksbank eG",
+    "ladepunkte_gesamt": 41,
+    "ladetyp_dominant": "AC"
+  },
+  {
+    "betreiber": "Stadtwerke Wunstorf GmbH & Co. KG",
+    "ladepunkte_gesamt": 41,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Böblingen GmbH & Co. KG",
+    "ladepunkte_gesamt": 40,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Magna PT B.V. & Co KG",
+    "ladepunkte_gesamt": 40,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Stadtwerke Ditzingen GmbH & Co. KG",
+    "ladepunkte_gesamt": 40,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Energieversorgung Main-Spessart GmbH",
+    "ladepunkte_gesamt": 40,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Gienger Logistik KG",
+    "ladepunkte_gesamt": 40,
+    "ladetyp_dominant": "DC"
+  },
+  {
+    "betreiber": "Flughafen Nürnberg Energie GmbH",
+    "ladepunkte_gesamt": 40,
+    "ladetyp_dominant": "DC"
+  }
+]
