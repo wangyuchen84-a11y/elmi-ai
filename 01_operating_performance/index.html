@@ -57,14 +57,20 @@
 </div>
 <script>
 (function(){
-  const KEY="elmi_auth_37910", PWD="***REMOVED***";
+  const KEY="elmi_auth_37910", PWD_HASH="__ELMI_AI_PWD_HASH__";
 
-  function doLogin(){
+  async function sha256hex(s){
+    const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+
+  async function doLogin(){
     const inp=document.getElementById("elmiLoginPwd");
     const overlay=document.getElementById("elmiLoginOverlay");
     if(!inp||!overlay) return;
-    if(inp.value===PWD){
-      sessionStorage.setItem(KEY,PWD);
+    const h=await sha256hex(inp.value);
+    if(h===PWD_HASH){
+      sessionStorage.setItem(KEY,PWD_HASH);
       overlay.style.display="none";
     } else {
       const err=document.getElementById("elmiLoginErr");
@@ -81,7 +87,7 @@
   });
 
   function checkSession(){
-    if(sessionStorage.getItem(KEY)===PWD){
+    if(sessionStorage.getItem(KEY)===PWD_HASH){
       const o=document.getElementById("elmiLoginOverlay");
       if(o) o.style.display="none";
     }

@@ -1,0 +1,46 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Inject password hash
+        env:
+          AI_DASHBOARD_PASSWORD: ${{ secrets.AI_DASHBOARD_PASSWORD }}
+        run: |
+          # Compute SHA-256 hex hash from the secret
+          AI_HASH=$(python3 -c "import hashlib,os; print(hashlib.sha256(os.environ['AI_DASHBOARD_PASSWORD'].encode()).hexdigest())")
+
+          # Replace placeholder in a build copy (never modifies source files)
+          cp -r . /tmp/build
+          sed -i "s/__ELMI_AI_PWD_HASH__/${AI_HASH}/g" /tmp/build/01_operating_performance/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: /tmp/build
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
