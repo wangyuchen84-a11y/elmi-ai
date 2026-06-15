@@ -51,12 +51,27 @@
       text-align: center;
     }
 
+    .sections {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #6B6B76;
+      margin-bottom: 12px;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-      width: 100%;
-      max-width: 640px;
+      gap: 12px;
     }
 
     .card {
@@ -169,13 +184,71 @@
   <h1>ELMI AI</h1>
   <p class="subtitle" id="subtitle-text">Interne Tools &amp; Dashboards</p>
 
-  <div class="grid">
-    <a class="card" href="01_operating_performance/">
-      <div class="card-icon">📊</div>
-      <div class="card-title">Operating Performance</div>
-      <div class="card-desc" id="card-desc-opd">CPO Sites Dashboard – Betriebskennzahlen</div>
-      <span class="card-arrow">→</span>
-    </a>
+  <div class="sections">
+
+    <!-- Operations -->
+    <div class="section">
+      <div class="section-label" id="label-operations">Operations</div>
+      <div class="grid">
+        <a class="card" href="01_operating_performance/">
+          <div class="card-icon">📊</div>
+          <div class="card-title">Operating Performance</div>
+          <div class="card-desc" id="desc-opd">CPO Sites Dashboard – Betriebskennzahlen</div>
+          <span class="card-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- AI Centers -->
+    <div class="section">
+      <div class="section-label" id="label-ai-centers">AI Centers</div>
+      <div class="grid">
+        <a class="card" href="02_pv_optimization_ai/">
+          <div class="card-icon">☀️</div>
+          <div class="card-title">PV Optimization AI</div>
+          <div class="card-desc" id="desc-pv">KI-gestützte Optimierung von PV-Anlagen</div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a class="card" href="03_electricity_procurement_ai/">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">Electricity Procurement AI</div>
+          <div class="card-desc" id="desc-ep">Intelligente Strombeschaffung &amp; Prognose</div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a class="card" href="04_cpo_sales_center_ai/">
+          <div class="card-icon">🔌</div>
+          <div class="card-title">CPO Sales Center AI</div>
+          <div class="card-desc" id="desc-cpo">KI-Vertriebsunterstützung für Ladenetz</div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a class="card" href="05_energy_trading_ai/">
+          <div class="card-icon">📈</div>
+          <div class="card-title">Energy Trading AI</div>
+          <div class="card-desc" id="desc-et">KI-gestützter Energiehandel &amp; Arbitrage</div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a class="card" href="06_ad_sales_center_ai/">
+          <div class="card-icon">📢</div>
+          <div class="card-title">Ad Sales Center AI</div>
+          <div class="card-desc" id="desc-ad">KI-Werbevertrieb &amp; Kampagnensteuerung</div>
+          <span class="card-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Strategy -->
+    <div class="section">
+      <div class="section-label" id="label-strategy">Strategy</div>
+      <div class="grid">
+        <a class="card" href="07_ai_roadmap/">
+          <div class="card-icon">🧭</div>
+          <div class="card-title">AI Roadmap</div>
+          <div class="card-desc" id="desc-roadmap">Strategische KI-Planung &amp; Meilensteine</div>
+          <span class="card-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
   </div>
 
   <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
@@ -184,22 +257,49 @@
   (function(){
     var STRINGS = {
       de: {
-        subtitle: 'Interne Tools &amp; Dashboards',
-        opdDesc:  'CPO Sites Dashboard – Betriebskennzahlen',
-        footer:   'ELMI Power GmbH · Interne Nutzung'
+        subtitle:      'Interne Tools &amp; Dashboards',
+        operations:    'Operations',
+        aiCenters:     'AI Centers',
+        strategy:      'Strategy',
+        opdDesc:       'CPO Sites Dashboard – Betriebskennzahlen',
+        pvDesc:        'KI-gestützte Optimierung von PV-Anlagen',
+        epDesc:        'Intelligente Strombeschaffung &amp; Prognose',
+        cpoDesc:       'KI-Vertriebsunterstützung für Ladenetz',
+        etDesc:        'KI-gestützter Energiehandel &amp; Arbitrage',
+        adDesc:        'KI-Werbevertrieb &amp; Kampagnensteuerung',
+        roadmapDesc:   'Strategische KI-Planung &amp; Meilensteine',
+        footer:        'ELMI Power GmbH · Interne Nutzung'
       },
       en: {
-        subtitle: 'Internal Tools &amp; Dashboards',
-        opdDesc:  'CPO Sites Dashboard – Operating Performance',
-        footer:   'ELMI Power GmbH · Internal use only'
+        subtitle:      'Internal Tools &amp; Dashboards',
+        operations:    'Operations',
+        aiCenters:     'AI Centers',
+        strategy:      'Strategy',
+        opdDesc:       'CPO Sites Dashboard – Operating Performance',
+        pvDesc:        'AI-driven optimisation of PV systems',
+        epDesc:        'Intelligent electricity procurement &amp; forecasting',
+        cpoDesc:       'AI sales support for charging networks',
+        etDesc:        'AI-powered energy trading &amp; arbitrage',
+        adDesc:        'AI ad sales &amp; campaign management',
+        roadmapDesc:   'Strategic AI planning &amp; milestones',
+        footer:        'ELMI Power GmbH · Internal use only'
       }
     };
 
     function applyLang(lang) {
       var s = STRINGS[lang] || STRINGS.de;
-      document.getElementById('subtitle-text').innerHTML  = s.subtitle;
-      document.getElementById('card-desc-opd').textContent = s.opdDesc;
-      document.getElementById('footer-text').textContent  = s.footer;
+      document.getElementById('subtitle-text').innerHTML    = s.subtitle;
+      document.getElementById('label-operations').innerHTML = s.operations;
+      document.getElementById('label-ai-centers').innerHTML = s.aiCenters;
+      document.getElementById('label-strategy').innerHTML   = s.strategy;
+      document.getElementById('desc-opd').innerHTML         = s.opdDesc;
+      document.getElementById('desc-pv').innerHTML          = s.pvDesc;
+      document.getElementById('desc-ep').innerHTML          = s.epDesc;
+      document.getElementById('desc-cpo').innerHTML         = s.cpoDesc;
+      document.getElementById('desc-et').innerHTML          = s.etDesc;
+      document.getElementById('desc-ad').innerHTML          = s.adDesc;
+      document.getElementById('desc-roadmap').innerHTML     = s.roadmapDesc;
+      document.getElementById('footer-text').textContent    = s.footer;
       document.documentElement.lang = lang;
       ['de','en'].forEach(function(l){
         var b = document.getElementById('lbtn-'+l);
@@ -212,7 +312,6 @@
       applyLang(lang);
     };
 
-    // Apply stored language on load
     applyLang(localStorage.getItem('elmi_lang') || 'de');
   })();
   </script>

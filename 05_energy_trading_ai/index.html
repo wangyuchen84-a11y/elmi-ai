@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energy Trading AI · ELMI AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; }
+    .logo { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #F39A3A, #E32028, #6D2A99); display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 20px; }
+    .brand { font-size: 13px; font-weight: 600; color: #6B6B76; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+    h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 24px; text-align: center; }
+    .placeholder { background: #1B1B22; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 32px 40px; text-align: center; max-width: 480px; width: 100%; }
+    .placeholder-icon { font-size: 40px; margin-bottom: 16px; }
+    .placeholder-text { font-size: 15px; color: #6B6B76; line-height: 1.6; }
+    footer { margin-top: 64px; font-size: 12px; color: #3A3A3C; }
+    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 13px/1 'Maven Pro', system-ui, sans-serif; font-weight: 600; text-decoration: none; transition: background .2s; z-index: 100; }
+    .back-btn:hover { background: #2a2a35; }
+    .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; align-items: center; gap: 6px; z-index: 100; }
+    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font-size: 12px; font-family: 'Maven Pro', system-ui, sans-serif; font-weight: 600; color: rgba(255,255,255,.45); letter-spacing: .3px; line-height: 1.4; transition: all .15s; display: flex; align-items: center; gap: 4px; }
+    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
+    .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
+  </style>
+</head>
+<body>
+  <a class="back-btn" href="../">← <span id="back-label">Zurück</span></a>
+  <div class="lang-toggle">
+    <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
+    <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
+  </div>
+  <div class="logo">📈</div>
+  <div class="brand">ELMI AI</div>
+  <h1>Energy Trading AI</h1>
+  <div class="placeholder">
+    <div class="placeholder-icon">🚧</div>
+    <p class="placeholder-text" id="placeholder-text">Dieses Modul wird gerade aufgebaut.</p>
+  </div>
+  <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
+  <script>
+  (function(){
+    var STRINGS = {
+      de: { back: 'Zurück', placeholder: 'Dieses Modul wird gerade aufgebaut.', footer: 'ELMI Power GmbH · Interne Nutzung' },
+      en: { back: 'Back',   placeholder: 'This module is currently under construction.', footer: 'ELMI Power GmbH · Internal use only' }
+    };
+    function applyLang(lang) {
+      var s = STRINGS[lang] || STRINGS.de;
+      document.getElementById('back-label').textContent       = s.back;
+      document.getElementById('placeholder-text').textContent = s.placeholder;
+      document.getElementById('footer-text').textContent      = s.footer;
+      document.documentElement.lang = lang;
+      ['de','en'].forEach(function(l){ var b = document.getElementById('lbtn-'+l); if (b) b.classList.toggle('active', l === lang); });
+    }
+    window.setLang = function(lang) { localStorage.setItem('elmi_lang', lang); applyLang(lang); };
+    applyLang(localStorage.getItem('elmi_lang') || 'de');
+  })();
+  </script>
+</body>
+</html>
