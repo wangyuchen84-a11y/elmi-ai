@@ -9,16 +9,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; padding: 72px 16px 64px; }
-    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 100; }
-    .back-btn:hover { background: #2a2a35; }
+    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #FAFAFB; color: #0E0E14; min-height: 100vh; padding: 72px 16px 64px; }
+    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #FFFFFF; border: 1px solid #D1D1D8; border-radius: 999px; color: #4A4A55; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 100; }
+    .back-btn:hover { background: #E7E7EB; }
     .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; gap: 6px; z-index: 100; }
-    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: rgba(255,255,255,.45); transition: all .15s; display: flex; align-items: center; gap: 4px; }
-    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
-    .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
+    .lang-btn { background: transparent; border: 1px solid #D1D1D8; border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: #4A4A55; transition: all .15s; display: flex; align-items: center; gap: 4px; }
+    .lang-btn:hover { color: #0E0E14; border-color: #9A9AA5; }
+    .lang-btn.active { background: #E7E7EB; border-color: #9A9AA5; color: #0E0E14; font-weight: 800; }
     h1 { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 24px; }
     .page-wrap { max-width: 840px; margin: 0 auto; }
-    .section { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+    .section { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 16px; padding: 24px; margin-bottom: 20px; }
     .section-title { font-size: 14px; font-weight: 800; color: #9B59B6; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 18px; }
     .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
     .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
@@ -26,12 +26,12 @@
     .field { display: flex; flex-direction: column; gap: 6px; }
     label { font-size: 11px; font-weight: 600; color: #6B6B76; letter-spacing: .4px; text-transform: uppercase; }
     input[type=text], input[type=number], select {
-      background: #0E0E14; border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
-      color: #fff; font: 400 14px 'Maven Pro', system-ui, sans-serif; padding: 9px 12px;
+      background: #F4F4F6; border: 1px solid #D1D1D8; border-radius: 8px;
+      color: #0E0E14; font: 400 14px 'Maven Pro', system-ui, sans-serif; padding: 9px 12px;
       width: 100%; transition: border-color .15s;
     }
     input:focus, select:focus { outline: none; border-color: #6D2A99; }
-    input::placeholder { color: #3A3A3C; }
+    input::placeholder { color: #9A9AA5; }
     .addr-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
     .addr-row2 { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 14px; margin-top: 14px; }
     @media(max-width:560px) { .addr-grid { grid-template-columns: 1fr; } .addr-row2 { grid-template-columns: 1fr; } }
@@ -40,7 +40,7 @@
     .geo-result.err { color: #E32028; }
     .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font: 700 13px 'Maven Pro', system-ui, sans-serif; transition: opacity .15s; }
     .btn-primary { background: linear-gradient(135deg, #6D2A99, #9B59B6); color: #fff; }
-    .btn-secondary { background: #2a2a35; color: #ccc; border: 1px solid rgba(255,255,255,.1); }
+    .btn-secondary { background: #E7E7EB; color: #4A4A55; border: 1px solid #E7E7EB; }
     .btn:hover { opacity: .85; }
     .btn:disabled { opacity: .4; cursor: not-allowed; }
     .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
@@ -48,7 +48,7 @@
     .upload-zone:hover, .upload-zone.dragover { border-color: #9B59B6; background: rgba(109,42,153,.08); }
     .upload-zone p { font-size: 13px; color: #6B6B76; margin-top: 8px; }
     .upload-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
-    .upload-item { background: #0E0E14; border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .upload-item { background: #F4F4F6; border: 1px solid #E7E7EB; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .upload-item-info { font-size: 13px; }
     .upload-item-info small { display: block; color: #6B6B76; font-size: 11px; margin-top: 2px; }
     .btn-del { background: transparent; border: 1px solid rgba(227,32,40,.3); border-radius: 6px; color: #E32028; font: 600 11px 'Maven Pro', system-ui, sans-serif; padding: 4px 10px; cursor: pointer; }
@@ -56,13 +56,13 @@
     .preis-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
     .preis-group { display: flex; flex-direction: column; gap: 10px; }
     .preis-group .group-label { font-size: 11px; font-weight: 800; color: #9B59B6; text-transform: uppercase; letter-spacing: .5px; }
-    .status-strip { background: #0E0E14; border: 1px solid rgba(255,255,255,.06); border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #6B6B76; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #3A3A3C; flex-shrink: 0; }
+    .status-strip { background: #F4F4F6; border: 1px solid #F4F4F6; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #6B6B76; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #9A9AA5; flex-shrink: 0; }
     .dot.ok { background: #4CAF50; }
     .dot.warn { background: #F39A3A; }
-    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #2a2a35; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 12px 20px; font-size: 13px; color: #fff; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #E7E7EB; border: 1px solid #E7E7EB; border-radius: 10px; padding: 12px 20px; font-size: 13px; color: #0E0E14; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
     .toast.show { opacity: 1; }
-    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #3A3A3C; }
+    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #9A9AA5; }
     .progress-bar { height: 4px; background: rgba(109,42,153,.2); border-radius: 2px; margin-top: 10px; overflow: hidden; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, #6D2A99, #9B59B6); border-radius: 2px; transition: width .3s; }
   </style>
@@ -203,7 +203,7 @@
       <div class="section-title">📁 Eigene Ladedaten (1-Minuten-Rohdaten, xlsx/csv)</div>
       <div class="upload-zone" id="upload-zone">
         <div style="font-size:28px;">📂</div>
-        <p>Dateien hier ablegen oder klicken zum Auswählen<br><small style="font-size:11px;color:#3A3A3C;">xlsx / csv · mehrere Dateien möglich</small></p>
+        <p>Dateien hier ablegen oder klicken zum Auswählen<br><small style="font-size:11px;color:#9A9AA5;">xlsx / csv · mehrere Dateien möglich</small></p>
         <input type="file" id="file-input" accept=".xlsx,.csv" multiple style="display:none">
         <div class="progress-bar" id="progress-bar" style="display:none"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
       </div>

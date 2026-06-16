@@ -8,28 +8,28 @@
   <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; padding: 72px 16px 64px; }
-    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 100; }
-    .back-btn:hover { background: #2a2a35; }
+    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #FAFAFB; color: #0E0E14; min-height: 100vh; padding: 72px 16px 64px; }
+    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #FFFFFF; border: 1px solid #D1D1D8; border-radius: 999px; color: #4A4A55; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 100; }
+    .back-btn:hover { background: #E7E7EB; }
     .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; gap: 6px; z-index: 100; }
-    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: rgba(255,255,255,.45); transition: all .15s; display: flex; align-items: center; gap: 4px; }
-    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
-    .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
+    .lang-btn { background: transparent; border: 1px solid #D1D1D8; border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: #4A4A55; transition: all .15s; display: flex; align-items: center; gap: 4px; }
+    .lang-btn:hover { color: #0E0E14; border-color: #9A9AA5; }
+    .lang-btn.active { background: #E7E7EB; border-color: #9A9AA5; color: #0E0E14; font-weight: 800; }
     h1 { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; }
     .page-wrap { max-width: 1200px; margin: 0 auto; }
-    .notice { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 12px 18px; font-size: 13px; color: #6B6B76; margin-bottom: 16px; }
+    .notice { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 12px; padding: 12px 18px; font-size: 13px; color: #6B6B76; margin-bottom: 16px; }
     .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
-    .filter-bar select, .filter-bar input { background: #1B1B22; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #fff; font: 400 13px 'Maven Pro', system-ui, sans-serif; padding: 8px 12px; }
+    .filter-bar select, .filter-bar input { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 8px; color: #0E0E14; font: 400 13px 'Maven Pro', system-ui, sans-serif; padding: 8px 12px; }
     .filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: #6D2A99; }
     .filter-bar label { font-size: 11px; color: #6B6B76; font-weight: 600; text-transform: uppercase; }
     .count-label { font-size: 12px; color: #6B6B76; margin-left: auto; }
-    .table-wrap { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; overflow: auto; }
+    .table-wrap { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 14px; overflow: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead th { padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #6B6B76; text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid rgba(255,255,255,.06); cursor: pointer; white-space: nowrap; user-select: none; }
+    thead th { padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #6B6B76; text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid #F4F4F6; cursor: pointer; white-space: nowrap; user-select: none; }
     thead th:hover { color: #9B59B6; }
     thead th .sort-icon { margin-left: 4px; opacity: .4; }
     thead th.sorted .sort-icon { opacity: 1; color: #9B59B6; }
-    tbody tr { border-bottom: 1px solid rgba(255,255,255,.04); transition: background .15s; }
+    tbody tr { border-bottom: 1px solid #F4F4F6; transition: background .15s; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: rgba(109,42,153,.06); }
     td { padding: 10px 14px; vertical-align: middle; }
@@ -39,18 +39,18 @@
     .badge-ac  { background: rgba(195,155,211,.15); color: #C39BD3; }
     .badge-ov  { background: rgba(243,154,58,.15); color: #F39A3A; font-size: 10px; margin-left: 4px; }
     .override-row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-    .ov-input { background: #0E0E14; border: 1px solid rgba(255,255,255,.1); border-radius: 6px; color: #fff; font: 400 12px 'Maven Pro', system-ui, sans-serif; padding: 5px 8px; width: 90px; }
-    .ov-select { background: #0E0E14; border: 1px solid rgba(255,255,255,.1); border-radius: 6px; color: #fff; font: 400 12px 'Maven Pro', system-ui, sans-serif; padding: 5px 8px; }
+    .ov-input { background: #F4F4F6; border: 1px solid #E7E7EB; border-radius: 6px; color: #0E0E14; font: 400 12px 'Maven Pro', system-ui, sans-serif; padding: 5px 8px; width: 90px; }
+    .ov-select { background: #F4F4F6; border: 1px solid #E7E7EB; border-radius: 6px; color: #0E0E14; font: 400 12px 'Maven Pro', system-ui, sans-serif; padding: 5px 8px; }
     .ov-btn { background: rgba(109,42,153,.3); border: 1px solid #6D2A99; border-radius: 6px; color: #C39BD3; font: 600 11px 'Maven Pro', system-ui, sans-serif; padding: 5px 10px; cursor: pointer; }
     .ov-btn:hover { background: rgba(109,42,153,.5); }
     .ov-reset { background: transparent; border: 1px solid rgba(227,32,40,.3); border-radius: 6px; color: #E32028; font: 600 11px 'Maven Pro', system-ui, sans-serif; padding: 5px 10px; cursor: pointer; }
     .ov-reset:hover { background: rgba(227,32,40,.1); }
     .no-data { padding: 40px; text-align: center; color: #6B6B76; font-size: 14px; }
-    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #3A3A3C; }
-    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #2a2a35; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 12px 20px; font-size: 13px; color: #fff; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
+    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #9A9AA5; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #E7E7EB; border: 1px solid #E7E7EB; border-radius: 10px; padding: 12px 20px; font-size: 13px; color: #0E0E14; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
     .toast.show { opacity: 1; }
     .preis-cell { font-weight: 600; }
-    .preis-null { color: #3A3A3C; font-style: italic; }
+    .preis-null { color: #9A9AA5; font-style: italic; }
   </style>
 </head>
 <body>

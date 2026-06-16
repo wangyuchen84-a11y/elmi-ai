@@ -8,28 +8,28 @@
   <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; padding: 72px 16px 64px; }
-    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 100; }
-    .back-btn:hover { background: #2a2a35; }
+    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #FAFAFB; color: #0E0E14; min-height: 100vh; padding: 72px 16px 64px; }
+    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #FFFFFF; border: 1px solid #D1D1D8; border-radius: 999px; color: #4A4A55; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 100; }
+    .back-btn:hover { background: #E7E7EB; }
     .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; gap: 6px; z-index: 100; }
-    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: rgba(255,255,255,.45); transition: all .15s; display: flex; align-items: center; gap: 4px; }
-    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
-    .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
+    .lang-btn { background: transparent; border: 1px solid #D1D1D8; border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: #4A4A55; transition: all .15s; display: flex; align-items: center; gap: 4px; }
+    .lang-btn:hover { color: #0E0E14; border-color: #9A9AA5; }
+    .lang-btn.active { background: #E7E7EB; border-color: #9A9AA5; color: #0E0E14; font-weight: 800; }
     h1 { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; }
     .page-wrap { max-width: 960px; margin: 0 auto; }
-    .notice { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 12px 18px; font-size: 13px; color: #6B6B76; margin-bottom: 16px; }
+    .notice { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 12px; padding: 12px 18px; font-size: 13px; color: #6B6B76; margin-bottom: 16px; }
     .notice a { color: #9B59B6; }
     /* Belegungsrate input */
-    .beleg-section { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .beleg-section { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
     .beleg-section label { font-size: 12px; font-weight: 700; color: #6B6B76; text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; }
     .beleg-input-wrap { display: flex; align-items: center; gap: 10px; }
     input[type=range] { width: 220px; accent-color: #9B59B6; }
     .beleg-val { font-size: 22px; font-weight: 800; color: #9B59B6; min-width: 52px; }
-    .beleg-hint { font-size: 12px; color: #3A3A3C; margin-left: auto; }
+    .beleg-hint { font-size: 12px; color: #9A9AA5; margin-left: auto; }
     /* Result cards */
     .cards-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
     @media(max-width:640px) { .cards-row { grid-template-columns: 1fr; } }
-    .price-card { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 20px; position: relative; }
+    .price-card { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 14px; padding: 20px; position: relative; }
     .price-card-type { font-size: 11px; font-weight: 800; color: #9B59B6; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
     .price-final { font-size: 42px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
     .price-final.ac  { color: #C39BD3; }
@@ -37,17 +37,17 @@
     .price-final.hpc { color: #6D2A99; }
     .price-unit { font-size: 14px; color: #6B6B76; }
     .breakdown { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; font-size: 12px; }
-    .breakdown-row { display: flex; justify-content: space-between; gap: 8px; padding: 6px 10px; background: #0E0E14; border-radius: 8px; }
+    .breakdown-row { display: flex; justify-content: space-between; gap: 8px; padding: 6px 10px; background: #F4F4F6; border-radius: 8px; }
     .breakdown-label { color: #6B6B76; }
     .breakdown-val { font-weight: 700; }
     .clamp-badge { position: absolute; top: 14px; right: 14px; background: rgba(243,154,58,.15); border: 1px solid rgba(243,154,58,.3); border-radius: 6px; padding: 3px 8px; font-size: 10px; color: #F39A3A; font-weight: 700; }
     /* Params section */
-    .params-section { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; }
+    .params-section { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; }
     .params-title { font-size: 13px; font-weight: 800; color: #9B59B6; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 14px; }
     .params-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 12px; }
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 11px; font-weight: 600; color: #6B6B76; letter-spacing: .3px; text-transform: uppercase; }
-    input[type=number] { background: #0E0E14; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #fff; font: 400 14px 'Maven Pro', system-ui, sans-serif; padding: 8px 11px; width: 100%; }
+    input[type=number] { background: #F4F4F6; border: 1px solid #E7E7EB; border-radius: 8px; color: #0E0E14; font: 400 14px 'Maven Pro', system-ui, sans-serif; padding: 8px 11px; width: 100%; }
     input[type=number]:focus { outline: none; border-color: #6D2A99; }
     .minmax-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-top: 14px; }
     .minmax-group { display: flex; flex-direction: column; gap: 8px; }
@@ -56,9 +56,9 @@
     .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font: 700 13px 'Maven Pro', system-ui, sans-serif; transition: opacity .15s; }
     .btn-primary { background: linear-gradient(135deg, #6D2A99, #9B59B6); color: #fff; }
     .btn:hover { opacity: .85; }
-    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #2a2a35; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 12px 20px; font-size: 13px; color: #fff; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #E7E7EB; border: 1px solid #E7E7EB; border-radius: 10px; padding: 12px 20px; font-size: 13px; color: #0E0E14; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
     .toast.show { opacity: 1; }
-    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #3A3A3C; }
+    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #9A9AA5; }
   </style>
 </head>
 <body>

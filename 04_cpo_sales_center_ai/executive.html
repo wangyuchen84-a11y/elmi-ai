@@ -11,21 +11,21 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; padding: 72px 16px 64px; }
-    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 200; }
-    .back-btn:hover { background: #2a2a35; }
+    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #FAFAFB; color: #0E0E14; min-height: 100vh; padding: 72px 16px 64px; }
+    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #FFFFFF; border: 1px solid #D1D1D8; border-radius: 999px; color: #4A4A55; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 200; }
+    .back-btn:hover { background: #E7E7EB; }
     .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; gap: 6px; z-index: 200; }
-    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: rgba(255,255,255,.45); transition: all .15s; display: flex; align-items: center; gap: 4px; }
-    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
-    .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
+    .lang-btn { background: transparent; border: 1px solid #D1D1D8; border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: #4A4A55; transition: all .15s; display: flex; align-items: center; gap: 4px; }
+    .lang-btn:hover { color: #0E0E14; border-color: #9A9AA5; }
+    .lang-btn.active { background: #E7E7EB; border-color: #9A9AA5; color: #0E0E14; font-weight: 800; }
     h1 { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 24px; }
     .page-wrap { max-width: 1100px; margin: 0 auto; }
-    .notice { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 14px 18px; font-size: 13px; color: #6B6B76; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .notice { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 12px; padding: 14px 18px; font-size: 13px; color: #6B6B76; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
     .notice a { color: #9B59B6; text-decoration: none; }
     /* KPI tiles */
     .kpi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
     @media(max-width:560px) { .kpi-grid { grid-template-columns: 1fr; } }
-    .kpi-card { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 18px 20px; }
+    .kpi-card { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 14px; padding: 18px 20px; }
     .kpi-label { font-size: 11px; font-weight: 600; color: #6B6B76; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; }
     .kpi-value { font-size: 32px; font-weight: 800; }
     .kpi-value.ac  { color: #C39BD3; }
@@ -35,24 +35,22 @@
     /* Map + donut row */
     .main-row { display: grid; grid-template-columns: 1fr 360px; gap: 16px; margin-bottom: 20px; }
     @media(max-width:800px) { .main-row { grid-template-columns: 1fr; } }
-    .map-card { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; overflow: hidden; min-height: 400px; position: relative; }
-    #map { height: 420px; background: #0E0E14; }
+    .map-card { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 14px; overflow: hidden; min-height: 400px; position: relative; }
+    #map { height: 420px; background: #F4F4F6; }
     .map-no-coords { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #6B6B76; font-size: 13px; text-align: center; padding: 24px; }
     .map-no-coords a { color: #9B59B6; text-decoration: none; font-weight: 600; }
     .side-col { display: flex; flex-direction: column; gap: 14px; }
-    .card { background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 20px; }
+    .card { background: #FFFFFF; border: 1px solid #E7E7EB; border-radius: 14px; padding: 20px; }
     .card-title { font-size: 13px; font-weight: 800; color: #9B59B6; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 14px; }
-    .betreiber-count { font-size: 40px; font-weight: 800; color: #fff; }
+    .betreiber-count { font-size: 40px; font-weight: 800; color: #0E0E14; }
     .betreiber-label { font-size: 12px; color: #6B6B76; margin-top: 4px; }
     .donut-wrap { position: relative; max-width: 220px; margin: 0 auto; }
     .chart-legend { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
-    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #ccc; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #4A4A55; }
     .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .data-stand { font-size: 11px; color: #3A3A3C; margin-top: 10px; }
-    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #3A3A3C; }
-    /* Leaflet dark override */
-    .leaflet-tile { filter: brightness(.7) invert(1) contrast(3) hue-rotate(200deg) saturate(.3) brightness(.7); }
-    .leaflet-container { background: #0E0E14; }
+    .data-stand { font-size: 11px; color: #9A9AA5; margin-top: 10px; }
+    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #9A9AA5; }
+    .leaflet-container { background: #F4F4F6; }
   </style>
 </head>
 <body>
@@ -129,7 +127,7 @@
       'Flatrate/Abo':                  '#C39BD3',
       'Penetration/Markteinstieg':     '#F39A3A',
       'Dynamisch/Zeitabhängig':        '#E32028',
-      'Unbekannt':                     '#3A3A3C'
+      'Unbekannt':                     '#9A9AA5'
     };
 
     let map = null, donutChart = null;
@@ -216,12 +214,12 @@
 
       const labels = Object.keys(counts);
       const values = labels.map(l => counts[l]);
-      const colors = labels.map(l => KATEGORIE_COLORS[l] || '#3A3A3C');
+      const colors = labels.map(l => KATEGORIE_COLORS[l] || '#9A9AA5');
 
       if (donutChart) donutChart.destroy();
       const ctx = document.getElementById('donut-chart').getContext('2d');
       if (!labels.length) {
-        ctx.fillStyle = '#3A3A3C';
+        ctx.fillStyle = '#9A9AA5';
         ctx.font = '12px Maven Pro';
         ctx.textAlign = 'center';
         ctx.fillText('Keine Daten', 110, 100);
