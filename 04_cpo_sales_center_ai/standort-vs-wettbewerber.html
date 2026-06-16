@@ -101,18 +101,20 @@
     <!-- Table -->
     <div class="section">
       <div class="section-title">Detailtabelle</div>
-      <table>
-        <thead>
-          <tr>
-            <th>Ladetyp</th>
-            <th>Kennzahl</th>
-            <th>Eigener Standort</th>
-            <th>Wettbewerber-Ø</th>
-            <th>Abweichung</th>
-          </tr>
-        </thead>
-        <tbody id="detail-table"></tbody>
-      </table>
+      <div class="table-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table style="min-width:600px;width:100%;">
+          <thead>
+            <tr>
+              <th>Ladetyp</th>
+              <th>Kennzahl</th>
+              <th>Eigener Standort</th>
+              <th>Wettbewerber-Ø</th>
+              <th>Abweichung</th>
+            </tr>
+          </thead>
+          <tbody id="detail-table"></tbody>
+        </table>
+      </div>
       <div class="hint" id="data-hint"></div>
     </div>
   </div>
