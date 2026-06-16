@@ -1025,6 +1025,55 @@ async function initAutoLoadBanner(){
   if (savedHandle) showAutoLoadBanner(savedHandle);
 }
 
+/* ── Bundled fallback data (committed in /data) ──
+   Works for everyone who opens the page — including external visitors
+   without local file-system access — since the files ship with the repo
+   instead of requiring a local folder pick. */
+var BUNDLED_DATA_URL = 'data/manifest.json';
+var _bundledLoaded = false;
+
+async function loadBundledData(){
+  if (_bundledLoaded) return;
+  if (!window.ELMI || !window.ELMI.parseWorkbook || !window.ELMI.app) return;
+  _bundledLoaded = true;
+  try{
+    var manifestRes = await fetch(BUNDLED_DATA_URL);
+    if (!manifestRes.ok) return;
+    var fileNames = await manifestRes.json();
+    var loaded = [];
+    for (var i = 0; i < fileNames.length; i++) {
+      var name = fileNames[i];
+      try{
+        var res = await fetch('data/' + name);
+        if (!res.ok) continue;
+        var blob = await res.blob();
+        var file = new File([blob], name);
+        var db = await window.ELMI.parseWorkbook(file);
+        loaded.push({sn: extractSN(name, db.sn), fileName: name, db: db});
+      }catch(fileErr){
+        console.error('[multi-station] failed to load bundled file', name, fileErr);
+      }
+    }
+    if (!loaded.length) return;
+    Multi.stations = loaded;
+    Multi.activeSN = loaded[0].sn;
+    populateSelector();
+    window.ELMI.app.applyDB(loaded[0].db, loaded[0].fileName);
+  }catch(err){
+    console.error('[multi-station] failed to load bundled dataset', err);
+  }
+}
+
+var _bli = 0, _bliv = setInterval(function(){
+  _bli++;
+  if (window.ELMI && window.ELMI.parseWorkbook && window.ELMI.app) {
+    loadBundledData();
+    clearInterval(_bliv);
+  } else if (_bli > 60) {
+    clearInterval(_bliv);
+  }
+}, 200);
+
 function injectIntoInputPage(page){
   if (!page) return;
   ensureStyles();
