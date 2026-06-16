@@ -18,6 +18,7 @@
     </div>
   </noscript>
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
 </head>
 <body>
 <style id="elmi-login-css">
@@ -826,6 +827,17 @@ function ensureStyles(){
     + '.elmi-status-box.error{background:rgba(227,32,40,.12);color:#E32028;}'
     + '#elmi-station-bar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--neutral-100,#f4f4f6);border:1px solid var(--border-1,#e7e7eb);border-radius:10px;margin-bottom:18px;font-size:13px;}'
     + '#elmi-station-bar select{background:#fff;color:var(--fg1,#1b1b22);border:1px solid var(--border-2,#d1d1d8);border-radius:6px;padding:6px 10px;font-size:13px;min-width:280px;}'
+    + '.btn-primary{display:inline-block;padding:9px 16px;border:none;border-radius:var(--radius-md,8px);'
+    + 'background:var(--color-accent,var(--elmi-orange,#F39A3A));color:#fff;font-size:13px;font-weight:600;cursor:pointer;}'
+    + '.btn-primary:disabled{opacity:.5;cursor:not-allowed;}'
+    + '.btn-primary:hover:not(:disabled){filter:brightness(1.06);}'
+    + '.input-hint{font-size:12px;color:var(--fg2,#6b6b76);margin:14px 0 6px;}'
+    + '.banner-info{display:flex;align-items:center;gap:12px;padding:12px 16px;margin-bottom:16px;'
+    + 'border-radius:var(--radius-md,8px);background:var(--color-surface,rgba(243,154,58,.08));'
+    + 'border:1px solid var(--color-accent,var(--elmi-orange,#F39A3A));font-size:13px;color:var(--fg1,#1b1b22);}'
+    + '.banner-info button{cursor:pointer;}'
+    + '.banner-info #btn-auto-load{padding:6px 12px;border:none;border-radius:6px;background:var(--color-accent,var(--elmi-orange,#F39A3A));color:#fff;font-size:12.5px;font-weight:600;}'
+    + '.banner-info #btn-dismiss-banner{margin-left:auto;background:none;border:none;font-size:14px;color:var(--fg2,#6b6b76);}'
     + '.hidden{display:none!important;}';
   document.head.appendChild(mk('style', {id:'elmi-multi-station-css'}, css));
 }
@@ -834,6 +846,33 @@ function showStatus(host, msg, type){
   host.textContent = msg;
   host.className = 'elmi-status-box ' + type;
   host.classList.remove('hidden');
+}
+
+/* ── IndexedDB persistence for the default folder handle ── */
+var IDB_DB = 'elmi-cpo-settings', IDB_STORE = 'handles', IDB_KEY = 'defaultChargingDir';
+
+async function saveDirectoryHandle(handle){
+  if (!window.idb) return;
+  var db = await window.idb.openDB(IDB_DB, 1, {
+    upgrade: function(db){ db.createObjectStore(IDB_STORE); }
+  });
+  await db.put(IDB_STORE, handle, IDB_KEY);
+  localStorage.setItem('defaultChargingDataDir', handle.name || 'Charging Stations Operating Datas');
+}
+
+async function getSavedDirectoryHandle(){
+  if (!window.idb) return null;
+  try{
+    var db = await window.idb.openDB(IDB_DB, 1, {
+      upgrade: function(db){ db.createObjectStore(IDB_STORE); }
+    });
+    var handle = await db.get(IDB_STORE, IDB_KEY);
+    if (!handle) return null;
+    var permission = await handle.queryPermission({mode: 'read'});
+    if (permission === 'granted') return handle;
+    var request = await handle.requestPermission({mode: 'read'});
+    return request === 'granted' ? handle : null;
+  }catch(e){ return null; }
 }
 
 function populateSelector(){
@@ -863,6 +902,16 @@ function buildSelectorBar(){
 
 function buildFolderSection(){
   var status = mk('div', {id: 'elmi-folder-status', class: 'elmi-status-box hidden'});
+  var defaultBtn = mk('button', {id: 'btn-load-default', class: 'btn-primary', type: 'button'},
+    '⚡ Standard-Ordner laden (Charging Stations Operating Datas)');
+  defaultBtn.addEventListener('click', function(){
+    loadDefaultFolder(status);
+  });
+  if (!('showDirectoryPicker' in window)) {
+    defaultBtn.disabled = true;
+    defaultBtn.title = 'Nur in Chrome/Edge verfügbar. Bitte Ordner manuell auswählen.';
+  }
+  var manualHint = mk('p', {class: 'input-hint'}, 'Oder wähle manuell einen anderen Ordner:');
   var btn = mk('button', {id: 'elmi-btn-pick-folder', class: 'btn ghost sm', type: 'button'},
     '📁 Select Folder & Load All Stations');
   btn.addEventListener('click', function(){
@@ -872,7 +921,32 @@ function buildFolderSection(){
     'Load every Excel file from a local folder (e.g. a synced OneDrive directory) in one go — no need to upload files one by one.');
   return mk('div', {id: 'elmi-folder-section'},
     mk('div', {class: 'section-title', style: {marginTop: '0'}}, '📂 Load from Folder'),
-    hint, mk('div', {style: {marginTop: '10px'}}, btn), status);
+    mk('div', {style: {marginTop: '4px'}}, defaultBtn),
+    manualHint, hint, mk('div', {style: {marginTop: '10px'}}, btn), status);
+}
+
+async function loadFromDirectoryHandle(dirHandle, status){
+  var loaded = [];
+  for await (var entry of dirHandle.values()) {
+    if (entry.kind === 'file' && /\.(xlsx|xls)$/i.test(entry.name)) {
+      try{
+        var file = await entry.getFile();
+        var db = await window.ELMI.parseWorkbook(file);
+        loaded.push({sn: extractSN(entry.name, db.sn), fileName: entry.name, db: db});
+      }catch(fileErr){
+        console.error('[multi-station] failed to parse', entry.name, fileErr);
+      }
+    }
+  }
+  if (!loaded.length) {
+    showStatus(status, '⚠️ No readable Excel files found in that folder.', 'warn');
+    return false;
+  }
+  Multi.stations = loaded;
+  Multi.activeSN = loaded[0].sn;
+  populateSelector();
+  window.ELMI.app.applyDB(loaded[0].db, loaded[0].fileName);
+  return loaded;
 }
 
 async function loadFolder(status){
@@ -882,43 +956,89 @@ async function loadFolder(status){
   }
   try{
     var dirHandle = await window.showDirectoryPicker({mode: 'read'});
-    var loaded = [];
-    for await (var entry of dirHandle.values()) {
-      if (entry.kind === 'file' && /\.(xlsx|xls)$/i.test(entry.name)) {
-        try{
-          var file = await entry.getFile();
-          var db = await window.ELMI.parseWorkbook(file);
-          loaded.push({sn: extractSN(entry.name, db.sn), fileName: entry.name, db: db});
-        }catch(fileErr){
-          console.error('[multi-station] failed to parse', entry.name, fileErr);
-        }
-      }
-    }
-    if (!loaded.length) {
-      showStatus(status, '⚠️ No readable Excel files found in that folder.', 'warn');
-      return;
-    }
-    Multi.stations = loaded;
-    Multi.activeSN = loaded[0].sn;
-    populateSelector();
-    window.ELMI.app.applyDB(loaded[0].db, loaded[0].fileName);
-    showStatus(status, '✅ Loaded ' + loaded.length + ' station(s): ' + loaded.map(function(s){ return s.sn; }).join(', '), 'ok');
+    var loaded = await loadFromDirectoryHandle(dirHandle, status);
+    if (loaded) showStatus(status, '✅ Loaded ' + loaded.length + ' station(s): ' + loaded.map(function(s){ return s.sn; }).join(', '), 'ok');
   }catch(err){
     if (err.name !== 'AbortError') showStatus(status, '❌ Error loading folder: ' + err.message, 'error');
   }
+}
+
+async function loadDefaultFolder(status){
+  if (!('showDirectoryPicker' in window)) {
+    showStatus(status, '⚠️ This browser does not support the folder picker. Please use Chrome or Edge.', 'warn');
+    return;
+  }
+  try{
+    var dirHandle = await window.showDirectoryPicker({mode: 'read'});
+    await saveDirectoryHandle(dirHandle);
+    var loaded = await loadFromDirectoryHandle(dirHandle, status);
+    if (loaded) {
+      showStatus(status, '✅ Ordner gespeichert. Beim nächsten Besuch wird dieser Ordner automatisch vorgeschlagen. Geladen: ' +
+        loaded.length + ' station(s): ' + loaded.map(function(s){ return s.sn; }).join(', '), 'ok');
+    }
+    hideAutoLoadBanner();
+  }catch(err){
+    if (err.name !== 'AbortError') showStatus(status, '❌ Error loading folder: ' + err.message, 'error');
+  }
+}
+
+/* ── Auto-load banner ── */
+function buildAutoLoadBanner(){
+  var nameEl = mk('strong', {id: 'saved-folder-name'});
+  var loadBtn = mk('button', {id: 'btn-auto-load', type: 'button'}, 'Automatisch laden');
+  var dismissBtn = mk('button', {id: 'btn-dismiss-banner', type: 'button'}, '✕');
+  var banner = mk('div', {id: 'auto-load-banner', class: 'banner-info', style: {display: 'none'}},
+    mk('span', {}, '📁 Gespeicherter Ordner erkannt: ', nameEl),
+    loadBtn, dismissBtn);
+  dismissBtn.addEventListener('click', function(){ banner.style.display = 'none'; });
+  return banner;
+}
+
+function hideAutoLoadBanner(){
+  var banner = document.getElementById('auto-load-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+async function showAutoLoadBanner(handle){
+  var banner = document.getElementById('auto-load-banner');
+  if (!banner) return;
+  var nameEl = document.getElementById('saved-folder-name');
+  if (nameEl) nameEl.textContent = handle.name || localStorage.getItem('defaultChargingDataDir') || 'Ordner';
+  var loadBtn = document.getElementById('btn-auto-load');
+  if (loadBtn) {
+    loadBtn.onclick = async function(){
+      var status = document.getElementById('elmi-folder-status');
+      try{
+        var loaded = await loadFromDirectoryHandle(handle, status);
+        if (loaded && status) showStatus(status, '✅ Loaded ' + loaded.length + ' station(s): ' + loaded.map(function(s){ return s.sn; }).join(', '), 'ok');
+        banner.style.display = 'none';
+      }catch(err){
+        if (status) showStatus(status, '❌ Error loading folder: ' + err.message, 'error');
+      }
+    };
+  }
+  banner.style.display = 'flex';
+}
+
+async function initAutoLoadBanner(){
+  var savedHandle = await getSavedDirectoryHandle();
+  if (savedHandle) showAutoLoadBanner(savedHandle);
 }
 
 function injectIntoInputPage(page){
   if (!page) return;
   ensureStyles();
   if (page.querySelector('#elmi-folder-section')) return;
+  var banner = buildAutoLoadBanner();
+  page.insertBefore(banner, page.firstChild);
   var bar = buildSelectorBar();
-  page.insertBefore(bar, page.firstChild ? page.firstChild.nextSibling : null);
+  page.insertBefore(bar, banner.nextSibling);
   if (Multi.stations.length) populateSelector();
   var section = buildFolderSection();
   var dsCard = page.querySelector('.ds-card');
   if (dsCard && dsCard.parentNode) dsCard.parentNode.insertBefore(section, dsCard.nextSibling);
   else page.appendChild(section);
+  initAutoLoadBanner();
 }
 
 /* Render timing for the Settings tab is unreliable to patch via function-wrap
