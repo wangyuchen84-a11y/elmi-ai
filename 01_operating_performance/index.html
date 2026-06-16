@@ -922,21 +922,30 @@ function injectIntoInputPage(page){
   else page.appendChild(section);
 }
 
-function hookInputPage(){
-  var ELMI = window.ELMI;
-  if (!ELMI || !ELMI.pages || !ELMI.pages.input) return false;
-  var orig = ELMI.pages.input;
-  ELMI.pages.input = function(state, onChange){
-    var node = orig(state, onChange);
-    injectIntoInputPage(node);
-    return node;
-  };
+/* Render timing for the Settings tab is unreliable to patch via function-wrap
+   (it's often the very first tab rendered, before our hook installs). Instead,
+   watch #content like the Financial Performance extension does and inject
+   directly into whatever .page DOM is already there. */
+function tryInject(){
+  if (location.hash !== '#input' && location.hash !== '') return;
+  var page = document.querySelector('#content .page');
+  if (!page) return;
+  injectIntoInputPage(page);
+}
+
+function startWatching(){
+  var contentEl = document.getElementById('content');
+  if (!contentEl) return false;
+  var obs = new MutationObserver(function(){ tryInject(); });
+  obs.observe(contentEl, {childList: true, subtree: true});
+  window.addEventListener('hashchange', tryInject);
+  tryInject();
   return true;
 }
 
 var _msi = 0, _msiv = setInterval(function(){
   _msi++;
-  if (hookInputPage() || _msi > 60) clearInterval(_msiv);
+  if (startWatching() || _msi > 60) clearInterval(_msiv);
 }, 200);
 
 })();
