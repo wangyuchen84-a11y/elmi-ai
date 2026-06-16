@@ -293,9 +293,7 @@ function injectLangToggle(){
     },100);
     return;
   }
-  var wrap=mk('div',{id:'elmi-lang-toggle',style:'position:absolute;top:50%;right:16px;transform:translateY(-50%);display:flex;align-items:center;gap:6px;z-index:200'});
-  /* ensure target has position so absolute child works */
-  if(getComputedStyle(target).position==='static')target.style.position='relative';
+  var wrap=mk('div',{id:'elmi-lang-toggle','class':'lang-switcher',style:'display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;white-space:nowrap'});
   ['en','de'].forEach(function(lang){
     var btn=mk('button',{
       id:'elmi-lang-btn-'+lang,
