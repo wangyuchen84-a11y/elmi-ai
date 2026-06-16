@@ -5,54 +5,248 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Roadmap · ELMI AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --elmi-orange:     #F39A3A;
+      --elmi-tangerine:  #EC6A2A;
+      --elmi-red:        #E32028;
+      --elmi-magenta:    #B5188B;
+      --elmi-purple:     #6D2A99;
+      --elmi-gradient:   linear-gradient(90deg, #F39A3A 0%, #EC6A2A 22%, #E32028 48%, #B5188B 78%, #6D2A99 100%);
+      --elmi-accent:     #E32028;
+
+      --neutral-0:   #FFFFFF;
+      --neutral-50:  #FAFAFB;
+      --neutral-100: #F4F4F6;
+      --neutral-200: #E7E7EB;
+      --neutral-300: #D1D1D8;
+      --neutral-400: #9A9AA5;
+      --neutral-500: #6B6B76;
+      --neutral-600: #4A4A55;
+      --neutral-700: #2E2E36;
+      --neutral-800: #1B1B22;
+      --neutral-900: #0E0E14;
+
+      --fg1: var(--neutral-900);
+      --fg2: var(--neutral-600);
+      --fg3: var(--neutral-400);
+      --bg1: var(--neutral-0);
+      --bg2: var(--neutral-50);
+      --bg3: var(--neutral-100);
+      --border-1: var(--neutral-200);
+      --border-2: var(--neutral-300);
+
+      --font-body: "Maven Pro", system-ui, sans-serif;
+
+      --radius-sm:   8px;
+      --radius-md:   14px;
+      --radius-lg:   22px;
+      --radius-pill: 999px;
+
+      --shadow-1: 0 1px 2px rgba(14,14,20,.06);
+      --shadow-2: 0 4px 12px rgba(14,14,20,.08);
+
+      --ease-out: cubic-bezier(.22,1,.36,1);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; }
-    .logo { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #F39A3A, #E32028, #6D2A99); display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 20px; }
-    .brand { font-size: 13px; font-weight: 600; color: #6B6B76; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
-    h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 24px; text-align: center; }
-    .placeholder { background: #1B1B22; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 32px 40px; text-align: center; max-width: 480px; width: 100%; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg2);
+      color: var(--fg1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+
+    .appbar {
+      width: 100%;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-1);
+    }
+    .appbar-top {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 28px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+    .appbar-meta .title { font-size: 14px; font-weight: 700; color: var(--fg1); }
+    .appbar-meta .sub { font-size: 12px; color: var(--fg2); }
+    .gbar { height: 3px; background: var(--elmi-gradient); }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: var(--elmi-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: var(--neutral-100);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius-pill);
+      color: var(--fg2);
+      font: 13px/1 var(--font-body);
+      font-weight: 600;
+      text-decoration: none;
+      transition: background .2s, color .2s;
+    }
+    .back-btn:hover { background: var(--neutral-200); color: var(--fg1); }
+
+    .lang-toggle { display: flex; align-items: center; gap: 6px; }
+    .lang-btn {
+      background: transparent;
+      border: 1px solid var(--border-2);
+      border-radius: 6px;
+      padding: 5px 11px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      color: var(--fg2);
+      letter-spacing: .3px;
+      line-height: 1.4;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .lang-btn:hover { color: var(--fg1); border-color: var(--neutral-400); }
+    .lang-btn.active {
+      background: var(--neutral-100);
+      border-color: var(--neutral-400);
+      color: var(--fg1);
+      font-weight: 800;
+    }
+
+    .content {
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 40px 28px 80px;
+      flex: 1;
+    }
+
+    .placeholder {
+      background: var(--neutral-0);
+      border: 1px solid var(--border-1);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+      text-align: center;
+      max-width: 520px;
+      box-shadow: var(--shadow-2);
+      margin: 60px auto;
+    }
     .placeholder-icon { font-size: 40px; margin-bottom: 16px; }
-    .placeholder-text { font-size: 15px; color: #6B6B76; line-height: 1.6; }
-    footer { margin-top: 64px; font-size: 12px; color: #3A3A3C; }
-    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 13px/1 'Maven Pro', system-ui, sans-serif; font-weight: 600; text-decoration: none; transition: background .2s; z-index: 100; }
-    .back-btn:hover { background: #2a2a35; }
-    .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; align-items: center; gap: 6px; z-index: 100; }
-    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font-size: 12px; font-family: 'Maven Pro', system-ui, sans-serif; font-weight: 600; color: rgba(255,255,255,.45); letter-spacing: .3px; line-height: 1.4; transition: all .15s; display: flex; align-items: center; gap: 4px; }
-    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
-    .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
+    .placeholder-title { font-size: 20px; font-weight: 800; color: var(--fg1); margin-bottom: 10px; }
+    .placeholder-text { font-size: 14px; color: var(--fg2); line-height: 1.6; }
+    .placeholder-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 20px;
+      padding: 6px 14px;
+      background: var(--neutral-100);
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--fg2);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    footer { margin-top: 64px; font-size: 12px; color: var(--fg3); text-align: center; }
   </style>
 </head>
 <body>
-  <a class="back-btn" href="../">← <span id="back-label">Zurück</span></a>
-  <div class="lang-toggle">
-    <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
-    <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
+
+  <header class="appbar">
+    <div class="appbar-top">
+      <a class="back-btn" id="back-btn" href="../">← <span id="back-label">Zurück</span></a>
+      <div class="logo">🧭</div>
+      <div class="appbar-meta">
+        <div class="title">AI Roadmap</div>
+        <div class="sub" id="subtitle-text">Strategische KI-Planung &amp; Meilensteine</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="lang-toggle">
+        <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
+        <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
+      </div>
+    </div>
+    <div class="gbar"></div>
+  </header>
+
+  <div class="content">
+    <div class="placeholder">
+      <div class="placeholder-icon">🚧</div>
+      <div class="placeholder-title" id="placeholder-title">AI Roadmap</div>
+      <p class="placeholder-text" id="placeholder-text">Dieses Modul wird gerade aufgebaut.</p>
+      <div class="placeholder-badge" id="placeholder-badge">🔒 Coming Soon</div>
+    </div>
+
+    <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
   </div>
-  <div class="logo">🧭</div>
-  <div class="brand">ELMI AI</div>
-  <h1>AI Roadmap</h1>
-  <div class="placeholder">
-    <div class="placeholder-icon">🚧</div>
-    <p class="placeholder-text" id="placeholder-text">Dieses Modul wird gerade aufgebaut.</p>
-  </div>
-  <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
+
   <script>
   (function(){
     var STRINGS = {
-      de: { back: 'Zurück', placeholder: 'Dieses Modul wird gerade aufgebaut.', footer: 'ELMI Power GmbH · Interne Nutzung' },
-      en: { back: 'Back',   placeholder: 'This module is currently under construction.', footer: 'ELMI Power GmbH · Internal use only' }
+      de: {
+        back: 'Zurück',
+        subtitle: 'Strategische KI-Planung &amp; Meilensteine',
+        title: 'AI Roadmap',
+        placeholder: 'Dieses Modul wird gerade aufgebaut.',
+        badge: '🔒 Coming Soon',
+        footer: 'ELMI Power GmbH · Interne Nutzung'
+      },
+      en: {
+        back: 'Back',
+        subtitle: 'Strategic AI planning &amp; milestones',
+        title: 'AI Roadmap',
+        placeholder: 'This module is currently under construction.',
+        badge: '🔒 Coming Soon',
+        footer: 'ELMI Power GmbH · Internal use only'
+      }
     };
+
     function applyLang(lang) {
       var s = STRINGS[lang] || STRINGS.de;
       document.getElementById('back-label').textContent       = s.back;
+      document.getElementById('subtitle-text').textContent    = s.subtitle;
+      document.getElementById('placeholder-title').textContent = s.title;
       document.getElementById('placeholder-text').textContent = s.placeholder;
+      document.getElementById('placeholder-badge').textContent = s.badge;
       document.getElementById('footer-text').textContent      = s.footer;
       document.documentElement.lang = lang;
-      ['de','en'].forEach(function(l){ var b = document.getElementById('lbtn-'+l); if (b) b.classList.toggle('active', l === lang); });
+      ['de','en'].forEach(function(l){
+        var b = document.getElementById('lbtn-'+l);
+        if (b) b.classList.toggle('active', l === lang);
+      });
     }
-    window.setLang = function(lang) { localStorage.setItem('elmi_lang', lang); applyLang(lang); };
+
+    window.setLang = function(lang) {
+      localStorage.setItem('elmi_lang', lang);
+      applyLang(lang);
+    };
+
     applyLang(localStorage.getItem('elmi_lang') || 'de');
   })();
   </script>

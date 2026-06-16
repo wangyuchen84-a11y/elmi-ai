@@ -5,158 +5,245 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ELMI AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --elmi-orange:     #F39A3A;
+      --elmi-tangerine:  #EC6A2A;
+      --elmi-red:        #E32028;
+      --elmi-magenta:    #B5188B;
+      --elmi-purple:     #6D2A99;
+      --elmi-gradient:   linear-gradient(90deg, #F39A3A 0%, #EC6A2A 22%, #E32028 48%, #B5188B 78%, #6D2A99 100%);
+      --elmi-accent:     #E32028;
+
+      --neutral-0:   #FFFFFF;
+      --neutral-50:  #FAFAFB;
+      --neutral-100: #F4F4F6;
+      --neutral-200: #E7E7EB;
+      --neutral-300: #D1D1D8;
+      --neutral-400: #9A9AA5;
+      --neutral-500: #6B6B76;
+      --neutral-600: #4A4A55;
+      --neutral-700: #2E2E36;
+      --neutral-800: #1B1B22;
+      --neutral-900: #0E0E14;
+
+      --fg1: var(--neutral-900);
+      --fg2: var(--neutral-600);
+      --fg3: var(--neutral-400);
+      --bg1: var(--neutral-0);
+      --bg2: var(--neutral-50);
+      --bg3: var(--neutral-100);
+      --bg-dark:     var(--neutral-900);
+      --bg-dark-elev: #16161E;
+      --border-1: var(--neutral-200);
+      --border-2: var(--neutral-300);
+
+      --success: #1F9D55;
+      --warning: #E2A100;
+      --danger:  var(--elmi-red);
+      --info:    #2563EB;
+
+      --font-display: "Maven Pro", system-ui, sans-serif;
+      --font-body:    "Maven Pro", system-ui, sans-serif;
+      --font-mono:    "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+      --radius-sm:   8px;
+      --radius-md:   14px;
+      --radius-lg:   22px;
+      --radius-xl:   32px;
+      --radius-pill: 999px;
+
+      --shadow-1: 0 1px 2px rgba(14,14,20,.06);
+      --shadow-2: 0 4px 12px rgba(14,14,20,.08);
+      --shadow-3: 0 12px 32px rgba(14,14,20,.10);
+      --shadow-4: 0 24px 60px rgba(14,14,20,.16);
+      --shadow-glow: 0 12px 28px rgba(227,32,40,.22), 0 4px 10px rgba(109,42,153,.18);
+
+      --ease-out: cubic-bezier(.22,1,.36,1);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Maven Pro', system-ui, sans-serif;
-      background: #0E0E14;
-      color: #fff;
+      font-family: var(--font-body);
+      background: var(--bg2);
+      color: var(--fg1);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 32px 16px;
+      justify-content: flex-start;
+      padding: 0;
+    }
+
+    .appbar {
+      width: 100%;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-1);
+    }
+    .appbar-top {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 28px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+    .appbar-meta .title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--fg1);
+    }
+    .appbar-meta .sub {
+      font-size: 12px;
+      color: var(--fg2);
+    }
+    .gbar {
+      height: 3px;
+      background: var(--elmi-gradient);
     }
 
     .logo {
-      width: 64px;
-      height: 64px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #F39A3A, #E32028, #6D2A99);
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: var(--elmi-gradient);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
-      margin-bottom: 20px;
+      font-size: 18px;
+      flex-shrink: 0;
     }
 
-    h1 {
-      font-size: 36px;
+    .content {
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 40px 28px 80px;
+    }
+
+    .page-head {
+      margin-bottom: 36px;
+    }
+    .page-head h1 {
+      font-size: 32px;
       font-weight: 800;
       letter-spacing: -0.5px;
-      background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99);
+      background: var(--elmi-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
-
-    .subtitle {
+    .page-head .lead {
       font-size: 15px;
-      color: #6B6B76;
-      margin-bottom: 48px;
-      text-align: center;
-    }
-
-    .sections {
-      width: 100%;
-      max-width: 680px;
-      display: flex;
-      flex-direction: column;
-      gap: 40px;
+      color: var(--fg2);
     }
 
     .section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 34px 0 14px;
       font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1.2px;
+      font-weight: 700;
+      letter-spacing: .12em;
       text-transform: uppercase;
-      color: #6B6B76;
-      margin-bottom: 12px;
+      color: var(--fg2);
+    }
+    .section-label::before {
+      content: '';
+      width: 14px;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--elmi-gradient);
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
+      gap: 14px;
     }
 
     .card {
       display: block;
-      background: #1B1B22;
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 16px;
-      padding: 24px;
+      background: var(--neutral-0);
+      border: 1px solid var(--border-1);
+      border-radius: var(--radius-md);
+      padding: 22px 24px;
       text-decoration: none;
-      color: inherit;
-      transition: border-color .2s, background .2s;
+      color: var(--fg1);
+      box-shadow: var(--shadow-1);
+      transition: box-shadow var(--ease-out) 200ms, transform var(--ease-out) 200ms, border-color .2s;
       position: relative;
       overflow: hidden;
     }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(243,154,58,.07), rgba(227,32,40,.07), rgba(109,42,153,.07));
-      opacity: 0;
-      transition: opacity .2s;
+    .card:hover {
+      border-color: var(--elmi-red);
+      box-shadow: var(--shadow-3);
+      transform: translateY(-2px);
     }
 
-    .card:hover { border-color: rgba(227,32,40,.4); }
-    .card:hover::before { opacity: 1; }
-
     .card-icon {
-      font-size: 28px;
+      font-size: 26px;
       margin-bottom: 12px;
     }
 
     .card-title {
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 800;
-      margin-bottom: 6px;
-      letter-spacing: -0.2px;
+      margin-bottom: 5px;
+      letter-spacing: -.2px;
+      color: var(--fg1);
     }
 
     .card-desc {
       font-size: 13px;
-      color: #6B6B76;
+      color: var(--fg2);
       line-height: 1.5;
     }
 
     .card-arrow {
       position: absolute;
-      top: 24px;
-      right: 24px;
-      color: rgba(255,255,255,.2);
-      font-size: 18px;
+      top: 22px;
+      right: 22px;
+      color: var(--fg3);
+      font-size: 16px;
       transition: color .2s, transform .2s;
     }
-
     .card:hover .card-arrow {
-      color: #E32028;
+      color: var(--elmi-red);
       transform: translateX(2px);
     }
 
     footer {
       margin-top: 64px;
       font-size: 12px;
-      color: #3A3A3C;
+      color: var(--fg3);
+      text-align: center;
     }
 
     /* ── Language switcher ── */
     .lang-toggle {
-      position: fixed;
-      top: 16px;
-      right: 20px;
       display: flex;
       align-items: center;
       gap: 6px;
-      z-index: 100;
     }
     .lang-btn {
       background: transparent;
-      border: 1px solid rgba(255,255,255,.2);
+      border: 1px solid var(--border-2);
       border-radius: 6px;
       padding: 5px 11px;
       cursor: pointer;
       font-size: 12px;
-      font-family: 'Maven Pro', system-ui, sans-serif;
+      font-family: var(--font-body);
       font-weight: 600;
-      color: rgba(255,255,255,.45);
+      color: var(--fg2);
       letter-spacing: .3px;
       line-height: 1.4;
       transition: all .15s;
@@ -164,27 +251,34 @@
       align-items: center;
       gap: 4px;
     }
-    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
+    .lang-btn:hover { color: var(--fg1); border-color: var(--neutral-400); }
     .lang-btn.active {
-      background: rgba(255,255,255,.1);
-      border-color: rgba(255,255,255,.35);
-      color: #fff;
+      background: var(--neutral-100);
+      border-color: var(--neutral-400);
+      color: var(--fg1);
       font-weight: 800;
     }
   </style>
 </head>
 <body>
 
-  <div class="lang-toggle">
-    <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
-    <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
-  </div>
+  <header class="appbar">
+    <div class="appbar-top">
+      <div class="logo">⚡</div>
+      <div class="appbar-meta">
+        <div class="title">ELMI AI</div>
+        <div class="sub" id="subtitle-text">Interne Tools &amp; Dashboards</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="lang-toggle">
+        <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
+        <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
+      </div>
+    </div>
+    <div class="gbar"></div>
+  </header>
 
-  <div class="logo">⚡</div>
-  <h1>ELMI AI</h1>
-  <p class="subtitle" id="subtitle-text">Interne Tools &amp; Dashboards</p>
-
-  <div class="sections">
+  <div class="content">
 
     <!-- Operations -->
     <div class="section">
@@ -249,9 +343,9 @@
       </div>
     </div>
 
-  </div>
+    <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
 
-  <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
+  </div>
 
   <script>
   (function(){

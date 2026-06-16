@@ -5,106 +5,167 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CPO Sales Center AI · ELMI AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --elmi-orange:     #F39A3A;
+      --elmi-tangerine:  #EC6A2A;
+      --elmi-red:        #E32028;
+      --elmi-magenta:    #B5188B;
+      --elmi-purple:     #6D2A99;
+      --elmi-gradient:   linear-gradient(90deg, #F39A3A 0%, #EC6A2A 22%, #E32028 48%, #B5188B 78%, #6D2A99 100%);
+
+      --neutral-0:   #FFFFFF;
+      --neutral-50:  #FAFAFB;
+      --neutral-100: #F4F4F6;
+      --neutral-200: #E7E7EB;
+      --neutral-300: #D1D1D8;
+      --neutral-400: #9A9AA5;
+      --neutral-500: #6B6B76;
+      --neutral-600: #4A4A55;
+      --neutral-700: #2E2E36;
+      --neutral-800: #1B1B22;
+      --neutral-900: #0E0E14;
+
+      --fg1: var(--neutral-900);
+      --fg2: var(--neutral-600);
+      --fg3: var(--neutral-400);
+      --bg2: var(--neutral-50);
+      --border-1: var(--neutral-200);
+      --border-2: var(--neutral-300);
+
+      --success: #1F9D55;
+      --warning: #E2A100;
+
+      --font-body: "Maven Pro", system-ui, sans-serif;
+
+      --radius-sm:   8px;
+      --radius-md:   14px;
+      --radius-pill: 999px;
+
+      --shadow-1: 0 1px 2px rgba(14,14,20,.06);
+      --shadow-2: 0 4px 12px rgba(14,14,20,.08);
+      --shadow-3: 0 12px 32px rgba(14,14,20,.10);
+
+      --ease-out: cubic-bezier(.22,1,.36,1);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Maven Pro', system-ui, sans-serif; background: #0E0E14; color: #fff; min-height: 100vh; padding: 80px 16px 48px; }
-    .back-btn { position: fixed; top: 16px; left: 20px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B1B22; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #ccc; font: 600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration: none; transition: background .2s; z-index: 100; }
-    .back-btn:hover { background: #2a2a35; }
-    .lang-toggle { position: fixed; top: 16px; right: 20px; display: flex; gap: 6px; z-index: 100; }
-    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 'Maven Pro', system-ui, sans-serif; color: rgba(255,255,255,.45); transition: all .15s; display: flex; align-items: center; gap: 4px; }
-    .lang-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
-    .lang-btn.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); color: #fff; font-weight: 800; }
-    .header { text-align: center; margin-bottom: 48px; }
-    .logo { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #F39A3A, #E32028, #6D2A99); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px; }
-    .brand { font-size: 13px; font-weight: 600; color: #6B6B76; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
-    h1 { font-size: 28px; font-weight: 800; background: linear-gradient(90deg, #F39A3A, #E32028, #6D2A99); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .nav-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; max-width: 960px; margin: 0 auto; }
-    .nav-card { display: flex; align-items: center; gap: 16px; background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 20px 24px; text-decoration: none; color: #fff; transition: border-color .2s, background .2s; }
-    .nav-card:hover { border-color: rgba(109,42,153,.5); background: #20202c; }
-    .nav-card:hover .nav-arrow { color: #9B59B6; }
+    body { font-family: var(--font-body); background: var(--bg2); color: var(--fg1); min-height: 100vh; display: flex; flex-direction: column; padding: 0; }
+
+    .appbar { width: 100%; position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.88); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-1); }
+    .appbar-top { display: flex; align-items: center; gap: 18px; padding: 12px 28px; max-width: 1320px; margin: 0 auto; }
+    .appbar-meta .title { font-size: 14px; font-weight: 700; color: var(--fg1); }
+    .appbar-meta .sub { font-size: 12px; color: var(--fg2); }
+    .gbar { height: 3px; background: var(--elmi-gradient); }
+
+    .logo { width: 36px; height: 36px; border-radius: 9px; background: var(--elmi-gradient); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: var(--neutral-100); border: 1px solid var(--border-2); border-radius: var(--radius-pill); color: var(--fg2); font: 13px/1 var(--font-body); font-weight: 600; text-decoration: none; transition: background .2s, color .2s; }
+    .back-btn:hover { background: var(--neutral-200); color: var(--fg1); }
+
+    .lang-toggle { display: flex; align-items: center; gap: 6px; }
+    .lang-btn { background: transparent; border: 1px solid var(--border-2); border-radius: 6px; padding: 5px 11px; cursor: pointer; font: 600 12px/1.4 var(--font-body); color: var(--fg2); transition: all .15s; display: flex; align-items: center; gap: 4px; }
+    .lang-btn:hover { color: var(--fg1); border-color: var(--neutral-400); }
+    .lang-btn.active { background: var(--neutral-100); border-color: var(--neutral-400); color: var(--fg1); font-weight: 800; }
+
+    .content { width: 100%; max-width: 1320px; margin: 0 auto; padding: 40px 28px 80px; flex: 1; }
+
+    .nav-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+    .nav-card { display: flex; align-items: center; gap: 16px; background: var(--neutral-0); border: 1px solid var(--border-1); border-radius: var(--radius-md); padding: 20px 24px; text-decoration: none; color: var(--fg1); box-shadow: var(--shadow-1); transition: box-shadow var(--ease-out) 200ms, transform var(--ease-out) 200ms, border-color .2s; }
+    .nav-card:hover { border-color: var(--elmi-red); box-shadow: var(--shadow-3); transform: translateY(-2px); }
+    .nav-card:hover .nav-arrow { color: var(--elmi-red); }
     .nav-icon { font-size: 28px; flex-shrink: 0; width: 48px; text-align: center; }
     .nav-content { flex: 1; min-width: 0; }
-    .nav-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
-    .nav-desc { font-size: 12px; color: #6B6B76; line-height: 1.4; }
-    .nav-arrow { margin-left: auto; color: #3A3A3C; font-size: 18px; flex-shrink: 0; transition: color .2s; }
-    .status-bar { max-width: 960px; margin: 32px auto 0; background: #1B1B22; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 12px 20px; font-size: 12px; color: #6B6B76; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #3A3A3C; flex-shrink: 0; }
-    .status-dot.ok { background: #4CAF50; }
-    .status-dot.warn { background: #F39A3A; }
-    footer { text-align: center; margin-top: 48px; font-size: 12px; color: #3A3A3C; }
+    .nav-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; color: var(--fg1); }
+    .nav-desc { font-size: 12px; color: var(--fg2); line-height: 1.4; }
+    .nav-arrow { margin-left: auto; color: var(--fg3); font-size: 18px; flex-shrink: 0; transition: color .2s; }
+
+    .status-bar { margin: 32px 0 0; background: var(--neutral-0); border: 1px solid var(--border-1); border-radius: var(--radius-sm); padding: 12px 20px; font-size: 12px; color: var(--fg2); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; box-shadow: var(--shadow-1); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-2); flex-shrink: 0; }
+    .status-dot.ok { background: var(--success); }
+    .status-dot.warn { background: var(--warning); }
+
+    footer { text-align: center; margin-top: 48px; font-size: 12px; color: var(--fg3); }
   </style>
 </head>
 <body>
-  <a class="back-btn" href="../">← <span id="back-label">Zurück</span></a>
-  <div class="lang-toggle">
-    <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
-    <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
-  </div>
+  <header class="appbar">
+    <div class="appbar-top">
+      <a class="back-btn" href="../">← <span id="back-label">Zurück</span></a>
+      <div class="logo">🔌</div>
+      <div class="appbar-meta">
+        <div class="title">CPO Sales Center AI</div>
+        <div class="sub" id="subtitle-text">KI-Vertriebsunterstützung für Ladenetz</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="lang-toggle">
+        <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
+        <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
+      </div>
+    </div>
+    <div class="gbar"></div>
+  </header>
 
-  <div class="header">
-    <div class="logo">🔌</div>
-    <div class="brand">ELMI AI</div>
-    <h1>CPO Sales Center AI</h1>
-  </div>
+  <div class="content">
+    <div class="nav-grid">
+      <a class="nav-card" href="settings.html">
+        <div class="nav-icon">⚙️</div>
+        <div class="nav-content">
+          <div class="nav-title" data-i18n="nav_settings">Settings</div>
+          <div class="nav-desc" data-i18n="nav_settings_desc">Standort, Preise, Radius, Daten-Upload</div>
+        </div>
+        <div class="nav-arrow">›</div>
+      </a>
+      <a class="nav-card" href="executive.html">
+        <div class="nav-icon">🗺️</div>
+        <div class="nav-content">
+          <div class="nav-title" data-i18n="nav_executive">Executive</div>
+          <div class="nav-desc" data-i18n="nav_executive_desc">Karte, KPIs, Wettbewerber-Cluster</div>
+        </div>
+        <div class="nav-arrow">›</div>
+      </a>
+      <a class="nav-card" href="wettbewerber-details.html">
+        <div class="nav-icon">🏢</div>
+        <div class="nav-content">
+          <div class="nav-title" data-i18n="nav_wett">Wettbewerber-Details</div>
+          <div class="nav-desc" data-i18n="nav_wett_desc">Tabelle aller Wettbewerber im Radius</div>
+        </div>
+        <div class="nav-arrow">›</div>
+      </a>
+      <a class="nav-card" href="standort-vs-wettbewerber.html">
+        <div class="nav-icon">📊</div>
+        <div class="nav-content">
+          <div class="nav-title" data-i18n="nav_standort">Standort vs. Wettbewerber</div>
+          <div class="nav-desc" data-i18n="nav_standort_desc">Auslastungsvergleich eigener Standort</div>
+        </div>
+        <div class="nav-arrow">›</div>
+      </a>
+      <a class="nav-card" href="preisstrategie.html">
+        <div class="nav-icon">💡</div>
+        <div class="nav-content">
+          <div class="nav-title" data-i18n="nav_preis">Preisstrategie</div>
+          <div class="nav-desc" data-i18n="nav_preis_desc">KI-gestützte Preisempfehlung</div>
+        </div>
+        <div class="nav-arrow">›</div>
+      </a>
+      <a class="nav-card" href="auslastungsrate.html">
+        <div class="nav-icon">⚡</div>
+        <div class="nav-content">
+          <div class="nav-title" data-i18n="nav_auslastung">Auslastungsrate</div>
+          <div class="nav-desc" data-i18n="nav_auslastung_desc">Power-BI Live-Report</div>
+        </div>
+        <div class="nav-arrow">›</div>
+      </a>
+    </div>
 
-  <div class="nav-grid">
-    <a class="nav-card" href="settings.html">
-      <div class="nav-icon">⚙️</div>
-      <div class="nav-content">
-        <div class="nav-title" data-i18n="nav_settings">Settings</div>
-        <div class="nav-desc" data-i18n="nav_settings_desc">Standort, Preise, Radius, Daten-Upload</div>
-      </div>
-      <div class="nav-arrow">›</div>
-    </a>
-    <a class="nav-card" href="executive.html">
-      <div class="nav-icon">🗺️</div>
-      <div class="nav-content">
-        <div class="nav-title" data-i18n="nav_executive">Executive</div>
-        <div class="nav-desc" data-i18n="nav_executive_desc">Karte, KPIs, Wettbewerber-Cluster</div>
-      </div>
-      <div class="nav-arrow">›</div>
-    </a>
-    <a class="nav-card" href="wettbewerber-details.html">
-      <div class="nav-icon">🏢</div>
-      <div class="nav-content">
-        <div class="nav-title" data-i18n="nav_wett">Wettbewerber-Details</div>
-        <div class="nav-desc" data-i18n="nav_wett_desc">Tabelle aller Wettbewerber im Radius</div>
-      </div>
-      <div class="nav-arrow">›</div>
-    </a>
-    <a class="nav-card" href="standort-vs-wettbewerber.html">
-      <div class="nav-icon">📊</div>
-      <div class="nav-content">
-        <div class="nav-title" data-i18n="nav_standort">Standort vs. Wettbewerber</div>
-        <div class="nav-desc" data-i18n="nav_standort_desc">Auslastungsvergleich eigener Standort</div>
-      </div>
-      <div class="nav-arrow">›</div>
-    </a>
-    <a class="nav-card" href="preisstrategie.html">
-      <div class="nav-icon">💡</div>
-      <div class="nav-content">
-        <div class="nav-title" data-i18n="nav_preis">Preisstrategie</div>
-        <div class="nav-desc" data-i18n="nav_preis_desc">KI-gestützte Preisempfehlung</div>
-      </div>
-      <div class="nav-arrow">›</div>
-    </a>
-    <a class="nav-card" href="auslastungsrate.html">
-      <div class="nav-icon">⚡</div>
-      <div class="nav-content">
-        <div class="nav-title" data-i18n="nav_auslastung">Auslastungsrate</div>
-        <div class="nav-desc" data-i18n="nav_auslastung_desc">Power-BI Live-Report</div>
-      </div>
-      <div class="nav-arrow">›</div>
-    </a>
-  </div>
+    <div class="status-bar">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Wettbewerberdaten werden geladen …</span>
+    </div>
 
-  <div class="status-bar">
-    <div class="status-dot" id="status-dot"></div>
-    <span id="status-text">Wettbewerberdaten werden geladen …</span>
+    <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
   </div>
-
-  <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
 
   <script src="js/db.js"></script>
   <script>
@@ -112,6 +173,7 @@
     const S = {
       de: {
         back: 'Zurück', footer: 'ELMI Power GmbH · Interne Nutzung',
+        subtitle: 'KI-Vertriebsunterstützung für Ladenetz',
         nav_settings: 'Settings', nav_settings_desc: 'Standort, Preise, Radius, Daten-Upload',
         nav_executive: 'Executive', nav_executive_desc: 'Karte, KPIs, Wettbewerber-Cluster',
         nav_wett: 'Wettbewerber-Details', nav_wett_desc: 'Tabelle aller Wettbewerber im Radius',
@@ -125,6 +187,7 @@
       },
       en: {
         back: 'Back', footer: 'ELMI Power GmbH · Internal use only',
+        subtitle: 'AI sales support for charging networks',
         nav_settings: 'Settings', nav_settings_desc: 'Location, prices, radius, data upload',
         nav_executive: 'Executive', nav_executive_desc: 'Map, KPIs, competitor cluster',
         nav_wett: 'Competitor Details', nav_wett_desc: 'All competitors within radius',
@@ -141,6 +204,7 @@
     const lang = ELMI_DB.getLang();
     const s = S[lang] || S.de;
     document.getElementById('back-label').textContent = s.back;
+    document.getElementById('subtitle-text').textContent = s.subtitle;
     document.getElementById('footer-text').textContent = s.footer;
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
