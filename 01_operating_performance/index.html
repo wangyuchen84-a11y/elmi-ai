@@ -782,6 +782,166 @@ var _mhi = 0, _mhiv = setInterval(function() {
 })();
 </script>
 
+<script>
+/* ELMI Multi-Station Loader Extension v1
+   Adds a "load all Excel files from a local folder" picker plus a
+   station selector to the Settings (#input) tab. Reuses the bundle's
+   own window.ELMI.parseWorkbook() / window.ELMI.app.applyDB() so every
+   page recomputes exactly as it does for a single manual upload.
+*/
+(function(){
+'use strict';
+
+var Multi = { stations: [], activeSN: null };
+
+function mk(tag, attrs){
+  var e = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach(function(k){
+    var v = attrs[k];
+    if (k === 'style' && typeof v === 'object') Object.assign(e.style, v);
+    else e.setAttribute(k, v);
+  });
+  for (var i = 2; i < arguments.length; i++) {
+    var c = arguments[i];
+    if (c == null) continue;
+    if (typeof c === 'string') e.appendChild(document.createTextNode(c));
+    else e.appendChild(c);
+  }
+  return e;
+}
+
+function extractSN(fileName, dbSn){
+  if (dbSn && dbSn !== '—') return String(dbSn);
+  var m = fileName.match(/(?:SN[_\-]?)([A-Za-z]\d{3,6})/i);
+  return m ? m[1].toUpperCase() : fileName.replace(/\.(xlsx|xls)$/i, '');
+}
+
+function ensureStyles(){
+  if (document.getElementById('elmi-multi-station-css')) return;
+  var css = ''
+    + '#elmi-folder-section{margin-top:12px;padding:18px 20px;border:1.5px dashed var(--elmi-orange,#F39A3A);border-radius:var(--radius-md,8px);background:rgba(243,154,58,.06);}'
+    + '#elmi-folder-section .settings-hint{font-size:12px;color:var(--fg2,#6b6b76);line-height:1.5;}'
+    + '.elmi-status-box{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:12.5px;}'
+    + '.elmi-status-box.ok{background:rgba(31,157,85,.12);color:#1F9D55;}'
+    + '.elmi-status-box.warn{background:rgba(226,161,0,.16);color:#8a6300;}'
+    + '.elmi-status-box.error{background:rgba(227,32,40,.12);color:#E32028;}'
+    + '#elmi-station-bar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--neutral-100,#f4f4f6);border:1px solid var(--border-1,#e7e7eb);border-radius:10px;margin-bottom:18px;font-size:13px;}'
+    + '#elmi-station-bar select{background:#fff;color:var(--fg1,#1b1b22);border:1px solid var(--border-2,#d1d1d8);border-radius:6px;padding:6px 10px;font-size:13px;min-width:280px;}'
+    + '.hidden{display:none!important;}';
+  document.head.appendChild(mk('style', {id:'elmi-multi-station-css'}, css));
+}
+
+function showStatus(host, msg, type){
+  host.textContent = msg;
+  host.className = 'elmi-status-box ' + type;
+  host.classList.remove('hidden');
+}
+
+function populateSelector(){
+  var sel = document.getElementById('elmi-station-select');
+  var bar = document.getElementById('elmi-station-bar');
+  if (!sel || !bar) return;
+  sel.innerHTML = '';
+  Multi.stations.forEach(function(s){
+    var opt = mk('option', {value: s.sn}, 'SN ' + s.sn + ' – ' + s.fileName);
+    if (s.sn === Multi.activeSN) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  bar.classList.remove('hidden');
+}
+
+function buildSelectorBar(){
+  var sel = mk('select', {id: 'elmi-station-select'});
+  sel.addEventListener('change', function(){
+    var st = Multi.stations.filter(function(s){ return s.sn === sel.value; })[0];
+    if (!st) return;
+    Multi.activeSN = st.sn;
+    window.ELMI.app.applyDB(st.db, st.fileName);
+  });
+  return mk('div', {id: 'elmi-station-bar', class: 'hidden'},
+    mk('label', {for: 'elmi-station-select'}, '⚡ Active Station:'), sel);
+}
+
+function buildFolderSection(){
+  var status = mk('div', {id: 'elmi-folder-status', class: 'elmi-status-box hidden'});
+  var btn = mk('button', {id: 'elmi-btn-pick-folder', class: 'btn ghost sm', type: 'button'},
+    '📁 Select Folder & Load All Stations');
+  btn.addEventListener('click', function(){
+    loadFolder(status);
+  });
+  var hint = mk('div', {class: 'settings-hint'},
+    'Load every Excel file from a local folder (e.g. a synced OneDrive directory) in one go — no need to upload files one by one.');
+  return mk('div', {id: 'elmi-folder-section'},
+    mk('div', {class: 'section-title', style: {marginTop: '0'}}, '📂 Load from Folder'),
+    hint, mk('div', {style: {marginTop: '10px'}}, btn), status);
+}
+
+async function loadFolder(status){
+  if (!('showDirectoryPicker' in window)) {
+    showStatus(status, '⚠️ This browser does not support the folder picker. Please use Chrome or Edge.', 'warn');
+    return;
+  }
+  try{
+    var dirHandle = await window.showDirectoryPicker({mode: 'read'});
+    var loaded = [];
+    for await (var entry of dirHandle.values()) {
+      if (entry.kind === 'file' && /\.(xlsx|xls)$/i.test(entry.name)) {
+        try{
+          var file = await entry.getFile();
+          var db = await window.ELMI.parseWorkbook(file);
+          loaded.push({sn: extractSN(entry.name, db.sn), fileName: entry.name, db: db});
+        }catch(fileErr){
+          console.error('[multi-station] failed to parse', entry.name, fileErr);
+        }
+      }
+    }
+    if (!loaded.length) {
+      showStatus(status, '⚠️ No readable Excel files found in that folder.', 'warn');
+      return;
+    }
+    Multi.stations = loaded;
+    Multi.activeSN = loaded[0].sn;
+    populateSelector();
+    window.ELMI.app.applyDB(loaded[0].db, loaded[0].fileName);
+    showStatus(status, '✅ Loaded ' + loaded.length + ' station(s): ' + loaded.map(function(s){ return s.sn; }).join(', '), 'ok');
+  }catch(err){
+    if (err.name !== 'AbortError') showStatus(status, '❌ Error loading folder: ' + err.message, 'error');
+  }
+}
+
+function injectIntoInputPage(page){
+  if (!page) return;
+  ensureStyles();
+  if (page.querySelector('#elmi-folder-section')) return;
+  var bar = buildSelectorBar();
+  page.insertBefore(bar, page.firstChild ? page.firstChild.nextSibling : null);
+  if (Multi.stations.length) populateSelector();
+  var section = buildFolderSection();
+  var dsCard = page.querySelector('.ds-card');
+  if (dsCard && dsCard.parentNode) dsCard.parentNode.insertBefore(section, dsCard.nextSibling);
+  else page.appendChild(section);
+}
+
+function hookInputPage(){
+  var ELMI = window.ELMI;
+  if (!ELMI || !ELMI.pages || !ELMI.pages.input) return false;
+  var orig = ELMI.pages.input;
+  ELMI.pages.input = function(state, onChange){
+    var node = orig(state, onChange);
+    injectIntoInputPage(node);
+    return node;
+  };
+  return true;
+}
+
+var _msi = 0, _msiv = setInterval(function(){
+  _msi++;
+  if (hookInputPage() || _msi > 60) clearInterval(_msiv);
+}, 200);
+
+})();
+</script>
+
   <div id="__bundler_thumbnail">
 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 <rect width="100" height="100" rx="18" fill="#0E0E14"></rect>
