@@ -1,153 +1,408 @@
-/* ===== ELMI AI - Responsive Base ===== */
+/* ============================================================
+   ELMI AI – Shared Responsive CSS
+   Gilt für: index.html + alle Unterseiten + alle Unter-Unterseiten
+   ============================================================ */
+
+/* --- CSS Custom Properties (Tokens) --- */
 :root {
-  --sidebar-width: 240px;
-  --header-height: 60px;
-  --content-max-width: 1400px;
-  --gap: 1.5rem;
-  --font-base: clamp(13px, 1.5vw, 16px);
+  --sidebar-w: 220px;
+  --header-h: 56px;
+  --gap: 1.25rem;
+  --radius: 8px;
+  --font-base: clamp(13px, 1.4vw, 15px);
+  --font-sm: clamp(11px, 1.2vw, 13px);
+  --content-max: 1440px;
+  --transition: 0.2s ease;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+/* --- Reset & Grundregeln --- */
+*, *::before, *::after { box-sizing: border-box; }
 
-html, body {
-  margin: 0;
-  padding: 0;
+html {
   font-size: var(--font-base);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
   overflow-x: hidden;
+  min-width: 320px;
 }
 
-/* Container */
-.container, .main-content, .page-wrapper {
+img, svg, video, canvas, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* --- Viewport-sichere max-width Helfer --- */
+.container,
+.content-wrapper,
+.page-content,
+.main-content {
   width: 100%;
-  max-width: var(--content-max-width);
-  margin: 0 auto;
-  padding: 0 var(--gap);
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--gap);
 }
 
-/* ===== NAVIGATION / SIDEBAR ===== */
-@media (min-width: 1025px) {
-  .layout-with-sidebar {
-    display: flex;
-    flex-direction: row;
+/* ============================================================
+   HEADER – universell für alle Seiten
+   ============================================================ */
+header,
+.header,
+#header,
+.site-header,
+.dashboard-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  width: 100%;
+  min-height: var(--header-h);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: visible;
+}
+
+header .logo,
+header .site-title,
+header .brand,
+.header .logo,
+.header .site-title {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: clamp(0.85rem, 2vw, 1.1rem);
+}
+
+/* Sprach-Switcher (DE/EN Flags) – immer sichtbar, nie überlappt */
+.lang-switcher,
+.lang-toggle,
+.language-toggle,
+.flag-toggle,
+[class*="lang-switch"],
+[class*="language-switch"] {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* Header-Mitte (Seiten-Titel, Dropdown, Stationsfeld) */
+.header-center,
+.header-middle,
+.station-selector,
+[class*="station-select"],
+[class*="sn-select"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 0.5rem;
+}
+
+/* Auf schmalen Screens: Header-Zeilen umbrechen */
+@media (max-width: 640px) {
+  header,
+  .header,
+  #header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
   }
-  .sidebar {
-    width: var(--sidebar-width);
+  .header-center,
+  .station-selector,
+  [class*="station-select"],
+  [class*="sn-select"] {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .lang-switcher,
+  .lang-toggle,
+  .language-toggle,
+  .flag-toggle {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+}
+
+/* ============================================================
+   LAYOUT – Sidebar + Content
+   ============================================================ */
+.layout,
+.layout-with-sidebar,
+.app-layout,
+.page-layout {
+  display: flex;
+  flex-direction: row;
+  min-height: calc(100vh - var(--header-h));
+}
+
+@media (min-width: 1025px) {
+  .sidebar,
+  .nav-sidebar,
+  .left-nav,
+  #sidebar {
+    width: var(--sidebar-w);
     flex-shrink: 0;
     position: sticky;
-    top: var(--header-height);
-    height: calc(100vh - var(--header-height));
+    top: var(--header-h);
+    height: calc(100vh - var(--header-h));
     overflow-y: auto;
-  }
-  .main-content {
-    flex: 1;
-    min-width: 0;
+    overflow-x: hidden;
   }
 }
 
 @media (max-width: 1024px) {
-  .layout-with-sidebar {
-    display: flex;
+  .layout,
+  .layout-with-sidebar,
+  .app-layout,
+  .page-layout {
     flex-direction: column;
   }
-  .sidebar {
+  .sidebar,
+  .nav-sidebar,
+  .left-nav,
+  #sidebar {
     width: 100%;
-    position: relative;
     height: auto;
+    position: relative;
+    top: 0;
+    overflow-x: auto;
     overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
   }
-  .sidebar nav, .sidebar ul {
+  .sidebar nav,
+  .sidebar ul,
+  .sidebar .nav-list,
+  .nav-sidebar ul,
+  #sidebar ul {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    overflow-x: auto;
+    gap: 0.4rem;
+    padding: 0.6rem var(--gap);
+    list-style: none;
+    margin: 0;
+  }
+  .sidebar nav a,
+  .sidebar ul a,
+  #sidebar ul a {
+    white-space: nowrap;
+    padding: 0.35rem 0.7rem;
+    border-radius: var(--radius);
+    font-size: var(--font-sm);
   }
 }
 
-/* ===== HEADER ===== */
-.header, header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  width: 100%;
-  height: var(--header-height);
+/* ============================================================
+   HORIZONTALE NAVIGATIONS-LEISTEN / TAB-BARS
+   ============================================================ */
+.tab-bar,
+.tabs,
+.sub-nav,
+.page-tabs,
+.nav-tabs,
+.nav-pills,
+[class*="tab-nav"],
+[class*="sub-tabs"] {
   display: flex;
-  align-items: center;
-  padding: 0 var(--gap);
-  gap: 1rem;
+  flex-wrap: wrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  gap: 0.4rem;
+  scrollbar-width: thin;
+}
+
+.tab-bar::-webkit-scrollbar {
+  height: 3px;
+}
+
+.tab-bar .tab,
+.tab-bar .tab-item,
+.tabs .tab,
+.nav-tabs .tab,
+.nav-pills .pill {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 0.4rem 0.9rem;
+  font-size: var(--font-sm);
+  border-radius: var(--radius);
+  cursor: pointer;
 }
 
 @media (max-width: 480px) {
-  :root {
-    --header-height: 52px;
-    --gap: 0.75rem;
-  }
-  .header .logo-text,
-  header .site-title {
-    font-size: 1rem;
+  .tab-bar .tab,
+  .tab-bar .tab-item,
+  .tabs .tab,
+  .nav-pills .pill {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
   }
 }
 
-/* ===== KARTEN / GRID-LAYOUTS ===== */
-.card-grid, .module-grid, .dashboard-grid {
+/* ============================================================
+   KARTEN / GRID
+   ============================================================ */
+.card-grid,
+.module-grid,
+.dashboard-grid,
+.grid-layout {
   display: grid;
   gap: var(--gap);
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
 }
 
-.metrics-row, .kpi-row {
+.kpi-row,
+.metrics-row,
+.stats-row {
   display: grid;
   gap: var(--gap);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
 }
 
-/* ===== TABELLEN ===== */
-.table-wrapper {
+.card,
+.kpi-card,
+.metric-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ============================================================
+   TABELLEN – horizontal scrollbar
+   ============================================================ */
+.table-wrapper,
+.table-scroll,
+[class*="table-container"] {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius);
 }
 
 table {
-  min-width: 600px;
+  min-width: 540px;
   width: 100%;
   border-collapse: collapse;
 }
 
-/* ===== CHARTS / DIAGRAMME ===== */
-.chart-container {
+@media (max-width: 640px) {
+  table th,
+  table td {
+    padding: 0.3rem 0.5rem;
+    font-size: var(--font-sm);
+    white-space: nowrap;
+  }
+}
+
+/* ============================================================
+   FILTER-LEISTEN
+   ============================================================ */
+.filter-bar,
+.filter-row,
+.controls-row,
+[class*="filter-group"],
+[class*="control-bar"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.filter-bar select,
+.filter-bar input,
+.controls-row select,
+.controls-row input {
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .filter-bar,
+  .filter-row,
+  .controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-bar select,
+  .filter-bar input {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   CHARTS / VISUALISIERUNGEN
+   ============================================================ */
+.chart-container,
+.chart-wrapper,
+[class*="chart-box"],
+[class*="recharts"] {
   width: 100%;
-  min-height: 200px;
+  min-height: 180px;
   overflow: hidden;
 }
 
 .chart-container svg,
+.chart-wrapper svg,
 .recharts-wrapper {
   width: 100% !important;
   height: auto !important;
+  max-width: 100%;
 }
 
-/* ===== TABS / NAVIGATION PILLS ===== */
-.tab-bar, .nav-pills {
+[class*="recharts-surface"] {
+  overflow: visible;
+}
+
+/* ============================================================
+   PASSWORT-OVERLAY
+   ============================================================ */
+#password-overlay,
+.auth-overlay,
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+#password-overlay .login-box,
+.auth-overlay .login-box,
+.login-box {
+  width: min(92vw, 380px);
+  padding: clamp(1rem, 5vw, 2rem);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* ============================================================
+   UTILITY-KLASSEN
+   ============================================================ */
+.overflow-x-auto,
+.scroll-x {
   overflow-x: auto;
-  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
 }
 
-@media (max-width: 480px) {
-  .tab-bar .tab-item,
-  .nav-pills .pill {
-    font-size: 0.75rem;
-    padding: 0.3rem 0.6rem;
-  }
+.w-full { width: 100%; }
+.min-w-0 { min-width: 0; }
+.no-overflow { overflow: hidden; }
+
+.hide-mobile  { display: none !important; }
+.show-mobile  { display: block !important; }
+@media (min-width: 481px) {
+  .hide-mobile  { display: initial !important; }
+  .show-mobile  { display: none !important; }
 }
 
-/* ===== MODALS / OVERLAYS ===== */
+/* ============================================================
+   MODALS
+   ============================================================ */
 .modal-box {
   width: min(90vw, 640px);
   max-height: 90vh;
@@ -155,35 +410,12 @@ table {
   margin: auto;
 }
 
-/* ===== UTILITY ===== */
-.no-overflow {
-  overflow: hidden;
-}
-
-.scroll-x {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* ===== PASSWORT-OVERLAY ===== */
-#password-overlay {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-}
-
-#password-overlay .login-box {
-  width: min(90vw, 360px);
-  padding: clamp(1rem, 5vw, 2rem);
-}
-
-/* ===== WIDE SCREENS ===== */
+/* ============================================================
+   WIDE SCREENS
+   ============================================================ */
 @media (min-width: 1440px) {
   :root {
-    --sidebar-width: 280px;
-    --gap: 2rem;
+    --sidebar-w: 260px;
+    --gap: 1.75rem;
   }
 }
