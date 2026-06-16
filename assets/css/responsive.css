@@ -1,0 +1,189 @@
+/* ===== ELMI AI - Responsive Base ===== */
+:root {
+  --sidebar-width: 240px;
+  --header-height: 60px;
+  --content-max-width: 1400px;
+  --gap: 1.5rem;
+  --font-base: clamp(13px, 1.5vw, 16px);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-base);
+  overflow-x: hidden;
+}
+
+/* Container */
+.container, .main-content, .page-wrapper {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 var(--gap);
+}
+
+/* ===== NAVIGATION / SIDEBAR ===== */
+@media (min-width: 1025px) {
+  .layout-with-sidebar {
+    display: flex;
+    flex-direction: row;
+  }
+  .sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    position: sticky;
+    top: var(--header-height);
+    height: calc(100vh - var(--header-height));
+    overflow-y: auto;
+  }
+  .main-content {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .layout-with-sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    position: relative;
+    height: auto;
+    overflow-y: visible;
+  }
+  .sidebar nav, .sidebar ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    overflow-x: auto;
+  }
+}
+
+/* ===== HEADER ===== */
+.header, header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--gap);
+  gap: 1rem;
+}
+
+@media (max-width: 480px) {
+  :root {
+    --header-height: 52px;
+    --gap: 0.75rem;
+  }
+  .header .logo-text,
+  header .site-title {
+    font-size: 1rem;
+  }
+}
+
+/* ===== KARTEN / GRID-LAYOUTS ===== */
+.card-grid, .module-grid, .dashboard-grid {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+
+.metrics-row, .kpi-row {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+}
+
+/* ===== TABELLEN ===== */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  min-width: 600px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* ===== CHARTS / DIAGRAMME ===== */
+.chart-container {
+  width: 100%;
+  min-height: 200px;
+  overflow: hidden;
+}
+
+.chart-container svg,
+.recharts-wrapper {
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* ===== TABS / NAVIGATION PILLS ===== */
+.tab-bar, .nav-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+@media (max-width: 480px) {
+  .tab-bar .tab-item,
+  .nav-pills .pill {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+/* ===== MODALS / OVERLAYS ===== */
+.modal-box {
+  width: min(90vw, 640px);
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
+}
+
+/* ===== UTILITY ===== */
+.no-overflow {
+  overflow: hidden;
+}
+
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ===== PASSWORT-OVERLAY ===== */
+#password-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+#password-overlay .login-box {
+  width: min(90vw, 360px);
+  padding: clamp(1rem, 5vw, 2rem);
+}
+
+/* ===== WIDE SCREENS ===== */
+@media (min-width: 1440px) {
+  :root {
+    --sidebar-width: 280px;
+    --gap: 2rem;
+  }
+}
