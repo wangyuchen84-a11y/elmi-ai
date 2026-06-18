@@ -1193,7 +1193,8 @@ async function tryRestoreFromIDB(){
 var _bli = 0, _bliv = setInterval(function(){
   _bli++;
   if (window.ELMI && window.ELMI.parseWorkbook && window.ELMI.app) {
-    tryRestoreFromIDB();
+    // Kurz warten bis der initiale Bundle-Render abgeschlossen ist
+    setTimeout(tryRestoreFromIDB, 400);
     clearInterval(_bliv);
   } else if (_bli > 60) {
     clearInterval(_bliv);
