@@ -838,7 +838,10 @@ function ensureStyles(){
     + '.banner-info button{cursor:pointer;}'
     + '.banner-info #btn-auto-load{padding:6px 12px;border:none;border-radius:6px;background:var(--color-accent,var(--elmi-orange,#F39A3A));color:#fff;font-size:12.5px;font-weight:600;}'
     + '.banner-info #btn-dismiss-banner{margin-left:auto;background:none;border:none;font-size:14px;color:var(--fg2,#6b6b76);}'
-    + '.hidden{display:none!important;}';
+    + '.hidden{display:none!important;}'
+    + '.elmi-status-box.info{background:rgba(30,120,220,.10);color:#1168cc;}'
+    + '.btn-danger{display:inline-block;padding:7px 14px;border:none;border-radius:var(--radius-md,8px);background:#E32028;color:#fff;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;}'
+    + '.btn-danger:hover{filter:brightness(1.1);}';
   document.head.appendChild(mk('style', {id:'elmi-multi-station-css'}, css));
 }
 
@@ -919,10 +922,27 @@ function buildFolderSection(){
   });
   var hint = mk('div', {class: 'settings-hint'},
     'Load every Excel file from a local folder (e.g. a synced OneDrive directory) in one go — no need to upload files one by one.');
+
+  // === ELMI PATCH: IndexedDB Persist [ABSCHNITT C] — Löschen-Button ===
+  var deleteBtn = mk('button', {id: 'elmi-btn-delete-data', class: 'btn-danger', type: 'button'},
+    '🗑️ Gespeicherte Daten löschen');
+  deleteBtn.addEventListener('click', async function(){
+    await clearPersistedStations();
+    Multi.stations = [];
+    Multi.activeSN = null;
+    var sel = document.getElementById('elmi-station-select');
+    var bar = document.getElementById('elmi-station-bar');
+    if (sel) sel.innerHTML = '';
+    if (bar) bar.classList.add('hidden');
+    showStatus(status, '🗑️ Gespeicherte Daten wurden gelöscht.', 'warn');
+  });
+
   return mk('div', {id: 'elmi-folder-section'},
     mk('div', {class: 'section-title', style: {marginTop: '0'}}, '📂 Load from Folder'),
     mk('div', {style: {marginTop: '4px'}}, defaultBtn),
-    manualHint, hint, mk('div', {style: {marginTop: '10px'}}, btn), status);
+    manualHint, hint, mk('div', {style: {marginTop: '10px'}}, btn),
+    mk('div', {style: {marginTop: '6px'}}, deleteBtn),
+    status);
 }
 
 async function loadFromDirectoryHandle(dirHandle, status){
@@ -946,6 +966,13 @@ async function loadFromDirectoryHandle(dirHandle, status){
   Multi.activeSN = loaded[0].sn;
   populateSelector();
   window.ELMI.app.applyDB(loaded[0].db, loaded[0].fileName);
+
+  // === ELMI PATCH: IndexedDB Persist [ABSCHNITT A+D] — nach Load speichern ===
+  await persistStations(loaded);
+  var ts = fmtTimestamp(localStorage.getItem('elmi_last_upload'));
+  if (status) showStatus(status,
+    '✅ Daten gespeichert — ' + loaded.length + ' Station(en), ' + ts, 'ok');
+
   return loaded;
 }
 
@@ -956,8 +983,8 @@ async function loadFolder(status){
   }
   try{
     var dirHandle = await window.showDirectoryPicker({mode: 'read'});
-    var loaded = await loadFromDirectoryHandle(dirHandle, status);
-    if (loaded) showStatus(status, '✅ Loaded ' + loaded.length + ' station(s): ' + loaded.map(function(s){ return s.sn; }).join(', '), 'ok');
+    await loadFromDirectoryHandle(dirHandle, status);
+    // Status wird bereits in loadFromDirectoryHandle gesetzt
   }catch(err){
     if (err.name !== 'AbortError') showStatus(status, '❌ Error loading folder: ' + err.message, 'error');
   }
@@ -971,11 +998,8 @@ async function loadDefaultFolder(status){
   try{
     var dirHandle = await window.showDirectoryPicker({mode: 'read'});
     await saveDirectoryHandle(dirHandle);
-    var loaded = await loadFromDirectoryHandle(dirHandle, status);
-    if (loaded) {
-      showStatus(status, '✅ Ordner gespeichert. Beim nächsten Besuch wird dieser Ordner automatisch vorgeschlagen. Geladen: ' +
-        loaded.length + ' station(s): ' + loaded.map(function(s){ return s.sn; }).join(', '), 'ok');
-    }
+    await loadFromDirectoryHandle(dirHandle, status);
+    // Status (inkl. Persist-Bestätigung) wird in loadFromDirectoryHandle gesetzt
     hideAutoLoadBanner();
   }catch(err){
     if (err.name !== 'AbortError') showStatus(status, '❌ Error loading folder: ' + err.message, 'error');
@@ -1025,6 +1049,79 @@ async function initAutoLoadBanner(){
   if (savedHandle) showAutoLoadBanner(savedHandle);
 }
 
+// === ELMI PATCH: IndexedDB Persist [ABSCHNITT A/B/C/D] — Hilfsfunktionen ===
+var PERSIST_DB = 'elmi_cpo_db', PERSIST_STORE = 'stations_data', PERSIST_KEY = 'last_stations';
+
+async function openPersistDB(){
+  return new Promise(function(resolve, reject){
+    var req = indexedDB.open(PERSIST_DB, 1);
+    req.onupgradeneeded = function(e){ e.target.result.createObjectStore(PERSIST_STORE); };
+    req.onsuccess = function(e){ resolve(e.target.result); };
+    req.onerror = function(e){ reject(e.target.error); };
+  });
+}
+
+function safeSerialize(obj){
+  // Deep-clone via JSON round-trip; drops non-serializable values (functions, etc.)
+  try{ return JSON.parse(JSON.stringify(obj)); }catch(e){ return null; }
+}
+
+// === ELMI PATCH: IndexedDB Persist [ABSCHNITT A] — Stationen speichern ===
+async function persistStations(stations){
+  try{
+    var serializable = stations.map(function(s){
+      return { sn: s.sn, fileName: s.fileName, db: safeSerialize(s.db) };
+    }).filter(function(s){ return s.db !== null; });
+    if (!serializable.length) return;
+    var db = await openPersistDB();
+    var tx = db.transaction(PERSIST_STORE, 'readwrite');
+    tx.objectStore(PERSIST_STORE).put(serializable, PERSIST_KEY);
+    await new Promise(function(res, rej){ tx.oncomplete = res; tx.onerror = function(e){ rej(e.target.error); }; });
+    db.close();
+    localStorage.setItem('elmi_last_upload', new Date().toISOString());
+  }catch(err){ console.error('[elmi-persist] save failed', err); }
+}
+
+// === ELMI PATCH: IndexedDB Persist [ABSCHNITT B] — Stationen laden ===
+async function loadPersistedStations(){
+  try{
+    var db = await openPersistDB();
+    var result = await new Promise(function(res, rej){
+      var tx = db.transaction(PERSIST_STORE, 'readonly');
+      var req = tx.objectStore(PERSIST_STORE).get(PERSIST_KEY);
+      req.onsuccess = function(){ res(req.result); };
+      req.onerror = function(e){ rej(e.target.error); };
+    });
+    db.close();
+    return result || null;
+  }catch(err){ return null; }
+}
+
+// === ELMI PATCH: IndexedDB Persist [ABSCHNITT C] — Daten löschen ===
+async function clearPersistedStations(){
+  try{
+    var db = await openPersistDB();
+    var tx = db.transaction(PERSIST_STORE, 'readwrite');
+    tx.objectStore(PERSIST_STORE).clear();
+    await new Promise(function(res, rej){ tx.oncomplete = res; tx.onerror = function(e){ rej(e.target.error); }; });
+    db.close();
+  }catch(err){ console.error('[elmi-persist] clear failed', err); }
+  localStorage.removeItem('elmi_last_upload');
+}
+
+function fmtTimestamp(iso){
+  if (!iso) return '';
+  try{
+    var d = new Date(iso);
+    var dd = String(d.getDate()).padStart(2,'0');
+    var mm = String(d.getMonth()+1).padStart(2,'0');
+    var yyyy = d.getFullYear();
+    var hh = String(d.getHours()).padStart(2,'0');
+    var min = String(d.getMinutes()).padStart(2,'0');
+    return dd+'.'+mm+'.'+yyyy+' '+hh+':'+min;
+  }catch(e){ return iso; }
+}
+
 /* ── Bundled fallback data (committed in /data) ──
    Works for everyone who opens the page — including external visitors
    without local file-system access — since the files ship with the repo
@@ -1064,10 +1161,39 @@ async function loadBundledData(){
   }
 }
 
+// === ELMI PATCH: IndexedDB Persist [ABSCHNITT B] — Startup-Restore ===
+var _persistRestored = false;
+async function tryRestoreFromIDB(){
+  if (_persistRestored) return;
+  _persistRestored = true;
+  var stations = await loadPersistedStations();
+  if (!stations || !stations.length) {
+    loadBundledData();
+    return;
+  }
+  // Stations aus IDB restored — kein bundled-fallback nötig
+  Multi.stations = stations;
+  Multi.activeSN = stations[0].sn;
+  populateSelector();
+  window.ELMI.app.applyDB(stations[0].db, stations[0].fileName);
+  // Status-Hinweis im Settings-Tab anzeigen (sobald injiziert)
+  var ts = fmtTimestamp(localStorage.getItem('elmi_last_upload'));
+  var showRestoreHint = function(){
+    var statusEl = document.getElementById('elmi-folder-status');
+    if (statusEl) {
+      showStatus(statusEl, 'ℹ️ Daten aus letztem Upload geladen — ' + ts, 'info');
+    }
+  };
+  // Sofort versuchen, und auch nach Injection des Settings-Tab
+  showRestoreHint();
+  setTimeout(showRestoreHint, 800);
+  setTimeout(showRestoreHint, 2000);
+}
+
 var _bli = 0, _bliv = setInterval(function(){
   _bli++;
   if (window.ELMI && window.ELMI.parseWorkbook && window.ELMI.app) {
-    loadBundledData();
+    tryRestoreFromIDB();
     clearInterval(_bliv);
   } else if (_bli > 60) {
     clearInterval(_bliv);
