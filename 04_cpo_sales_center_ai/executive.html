@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../design.css"/>
   <title>Executive · CPO Sales Center AI</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
-      --bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--border:#30363d;
-      --accent:#f7c325;--accent2:#e6a817;--text:#e6edf3;--text-muted:#8b949e;
-      --green:#3fb950;--red:#f85149;--blue:#58a6ff;--orange:#d29922;
-      --radius:8px;--font:'Segoe UI',system-ui,-apple-system,sans-serif;
+      --green: var(--success);
+      --red:   var(--danger);
+      --blue:  var(--info);
+      --orange: var(--warning);
+      --accent2: var(--accent-dark);
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;min-height:100vh}
@@ -45,17 +47,13 @@
     /* Map */
     #map{width:100%;height:420px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2)}
 
-    /* Leaflet dark override */
-    .leaflet-container{background:#1c2330!important}
-    .leaflet-tile{filter:brightness(.75) saturate(.8) hue-rotate(180deg) invert(1)}
-    .leaflet-popup-content-wrapper{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:var(--radius)}
-    .leaflet-popup-tip{background:var(--surface)}
-    .leaflet-popup-content{margin:10px 14px;font-size:12px;line-height:1.6}
-    .leaflet-popup-content b{color:var(--accent)}
+    /* Leaflet light mode */
+    .leaflet-container{background:var(--bg)!important}
+    .leaflet-popup-content b{color:var(--accent-text)}
 
     /* Competitor list */
     .comp-list{max-height:420px;overflow-y:auto;scrollbar-width:thin}
-    .comp-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(48,54,61,.5);gap:8px}
+    .comp-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px}
     .comp-item:last-child{border-bottom:none}
     .comp-name{font-size:13px;font-weight:500}
     .comp-meta{font-size:11px;color:var(--text-muted)}
@@ -86,7 +84,7 @@
     .status-hint{color:var(--text-muted);font-size:13px;font-style:italic}
     .link-detail{font-size:12px;color:var(--text-muted);text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:4px}
     .link-detail:hover{color:var(--accent);border-color:var(--accent)}
-    .footer{text-align:center;font-size:11px;color:var(--border);margin-top:40px;padding-top:20px;border-top:1px solid var(--border)}
+    .footer{text-align:center;font-size:11px;color:var(--text-dim);margin-top:40px;padding-top:20px;border-top:1px solid var(--border)}
   </style>
 </head>
 <body>
