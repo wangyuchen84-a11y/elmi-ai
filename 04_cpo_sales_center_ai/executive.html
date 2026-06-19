@@ -86,18 +86,25 @@
     .link-detail:hover{color:var(--accent);border-color:var(--accent)}
     .footer{text-align:center;font-size:11px;color:var(--text-dim);margin-top:40px;padding-top:20px;border-top:1px solid var(--border)}
   </style>
+  <link rel="stylesheet" href="elmi-brand.css">
 </head>
 <body>
 
-<nav class="nav">
-  <a href="../index.html">← Zurück</a>
-  <span style="color:var(--border)">›</span>
-  <span style="color:var(--text);font-size:13px">🗺️ Executive</span>
-  <div class="lang-toggle">
-    <button class="lang-btn active" onclick="setLang('de')">🇩🇪 DE</button>
-    <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+<header class="elmi-appbar">
+  <a class="ab-brand" href="index.html">
+    <img class="ab-logo" src="elmi-logo.png" alt="ELMI">
+    <span class="ab-div"></span>
+    <span class="ab-ai">AI</span>
+  </a>
+  <span class="ab-crumb">CPO Sales Center AI · Executive</span>
+  <div class="ab-right">
+    <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="lbtn-de" onclick="setLang('de')">DE</button>
+      <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">EN</button>
+    </div>
   </div>
-</nav>
+</header>
 
 <main class="page">
   <h1>🗺️ Executive</h1>
@@ -247,12 +254,12 @@ function initMap(st, comps, preise) {
   if (st.lat) {
     const ownIcon = L.divIcon({
       className: '',
-      html: `<div style="background:#f7c325;border:3px solid #fff;width:18px;height:18px;border-radius:50%;box-shadow:0 0 8px rgba(247,195,37,.6)"></div>`,
+      html: `<div style="background:#E32028;border:3px solid #fff;width:18px;height:18px;border-radius:50%;box-shadow:0 0 8px rgba(227,32,40,.6)"></div>`,
       iconSize: [18,18], iconAnchor: [9,9]
     });
     L.marker([ownLat, ownLon], {icon: ownIcon})
       .addTo(map)
-      .bindPopup(`<b style="color:#f7c325">ELMI Power</b><br>${st.strasse || ''}, ${st.ort || ''}`);
+      .bindPopup(`<b style="color:#E32028">ELMI Power</b><br>${st.strasse || ''}, ${st.ort || ''}`);
   }
 
   // Competitor markers
@@ -263,7 +270,7 @@ function initMap(st, comps, preise) {
     let color = '#8b949e';
     if (ownHPCPrice && compPrice) {
       const delta = (compPrice - ownHPCPrice) / ownHPCPrice * 100;
-      color = delta > 5 ? '#3fb950' : delta < -5 ? '#f85149' : '#f7c325';
+      color = delta > 5 ? '#3fb950' : delta < -5 ? '#f85149' : '#9A9AA5';
     }
     const icon = L.divIcon({
       className: '',
@@ -281,13 +288,13 @@ function initMap(st, comps, preise) {
   const legend = L.control({position: 'bottomright'});
   legend.onAdd = () => {
     const div = L.DomUtil.create('div');
-    div.style.cssText = 'background:rgba(22,27,34,.9);padding:10px 14px;border-radius:6px;font-size:11px;color:#e6edf3;border:1px solid #30363d';
+    div.style.cssText = 'background:rgba(255,255,255,.95);padding:10px 14px;border-radius:8px;font-size:11px;color:#1A1714;border:1px solid #E7E7EB;box-shadow:0 4px 12px rgba(14,14,20,.1)';
     div.innerHTML = `
-      <div style="margin-bottom:4px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.05em">Preisvergleich</div>
+      <div style="margin-bottom:4px;font-weight:600;color:#6B6B76;text-transform:uppercase;letter-spacing:.05em">Preisvergleich</div>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div style="width:10px;height:10px;border-radius:50%;background:#3fb950"></div> Teurer als ELMI</div>
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div style="width:10px;height:10px;border-radius:50%;background:#f7c325"></div> Gleicher Preis</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div style="width:10px;height:10px;border-radius:50%;background:#9A9AA5"></div> Gleicher Preis</div>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div style="width:10px;height:10px;border-radius:50%;background:#f85149"></div> Günstiger als ELMI</div>
-      <div style="display:flex;align-items:center;gap:6px"><div style="width:14px;height:14px;border-radius:50%;background:#f7c325;border:2px solid #fff"></div> ELMI Standort</div>`;
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:14px;height:14px;border-radius:50%;background:#E32028;border:2px solid #fff"></div> ELMI Standort</div>`;
     return div;
   };
   legend.addTo(map);

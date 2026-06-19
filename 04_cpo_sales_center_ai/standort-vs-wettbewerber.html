@@ -48,13 +48,24 @@
     .hint { font-size: 11px; color: #9A9AA5; margin-top: 12px; }
   </style>
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="elmi-brand.css">
 </head>
 <body>
-  <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
-  <div class="lang-toggle">
-    <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
-    <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
-  </div>
+  <header class="elmi-appbar">
+    <a class="ab-brand" href="index.html">
+      <img class="ab-logo" src="elmi-logo.png" alt="ELMI">
+      <span class="ab-div"></span>
+      <span class="ab-ai">AI</span>
+    </a>
+    <span class="ab-crumb">CPO Sales Center AI · Standort vs. Wettbewerber</span>
+    <div class="ab-right">
+      <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="lbtn-de" onclick="setLang('de')">DE</button>
+        <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+  </header>
 
   <div class="page-wrap">
     <h1>📊 Standort vs. Wettbewerber</h1>
@@ -69,8 +80,8 @@
         <div class="chart-card"><div class="chart-label">HPC</div><canvas id="chart-sessions-hpc"></canvas></div>
       </div>
       <div class="legend-row">
-        <div class="leg-item"><div class="leg-box" style="background:#6D2A99"></div>Eigener Standort</div>
-        <div class="leg-item"><div class="leg-box outline" style="border-color:#9B59B6"></div>Wettbewerber (Ø Landkreis)</div>
+        <div class="leg-item"><div class="leg-box" style="background:#E32028"></div>Eigener Standort</div>
+        <div class="leg-item"><div class="leg-box outline" style="border-color:#9A9AA5"></div>Wettbewerber (Ø Landkreis)</div>
       </div>
     </div>
 
@@ -82,8 +93,8 @@
         <div class="chart-card"><div class="chart-label">HPC</div><canvas id="chart-energy-hpc"></canvas></div>
       </div>
       <div class="legend-row">
-        <div class="leg-item"><div class="leg-box" style="background:#6D2A99"></div>Eigener Standort</div>
-        <div class="leg-item"><div class="leg-box outline" style="border-color:#9B59B6"></div>Wettbewerber (Ø Landkreis)</div>
+        <div class="leg-item"><div class="leg-box" style="background:#E32028"></div>Eigener Standort</div>
+        <div class="leg-item"><div class="leg-box outline" style="border-color:#9A9AA5"></div>Wettbewerber (Ø Landkreis)</div>
       </div>
     </div>
 
@@ -95,8 +106,8 @@
         <div class="chart-card"><div class="chart-label">HPC</div><canvas id="chart-beleg-hpc"></canvas></div>
       </div>
       <div class="legend-row">
-        <div class="leg-item"><div class="leg-box" style="background:#6D2A99"></div>Eigener Standort</div>
-        <div class="leg-item"><div class="leg-box outline" style="border-color:#9B59B6"></div>Wettbewerber (Ø Landkreis)</div>
+        <div class="leg-item"><div class="leg-box" style="background:#E32028"></div>Eigener Standort</div>
+        <div class="leg-item"><div class="leg-box outline" style="border-color:#9A9AA5"></div>Wettbewerber (Ø Landkreis)</div>
       </div>
     </div>
 
@@ -133,7 +144,7 @@
     document.getElementById('footer-text').textContent = lang === 'en' ? 'ELMI Power GmbH · Internal use only' : 'ELMI Power GmbH · Interne Nutzung';
 
     const TYPES = ['AC','DC','HPC'];
-    const TYPE_COLOR = { AC: '#C39BD3', DC: '#9B59B6', HPC: '#6D2A99' };
+    const TYPE_COLOR = { AC: '#6D2A99', DC: '#EC6A2A', HPC: '#E32028' };
 
     // ── Eigene Standortdaten aus IndexedDB laden ──
     let stationUtilData = null;
@@ -149,7 +160,7 @@
         if (!badge) {
           badge = document.createElement('div');
           badge.id = 'ownDataBadge';
-          badge.style.cssText = 'padding:10px 16px;background:rgba(247,195,37,.08);border:1px solid rgba(247,195,37,.25);border-radius:8px;font-size:12px;color:#F39A3A;margin-bottom:16px';
+          badge.style.cssText = 'padding:10px 16px;background:rgba(227,32,40,.06);border:1px solid rgba(227,32,40,.22);border-radius:8px;font-size:12px;color:#E32028;margin-bottom:16px';
           const notice = document.getElementById('top-notice');
           if (notice) notice.after(badge);
         }

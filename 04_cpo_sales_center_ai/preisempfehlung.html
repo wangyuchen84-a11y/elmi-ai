@@ -135,18 +135,25 @@
     .footer{text-align:center;font-size:11px;color:var(--text-dim);margin-top:40px;padding-top:20px;border-top:1px solid var(--border)}
     @media(max-width:640px){.page{padding:16px 12px 40px}h1{font-size:18px}.price-table{font-size:12px}}
   </style>
+  <link rel="stylesheet" href="elmi-brand.css">
 </head>
 <body>
 
-<nav class="nav">
-  <a href="../index.html">← Zurück</a>
-  <span style="color:var(--border)">›</span>
-  <span style="color:var(--text);font-size:13px">🎯 Preisempfehlung</span>
-  <div class="lang-toggle">
-    <button class="lang-btn active" onclick="setLang('de')">🇩🇪 DE</button>
-    <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+<header class="elmi-appbar">
+  <a class="ab-brand" href="index.html">
+    <img class="ab-logo" src="elmi-logo.png" alt="ELMI">
+    <span class="ab-div"></span>
+    <span class="ab-ai">AI</span>
+  </a>
+  <span class="ab-crumb">CPO Sales Center AI · Preisempfehlung</span>
+  <div class="ab-right">
+    <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="lbtn-de" onclick="setLang('de')">DE</button>
+      <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">EN</button>
+    </div>
   </div>
-</nav>
+</header>
 
 <main class="page">
   <h1>🎯 Preisempfehlung</h1>

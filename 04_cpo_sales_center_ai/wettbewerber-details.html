@@ -54,13 +54,24 @@
     .preis-null { color: #9A9AA5; font-style: italic; }
   </style>
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="elmi-brand.css">
 </head>
 <body>
-  <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
-  <div class="lang-toggle">
-    <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
-    <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
-  </div>
+  <header class="elmi-appbar">
+    <a class="ab-brand" href="index.html">
+      <img class="ab-logo" src="elmi-logo.png" alt="ELMI">
+      <span class="ab-div"></span>
+      <span class="ab-ai">AI</span>
+    </a>
+    <span class="ab-crumb">CPO Sales Center AI · Wettbewerber-Details</span>
+    <div class="ab-right">
+      <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="lbtn-de" onclick="setLang('de')">DE</button>
+        <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+  </header>
 
   <div class="page-wrap">
     <h1>🏢 Wettbewerber-Details</h1>

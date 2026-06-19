@@ -111,31 +111,15 @@
     }
     .back-btn:hover { background: var(--neutral-200); color: var(--fg1); }
 
-    .lang-toggle { display: flex; align-items: center; gap: 6px; }
-    .lang-btn {
-      background: transparent;
-      border: 1px solid var(--border-2);
-      border-radius: 6px;
-      padding: 5px 11px;
-      cursor: pointer;
-      font-size: 12px;
-      font-family: var(--font-body);
-      font-weight: 600;
-      color: var(--fg2);
-      letter-spacing: .3px;
-      line-height: 1.4;
-      transition: all .15s;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .lang-btn:hover { color: var(--fg1); border-color: var(--neutral-400); }
-    .lang-btn.active {
-      background: var(--neutral-100);
-      border-color: var(--neutral-400);
-      color: var(--fg1);
-      font-weight: 800;
-    }
+    .lang-toggle { display:flex; align-items:center; gap:2px; padding:3px; border:1px solid var(--border-1); border-radius:var(--radius-pill); background:#fff; }
+    .lang-btn { background:transparent; border:0; border-radius:var(--radius-pill); padding:6px 13px; cursor:pointer; font:700 12px/1 var(--font-body); color:var(--fg2); letter-spacing:.04em; transition:background .14s,color .14s; }
+    .lang-btn:hover { color:var(--fg1); }
+    .lang-btn.active { background:var(--neutral-900); color:#fff; }
+    .logo { display:none !important; }
+    .ab-brand { display:flex; align-items:center; gap:11px; text-decoration:none; }
+    .brand-logo { height:26px; display:block; }
+    .brand-div { width:1px; height:22px; background:var(--border-1); display:block; }
+    .brand-ai { font-family:var(--font-body); font-weight:800; font-size:18px; letter-spacing:.02em; color:var(--fg1); }
 
     .content {
       width: 100%;
@@ -181,16 +165,16 @@
 
   <header class="appbar">
     <div class="appbar-top">
-      <a class="back-btn" id="back-btn" href="../">← <span id="back-label">Zurück</span></a>
-      <div class="logo">⚡</div>
+      <a class="ab-brand" href="../"><img class="brand-logo" src="../assets/logo-elmi-gradient.png" alt="ELMI"><span class="brand-div"></span><span class="brand-ai">AI</span></a><div class="logo">⚡</div>
       <div class="appbar-meta">
         <div class="title">Electricity Procurement AI</div>
-        <div class="sub" id="subtitle-text">Intelligente Strombeschaffung &amp; Prognose</div>
+        <div class="sub" id="subtitle-text">Intelligente Strombeschaffung & Prognose</div>
       </div>
       <div style="flex:1"></div>
+      <a class="back-btn" id="back-btn" href="../">← <span id="back-label">Zurück</span></a>
       <div class="lang-toggle">
-        <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">🇩🇪 DE</button>
-        <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">🇬🇧 EN</button>
+        <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">DE</button>
+        <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">EN</button>
       </div>
     </div>
     <div class="gbar"></div>
@@ -198,10 +182,10 @@
 
   <div class="content">
     <div class="placeholder">
-      <div class="placeholder-icon">🚧</div>
+      <div class="placeholder-icon">⚡</div>
       <div class="placeholder-title" id="placeholder-title">Electricity Procurement AI</div>
       <p class="placeholder-text" id="placeholder-text">Dieses Modul wird gerade aufgebaut.</p>
-      <div class="placeholder-badge" id="placeholder-badge">🔒 Coming Soon</div>
+      <div class="placeholder-badge" id="placeholder-badge">Coming Soon</div>
     </div>
 
     <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
@@ -212,18 +196,18 @@
     var STRINGS = {
       de: {
         back: 'Zurück',
-        subtitle: 'Intelligente Strombeschaffung &amp; Prognose',
+        subtitle: 'Intelligente Strombeschaffung & Prognose',
         title: 'Electricity Procurement AI',
         placeholder: 'Dieses Modul wird gerade aufgebaut.',
-        badge: '🔒 Coming Soon',
+        badge: 'Coming Soon',
         footer: 'ELMI Power GmbH · Interne Nutzung'
       },
       en: {
         back: 'Back',
-        subtitle: 'Intelligent electricity procurement &amp; forecasting',
+        subtitle: 'Intelligent electricity procurement & forecasting',
         title: 'Electricity Procurement AI',
         placeholder: 'This module is currently under construction.',
-        badge: '🔒 Coming Soon',
+        badge: 'Coming Soon',
         footer: 'ELMI Power GmbH · Internal use only'
       }
     };
