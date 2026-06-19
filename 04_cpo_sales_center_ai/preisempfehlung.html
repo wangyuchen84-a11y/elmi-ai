@@ -73,11 +73,10 @@
     .kpi-value{font-size:21px;font-weight:700}
     .kpi-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
 
-    /* File zone */
-    .file-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:24px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--surface2)}
-    .file-zone:hover{border-color:var(--accent);background:rgba(247,195,37,.04)}
-    .file-zone.has-file{border-color:var(--green);border-style:solid}
-    #fileInput{display:none}
+    /* Station status */
+    .station-status{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:13px}
+    .station-status .dot{width:8px;height:8px;border-radius:50%;background:#9A9AA5;flex-shrink:0}
+    .station-status .dot.ok{background:#4CAF50}
     .station-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
     .station-row label{color:var(--text-muted);font-size:13px;white-space:nowrap}
 
@@ -171,23 +170,18 @@
   ════════════════════════════════════════════════ -->
   <div class="tab-panel active" id="panel-params">
 
-    <!-- Stationsdaten / Excel Upload -->
+    <!-- Stationsdaten Status -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">📂 Stationsdaten laden</span>
+        <span class="card-title">📡 Stationsdaten</span>
         <span id="fileStatusBadge" class="hidden" style="font-size:12px;color:var(--green);font-weight:600"></span>
       </div>
-      <div class="file-zone" id="fileZone" onclick="document.getElementById('fileInput').click()">
-        <div style="font-size:28px;margin-bottom:8px">📂</div>
-        <div style="color:var(--text-muted);font-size:13px">
-          Excel aus <code style="color:var(--accent);font-size:12px">Charging Stations Operating Datas</code> auswählen<br>
-          <span style="font-size:11px;opacity:.6">Auslastung wird automatisch berechnet und für alle Module gespeichert</span>
-        </div>
-        <div id="fileName" class="hidden" style="color:var(--green);font-size:13px;font-weight:600;margin-top:6px"></div>
+      <div class="station-status">
+        <div class="dot" id="stationDot"></div>
+        <span id="stationStatusText">Wird geladen …</span>
       </div>
-      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv"/>
       <div class="station-row hidden" id="stationRow">
-        <label style="color:var(--text-muted);font-size:13px">Aktive Station:</label>
+        <label>Aktive Station:</label>
         <select id="stationSelect" style="flex:1;min-width:200px"><option value="">– wählen –</option></select>
       </div>
       <div id="utilFeedback" class="hidden" style="margin-top:12px;padding:12px 14px;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.25);border-radius:var(--radius);font-size:12px;color:var(--green)"></div>
@@ -419,17 +413,16 @@ async function loadParamFields() {
     stationData = su.active;
     showStationInfo(su);
     populateSheetSelect(su);
+  } else {
+    showNoStationData();
   }
 
   updateOutputKPIs();
 }
 
 function showStationInfo(su) {
-  const zone = document.getElementById('fileZone');
-  zone.classList.add('has-file');
-  const fn = document.getElementById('fileName');
-  fn.textContent = '✓ ' + (su.fileName || 'Datei geladen');
-  fn.classList.remove('hidden');
+  document.getElementById('stationDot').className = 'dot ok';
+  document.getElementById('stationStatusText').textContent = `✓ ${su.fileName || 'Datei geladen'} · Station: ${su.activeSheetName || '–'}`;
   document.getElementById('fileStatusBadge').textContent = su.activeSheetName || '';
   document.getElementById('fileStatusBadge').classList.remove('hidden');
   document.getElementById('stationRow').classList.remove('hidden');
@@ -438,8 +431,13 @@ function showStationInfo(su) {
   const ac  = su.active.ac?.util  != null ? su.active.ac.util.toFixed(1)+'%'  : '–';
   const dc  = su.active.dc?.util  != null ? su.active.dc.util.toFixed(1)+'%'  : '–';
   const hpc = su.active.hpc?.util != null ? su.active.hpc.util.toFixed(1)+'%' : '–';
-  fb.innerHTML = `✓ Auslastung aus IndexedDB geladen · <strong>${su.activeSheetName}</strong><br><span style="color:var(--text-muted)">AC: ${ac} · DC: ${dc} · HPC: ${hpc} · Gespeichert: ${su.uploadedAt ? new Date(su.uploadedAt).toLocaleDateString('de-DE') : '–'}</span>`;
+  fb.innerHTML = `AC: ${ac} · DC: ${dc} · HPC: ${hpc} · Gespeichert: ${su.uploadedAt ? new Date(su.uploadedAt).toLocaleDateString('de-DE') : '–'}`;
   fb.classList.remove('hidden');
+}
+
+function showNoStationData() {
+  document.getElementById('stationDot').className = 'dot';
+  document.getElementById('stationStatusText').innerHTML = 'Keine Stationsdaten geladen – bitte in <a href="settings.html" style="color:var(--accent)">Settings → Eigene Ladedaten</a> hochladen.';
 }
 
 function populateSheetSelect(su) {
@@ -507,64 +505,6 @@ async function saveParams() {
   setTimeout(() => msg.classList.add('hidden'), 2500);
 }
 
-// ─── Excel Upload ───
-document.getElementById('fileInput').addEventListener('change', async e => {
-  const f = e.target.files[0]; if (f) await processExcel(f);
-});
-document.getElementById('fileZone').addEventListener('dragover', e => { e.preventDefault(); document.getElementById('fileZone').style.borderColor='var(--accent)'; });
-document.getElementById('fileZone').addEventListener('dragleave', () => { document.getElementById('fileZone').style.borderColor=''; });
-document.getElementById('fileZone').addEventListener('drop', async e => { e.preventDefault(); document.getElementById('fileZone').style.borderColor=''; const f=e.dataTransfer.files[0]; if(f) await processExcel(f); });
-
-async function processExcel(file) {
-  document.getElementById('fileZone').classList.add('has-file');
-  document.getElementById('fileName').textContent = '✓ ' + file.name;
-  document.getElementById('fileName').classList.remove('hidden');
-  const reader = new FileReader();
-  reader.onload = async e => {
-    try {
-      const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
-      const results = {};
-      wb.SheetNames.forEach(sn => {
-        const ws = wb.Sheets[sn];
-        const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
-        let hr=-1, headers=[];
-        for(let i=0;i<Math.min(15,rows.length);i++){
-          const r=rows[i].map(c=>String(c).toLowerCase());
-          if(r.some(c=>c.includes('power')||c.includes('leistung')||c.includes('kwh')||c.includes('utiliz')||c.includes('auslast')||c.includes('energy'))){hr=i;headers=r;break}
-        }
-        if(hr<0){results[sn]={ac:{util:null},dc:{util:null},hpc:{util:null},rowCount:rows.length,fileName:file.name,uploadedAt:new Date().toISOString()};return}
-        const tI=headers.findIndex(h=>h.includes('type')||h.includes('typ')||h.includes('connector'));
-        const pI=headers.findIndex(h=>h.includes('power')||h.includes('leistung')||h.includes('kw'));
-        const uI=headers.findIndex(h=>h.includes('utiliz')||h.includes('auslast')||h.includes('%'));
-        const eI=headers.findIndex(h=>h.includes('energy')||h.includes('energie')||h.includes('kwh'));
-        const data=rows.slice(hr+1).filter(r=>r.some(c=>c!==''));
-        const acR=[],dcR=[],hpcR=[];
-        data.forEach(row=>{
-          const ts=tI>=0?String(row[tI]||'').toUpperCase():'';
-          const pw=pI>=0?parseFloat(row[pI]):NaN;
-          if(ts.includes('HPC')||ts.includes('ULTRA')||pw>=100)hpcR.push(row);
-          else if(ts.includes('DC')||ts.includes('CCS')||ts.includes('CHAdeMO')||(pw>=20&&pw<100))dcR.push(row);
-          else acR.push(row);
-        });
-        const calcU=rows=>{
-          if(!rows.length)return null;
-          if(uI>=0){const v=rows.map(r=>parseFloat(r[uI])).filter(v=>!isNaN(v));return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
-          if(eI>=0&&pI>=0){const te=rows.reduce((s,r)=>s+(parseFloat(r[eI])||0),0);const mp=parseFloat(rows[0][pI])||50;const he=mp*(rows.length/60);return he>0?Math.min(100,(te/he)*100):null}
-          return null;
-        };
-        results[sn]={ac:{util:calcU(acR)},dc:{util:calcU(dcR)},hpc:{util:calcU(hpcR)},rowCount:rows.length,fileName:file.name,uploadedAt:new Date().toISOString()};
-      });
-      const firstSheet = wb.SheetNames[0];
-      const su = {id:'stationUtilisation',active:results[firstSheet],activeSheetName:firstSheet,fileName:file.name,allSheets:results,uploadedAt:new Date().toISOString()};
-      await ELMI_DB.dbPut('settings', su);
-      stationData = su.active;
-      showStationInfo(su);
-      populateSheetSelect(su);
-      updateOutputKPIs();
-    } catch(err){alert('Fehler: '+err.message)}
-  };
-  reader.readAsArrayBuffer(file);
-}
 
 // ─── Output KPIs ───
 function updateOutputKPIs() {
