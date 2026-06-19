@@ -400,6 +400,8 @@
       setTimeout(() => { bar.style.display = 'none'; fill.style.width = '0%'; }, 800);
       await loadUploadList();
       showToast(`✓ ${files.length} Datei(en) verarbeitet`);
+      // Auslastung aus erstem File berechnen und in IndexedDB speichern
+      if (files.length > 0) await processStationExcel(files[0]);
     }
 
     async function processFile(file) {
@@ -508,6 +510,116 @@
       t.textContent = msg;
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    // ── Stationsdaten-Auslastung berechnen und in IndexedDB speichern ──
+    async function processStationExcel(file) {
+      try {
+        const data = await file.arrayBuffer();
+        const wb = XLSX.read(data, { type: 'array', cellDates: true });
+        const results = {};
+
+        wb.SheetNames.forEach(sheetName => {
+          const ws = wb.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+          let headerRow = -1, headers = [];
+          for (let i = 0; i < Math.min(15, rows.length); i++) {
+            const r = rows[i].map(c => String(c).toLowerCase());
+            if (r.some(c => c.includes('power') || c.includes('leistung') || c.includes('kwh') ||
+                            c.includes('utiliz') || c.includes('auslast') || c.includes('energy'))) {
+              headerRow = i; headers = r; break;
+            }
+          }
+          if (headerRow < 0) return;
+
+          const typeIdx   = headers.findIndex(h => h.includes('type') || h.includes('typ') || h.includes('connector'));
+          const powerIdx  = headers.findIndex(h => h.includes('power') || h.includes('leistung') || h.includes('kw'));
+          const utilIdx   = headers.findIndex(h => h.includes('utiliz') || h.includes('auslast') || h.includes('%'));
+          const energyIdx = headers.findIndex(h => h.includes('energy') || h.includes('energie') || h.includes('kwh'));
+
+          const dataRows = rows.slice(headerRow + 1).filter(r => r.some(c => c !== ''));
+          const acRows = [], dcRows = [], hpcRows = [];
+
+          dataRows.forEach(row => {
+            const ts = typeIdx >= 0 ? String(row[typeIdx] || '').toUpperCase() : '';
+            const pw = powerIdx >= 0 ? parseFloat(row[powerIdx]) : NaN;
+            if (ts.includes('HPC') || ts.includes('ULTRA') || pw >= 100) hpcRows.push(row);
+            else if (ts.includes('DC') || ts.includes('CCS') || ts.includes('CHADEMO') || (pw >= 20 && pw < 100)) dcRows.push(row);
+            else acRows.push(row);
+          });
+
+          const calcUtil = rs => {
+            if (!rs.length) return null;
+            if (utilIdx >= 0) {
+              const v = rs.map(r => parseFloat(r[utilIdx])).filter(v => !isNaN(v));
+              return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+            }
+            if (energyIdx >= 0 && powerIdx >= 0) {
+              const te = rs.reduce((s, r) => s + (parseFloat(r[energyIdx]) || 0), 0);
+              const mp = parseFloat(rs[0][powerIdx]) || 50;
+              const he = mp * (rs.length / 60);
+              return he > 0 ? Math.min(100, (te / he) * 100) : null;
+            }
+            return null;
+          };
+
+          results[sheetName] = {
+            ac:  { util: calcUtil(acRows),  count: acRows.length  },
+            dc:  { util: calcUtil(dcRows),  count: dcRows.length  },
+            hpc: { util: calcUtil(hpcRows), count: hpcRows.length },
+            rowCount: rows.length,
+            fileName: file.name,
+            uploadedAt: new Date().toISOString()
+          };
+        });
+
+        const firstSheet = wb.SheetNames[0];
+        const activeStation = results[firstSheet];
+
+        await ELMI_DB.dbPut('settings', {
+          id: 'stationUtilisation',
+          active: activeStation,
+          activeSheetName: firstSheet,
+          fileName: file.name,
+          allSheets: results,
+          uploadedAt: new Date().toISOString()
+        });
+
+        showStationFeedback(activeStation, firstSheet, file.name);
+      } catch (err) {
+        console.error('Excel-Verarbeitungsfehler:', err);
+        showUploadError('Fehler beim Lesen der Auslastungsdaten: ' + err.message);
+      }
+    }
+
+    function showStationFeedback(station, sheetName, fileName) {
+      let feedback = document.getElementById('stationUploadFeedback');
+      if (!feedback) {
+        feedback = document.createElement('div');
+        feedback.id = 'stationUploadFeedback';
+        feedback.style.cssText = 'margin-top:14px;padding:14px 16px;background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.3);border-radius:8px;font-size:13px;color:#4CAF50';
+        document.getElementById('upload-list').before(feedback);
+      }
+      const ac  = station?.ac?.util  != null ? station.ac.util.toFixed(1)  + ' %' : '–';
+      const dc  = station?.dc?.util  != null ? station.dc.util.toFixed(1)  + ' %' : '–';
+      const hpc = station?.hpc?.util != null ? station.hpc.util.toFixed(1) + ' %' : '–';
+      feedback.innerHTML = `✓ <strong>${fileName}</strong> · Station: <strong>${sheetName}</strong> verarbeitet<br>
+        <span style="color:#6B6B76;font-size:12px;margin-top:4px;display:block">
+          Auslastung → AC: ${ac} · DC: ${dc} · HPC: ${hpc}<br>
+          Daten automatisch in Preisstrategie + Standortvergleich verfügbar
+        </span>`;
+    }
+
+    function showUploadError(msg) {
+      let feedback = document.getElementById('stationUploadFeedback');
+      if (!feedback) {
+        feedback = document.createElement('div');
+        feedback.id = 'stationUploadFeedback';
+        document.getElementById('upload-list').before(feedback);
+      }
+      feedback.style.cssText = 'margin-top:14px;padding:14px 16px;background:rgba(227,32,40,.1);border:1px solid rgba(227,32,40,.3);border-radius:8px;font-size:13px;color:#E32028';
+      feedback.textContent = '⚠️ ' + msg;
     }
 
     init();

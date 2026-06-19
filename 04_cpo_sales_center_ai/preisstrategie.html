@@ -130,6 +130,50 @@
     document.getElementById('back-label').textContent = lang === 'en' ? 'Back' : 'Zurück';
     document.getElementById('footer-text').textContent = lang === 'en' ? 'ELMI Power GmbH · Internal use only' : 'ELMI Power GmbH · Interne Nutzung';
 
+    // ── Auslastung aus IndexedDB laden und Slider vorbelegen ──
+    async function loadUtilisationFromDB() {
+      try {
+        const data = await ELMI_DB.dbGet('settings', 'stationUtilisation');
+        if (!data || !data.active) return;
+        const station = data.active;
+
+        // Slider mit HPC-Auslastung vorbelegen (Fallback: DC, dann AC)
+        const util = station.hpc?.util ?? station.dc?.util ?? station.ac?.util ?? null;
+        if (util !== null) {
+          const slider = document.getElementById('beleg-slider');
+          if (slider) {
+            belegRate = Math.round(util);
+            slider.value = belegRate;
+            document.getElementById('beleg-pct').textContent = belegRate;
+          }
+        }
+
+        // Statusbadge nach dem Slider einfügen
+        let badge = document.getElementById('utilSourceBadge');
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.id = 'utilSourceBadge';
+          badge.style.cssText = 'font-size:12px;color:#4CAF50;margin-top:8px;padding:6px 12px;background:rgba(76,175,80,.1);border-radius:6px;border:1px solid rgba(76,175,80,.3);flex-basis:100%';
+          const belegSection = document.querySelector('.beleg-section');
+          if (belegSection) belegSection.appendChild(badge);
+        }
+
+        const hpcUtil = station.hpc?.util != null ? station.hpc.util.toFixed(1) + ' %' : '–';
+        const dcUtil  = station.dc?.util  != null ? station.dc.util.toFixed(1)  + ' %' : '–';
+        const acUtil  = station.ac?.util  != null ? station.ac.util.toFixed(1)  + ' %' : '–';
+        badge.innerHTML = `✓ Auto-Auslastung aus Excel: HPC ${hpcUtil} · DC ${dcUtil} · AC ${acUtil}
+          <span style="color:#9A9AA5"> · ${data.fileName || ''}</span>
+          <button onclick="clearUtilOverride()" style="margin-left:12px;background:none;border:1px solid #D1D1D8;color:#6B6B76;padding:2px 8px;border-radius:4px;font-size:11px;cursor:pointer">Manuell überschreiben</button>`;
+      } catch(e) { console.log('Keine Auslastungsdaten:', e); }
+    }
+
+    window.clearUtilOverride = function() {
+      const badge = document.getElementById('utilSourceBadge');
+      if (badge) badge.remove();
+      const slider = document.getElementById('beleg-slider');
+      if (slider) { belegRate = 50; slider.value = 50; document.getElementById('beleg-pct').textContent = 50; if (settings) recalc(); }
+    };
+
     let settings = null;
     let wettData = null;
     let belegRate = 50;
@@ -153,6 +197,8 @@
       }
 
       recalc();
+      await loadUtilisationFromDB();
+      if (settings) recalc();
     }
 
     function fillParamFields(ps) {

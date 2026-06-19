@@ -134,12 +134,43 @@
     const TYPES = ['AC','DC','HPC'];
     const TYPE_COLOR = { AC: '#C39BD3', DC: '#9B59B6', HPC: '#6D2A99' };
 
+    // ── Eigene Standortdaten aus IndexedDB laden ──
+    let stationUtilData = null;
+
+    async function loadOwnStationData() {
+      try {
+        const data = await ELMI_DB.dbGet('settings', 'stationUtilisation');
+        if (!data || !data.active) return;
+        stationUtilData = data;
+
+        // Badge oben auf der Seite
+        let badge = document.getElementById('ownDataBadge');
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.id = 'ownDataBadge';
+          badge.style.cssText = 'padding:10px 16px;background:rgba(247,195,37,.08);border:1px solid rgba(247,195,37,.25);border-radius:8px;font-size:12px;color:#F39A3A;margin-bottom:16px';
+          const notice = document.getElementById('top-notice');
+          if (notice) notice.after(badge);
+        }
+
+        const station = data.active;
+        const ac  = station.ac?.util  != null ? station.ac.util.toFixed(1)  + ' %' : '–';
+        const dc  = station.dc?.util  != null ? station.dc.util.toFixed(1)  + ' %' : '–';
+        const hpc = station.hpc?.util != null ? station.hpc.util.toFixed(1) + ' %' : '–';
+
+        badge.innerHTML = `✓ Eigene Auslastung automatisch geladen · <strong>${data.activeSheetName || ''}</strong> (${data.fileName || ''})<br>
+          <span style="color:#9A9AA5;font-size:11px">AC: ${ac} · DC: ${dc} · HPC: ${hpc}</span>`;
+      } catch(e) { console.log('Keine Stationsdaten:', e); }
+    }
+
     async function init() {
       const [settings, wettData, eigeneLadedaten] = await Promise.all([
         ELMI_DB.loadSettings(),
         ELMI_DB.loadWettbewerberDaten(),
         ELMI_DB.dbGetAll('eigeneLadedaten')
       ]);
+
+      await loadOwnStationData();
 
       const { standorte, betreiber, kennzahlen, meta, source } = wettData;
       const overrides = await ELMI_DB.dbGetAll('wettbewerberOverrides');
