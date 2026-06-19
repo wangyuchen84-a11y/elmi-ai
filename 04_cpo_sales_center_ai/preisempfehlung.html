@@ -407,14 +407,40 @@ async function loadParamFields() {
     competitorData = { acAvg: avg(acP), dcAvg: avg(dcP), hpcAvg: avg(hpcP), count: comps.length };
   } catch(_) {}
 
-  // Load station utilisation from shared settings store
-  const su = await ELMI_DB.dbGet('settings', 'stationUtilisation');
+  // Load station utilisation — prefer stationUtilisation, fallback to eigeneLadedaten
+  let su = await ELMI_DB.dbGet('settings', 'stationUtilisation');
   if (su && su.active) {
     stationData = su.active;
     showStationInfo(su);
     populateSheetSelect(su);
   } else {
-    showNoStationData();
+    // Fallback: compute from eigeneLadedaten (written by settings.html processFile)
+    const ladedaten = await ELMI_DB.dbGetAll('eigeneLadedaten');
+    if (ladedaten.length) {
+      const byType = { AC: [], DC: [], HPC: [] };
+      ladedaten.forEach(d => { if (byType[d.ladetyp]) byType[d.ladetyp].push(d); });
+      const utilFromLade = (items) => {
+        if (!items.length) return null;
+        const totalKwh  = items.reduce((s, d) => s + (d.gesamtEnergieKwh || 0), 0);
+        const totalTage = items.reduce((s, d) => s + (d.tageImZeitraum   || 0), 0);
+        // Rough benchmark: AC=22kW, DC=150kW, HPC=300kW, 24h/day
+        const maxKw = items[0].ladetyp === 'HPC' ? 300 : items[0].ladetyp === 'DC' ? 150 : 22;
+        const maxKwh = maxKw * 24 * totalTage;
+        return maxKwh > 0 ? Math.min(100, (totalKwh / maxKwh) * 100) : null;
+      };
+      const syntheticActive = {
+        ac:  { util: utilFromLade(byType.AC)  },
+        dc:  { util: utilFromLade(byType.DC)  },
+        hpc: { util: utilFromLade(byType.HPC) },
+      };
+      const fileName = ladedaten[0].dateiname || 'Eigene Ladedaten';
+      const sheetName = ladedaten[0].stationSN || '–';
+      su = { active: syntheticActive, fileName, activeSheetName: sheetName, uploadedAt: null };
+      stationData = syntheticActive;
+      showStationInfo(su);
+    } else {
+      showNoStationData();
+    }
   }
 
   updateOutputKPIs();
