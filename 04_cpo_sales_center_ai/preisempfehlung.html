@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Preisempfehlung · CPO Sales Center AI</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="js/db.js"></script>
   <style>
     :root{
       --bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--border:#30363d;
@@ -334,12 +335,7 @@
 
 <script>
 // ─── i18n ───
-let currentLang = 'de';
-function setLang(l) {
-  currentLang = l;
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
-}
+window.setLang = ELMI_DB.setLang;
 
 // ─── Tab logic ───
 function switchTab(id) {
@@ -349,72 +345,73 @@ function switchTab(id) {
   document.getElementById('tab-' + id).classList.add('active');
 }
 
-// ─── IndexedDB ───
-const DB_NAME = 'elmiCPOSettings', DB_VER = 1;
-let _db = null;
-function openDB() {
-  return new Promise((res, rej) => {
-    if (_db) return res(_db);
-    const req = indexedDB.open(DB_NAME, DB_VER);
-    req.onupgradeneeded = e => { const d = e.target.result; if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings'); };
-    req.onsuccess = e => { _db = e.target.result; res(_db); };
-    req.onerror = () => rej(req.error);
-  });
-}
-async function dbGet(k) {
-  const d = await openDB();
-  return new Promise((res, rej) => { const r = d.transaction('settings','readonly').objectStore('settings').get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-}
-async function dbSet(k, v) {
-  const d = await openDB();
-  return new Promise((res, rej) => { const r = d.transaction('settings','readwrite').objectStore('settings').put(v,k); r.onsuccess = () => res(); r.onerror = () => rej(r.error); });
-}
-
 // ─── State ───
 let settingsData = {}, competitorData = {}, stationData = {}, formulaResult = {};
+let _rawSettings = null;
 
 // ─── Load settings into param fields ───
 async function loadParamFields() {
-  const s = await dbGet('cpoSettings') || {};
-  settingsData = s;
+  const s = await ELMI_DB.loadSettings();
+  _rawSettings = s;
+  const ps = s.preisstrategie || {};
+
+  // Flat map for calcFormula
+  settingsData = {
+    auslastungSchwelle: ps.auslastungSchwelle,
+    preisSchritt:       ps.auslastungSchritt,
+    gewichtAuslastung:  ps.auslastungsGewicht,
+    gewichtWettbewerb:  ps.wettbewerbsGewicht,
+    priceAC:  s.preise.AC,  acMin: ps.preisMin?.AC,  acMax: ps.preisMax?.AC,
+    priceDC:  s.preise.DC,  dcMin: ps.preisMin?.DC,  dcMax: ps.preisMax?.DC,
+    priceHPC: s.preise.HPC, hpcMin: ps.preisMin?.HPC, hpcMax: ps.preisMax?.HPC,
+  };
+
   const fields = {
-    'p-schwelle': s.auslastungSchwelle || '',
-    'p-schritt':  s.preisSchritt || '',
-    'p-wA':       s.gewichtAuslastung || '',
-    'p-wW':       s.gewichtWettbewerb || '',
-    'p-priceAC':  s.priceAC || '',
-    'p-acMin':    s.acMin || '',
-    'p-acMax':    s.acMax || '',
-    'p-priceDC':  s.priceDC || '',
-    'p-dcMin':    s.dcMin || '',
-    'p-dcMax':    s.dcMax || '',
-    'p-priceHPC': s.priceHPC || '',
-    'p-hpcMin':   s.hpcMin || '',
-    'p-hpcMax':   s.hpcMax || '',
+    'p-schwelle': settingsData.auslastungSchwelle,
+    'p-schritt':  settingsData.preisSchritt,
+    'p-wA':       settingsData.gewichtAuslastung,
+    'p-wW':       settingsData.gewichtWettbewerb,
+    'p-priceAC':  settingsData.priceAC,
+    'p-acMin':    settingsData.acMin,
+    'p-acMax':    settingsData.acMax,
+    'p-priceDC':  settingsData.priceDC,
+    'p-dcMin':    settingsData.dcMin,
+    'p-dcMax':    settingsData.dcMax,
+    'p-priceHPC': settingsData.priceHPC,
+    'p-hpcMin':   settingsData.hpcMin,
+    'p-hpcMax':   settingsData.hpcMax,
   };
   Object.entries(fields).forEach(([id, val]) => {
     const el = document.getElementById(id);
-    if (el && val !== '') el.value = val;
+    if (el && val !== undefined && val !== null) el.value = val;
   });
 
-  // Load competitor data
-  const w = await dbGet('wettbewerberJSON') || [];
-  if (w.length) {
-    const ap = [], dp = [], hp = [];
-    w.forEach(c => { if (c.preisAC) ap.push(+c.preisAC); if (c.preisDC) dp.push(+c.preisDC); if (c.preisHPC) hp.push(+c.preisHPC); });
-    const avg = a => a.filter(v => !isNaN(v)).length ? a.reduce((s,v)=>s+v,0)/a.filter(v=>!isNaN(v)).length : null;
-    competitorData = { acAvg: avg(ap), dcAvg: avg(dp), hpcAvg: avg(hp), count: w.length };
-  }
+  // Load competitor data via shared ELMI_DB
+  try {
+    const { standorte, betreiber } = await ELMI_DB.loadWettbewerberDaten();
+    const overrides = await ELMI_DB.dbGetAll('wettbewerberOverrides');
+    const comps = ELMI_DB.joinWettbewerber(standorte, betreiber, overrides, s);
+    const acP = [], dcP = [], hpcP = [];
+    comps.forEach(c => {
+      const t = (c.ladetyp || '').toUpperCase();
+      const p = parseFloat(c.preis_aktuell || 0);
+      if (!p) return;
+      if (t === 'HPC') hpcP.push(p);
+      else if (t === 'DC') dcP.push(p);
+      else acP.push(p);
+    });
+    const avg = a => a.length ? a.reduce((s,v)=>s+v,0)/a.length : null;
+    competitorData = { acAvg: avg(acP), dcAvg: avg(dcP), hpcAvg: avg(hpcP), count: comps.length };
+  } catch(_) {}
 
-  // Load station utilisation
-  const su = await dbGet('stationUtilisation');
+  // Load station utilisation from shared settings store
+  const su = await ELMI_DB.dbGet('settings', 'stationUtilisation');
   if (su && su.active) {
     stationData = su.active;
     showStationInfo(su);
     populateSheetSelect(su);
   }
 
-  // Update KPI header on output tab
   updateOutputKPIs();
 }
 
@@ -429,9 +426,9 @@ function showStationInfo(su) {
   document.getElementById('stationRow').classList.remove('hidden');
 
   const fb = document.getElementById('utilFeedback');
-  const ac = su.active.ac?.util !== null ? su.active.ac.util.toFixed(1)+'%' : '–';
-  const dc = su.active.dc?.util !== null ? su.active.dc.util.toFixed(1)+'%' : '–';
-  const hpc = su.active.hpc?.util !== null ? su.active.hpc.util.toFixed(1)+'%' : '–';
+  const ac  = su.active.ac?.util  != null ? su.active.ac.util.toFixed(1)+'%'  : '–';
+  const dc  = su.active.dc?.util  != null ? su.active.dc.util.toFixed(1)+'%'  : '–';
+  const hpc = su.active.hpc?.util != null ? su.active.hpc.util.toFixed(1)+'%' : '–';
   fb.innerHTML = `✓ Auslastung aus IndexedDB geladen · <strong>${su.activeSheetName}</strong><br><span style="color:var(--text-muted)">AC: ${ac} · DC: ${dc} · HPC: ${hpc} · Gespeichert: ${su.uploadedAt ? new Date(su.uploadedAt).toLocaleDateString('de-DE') : '–'}</span>`;
   fb.classList.remove('hidden');
 }
@@ -448,11 +445,11 @@ function populateSheetSelect(su) {
     });
   }
   sel.onchange = async () => {
-    const su2 = await dbGet('stationUtilisation');
+    const su2 = await ELMI_DB.dbGet('settings', 'stationUtilisation');
     if (su2 && su2.allSheets && su2.allSheets[sel.value]) {
       su2.active = su2.allSheets[sel.value];
       su2.activeSheetName = sel.value;
-      await dbSet('stationUtilisation', su2);
+      await ELMI_DB.dbPut('settings', su2);
       stationData = su2.active;
       showStationInfo(su2);
       updateOutputKPIs();
@@ -460,22 +457,42 @@ function populateSheetSelect(su) {
   };
 }
 
-// ─── Save params ───
+// ─── Save params → shared settings store ───
 async function saveParams() {
-  const s = settingsData || {};
-  const fields = {
-    auslastungSchwelle: 'p-schwelle', preisSchritt: 'p-schritt',
-    gewichtAuslastung: 'p-wA', gewichtWettbewerb: 'p-wW',
-    priceAC: 'p-priceAC', acMin: 'p-acMin', acMax: 'p-acMax',
-    priceDC: 'p-priceDC', dcMin: 'p-dcMin', dcMax: 'p-dcMax',
-    priceHPC: 'p-priceHPC', hpcMin: 'p-hpcMin', hpcMax: 'p-hpcMax',
+  const s = _rawSettings || await ELMI_DB.loadSettings();
+  const ps = s.preisstrategie;
+  const read = id => parseFloat(document.getElementById(id)?.value);
+
+  const schwelle = read('p-schwelle'), schritt = read('p-schritt');
+  const wA = read('p-wA'), wW = read('p-wW');
+  const priceAC = read('p-priceAC'), acMin = read('p-acMin'), acMax = read('p-acMax');
+  const priceDC = read('p-priceDC'), dcMin = read('p-dcMin'), dcMax = read('p-dcMax');
+  const priceHPC = read('p-priceHPC'), hpcMin = read('p-hpcMin'), hpcMax = read('p-hpcMax');
+
+  if (!isNaN(schwelle)) ps.auslastungSchwelle = schwelle;
+  if (!isNaN(schritt))  ps.auslastungSchritt  = schritt;
+  if (!isNaN(wA))       ps.auslastungsGewicht = wA;
+  if (!isNaN(wW))       ps.wettbewerbsGewicht = wW;
+  if (!isNaN(priceAC))  s.preise.AC  = priceAC;
+  if (!isNaN(acMin))    ps.preisMin.AC  = acMin;
+  if (!isNaN(acMax))    ps.preisMax.AC  = acMax;
+  if (!isNaN(priceDC))  s.preise.DC  = priceDC;
+  if (!isNaN(dcMin))    ps.preisMin.DC  = dcMin;
+  if (!isNaN(dcMax))    ps.preisMax.DC  = dcMax;
+  if (!isNaN(priceHPC)) s.preise.HPC = priceHPC;
+  if (!isNaN(hpcMin))   ps.preisMin.HPC = hpcMin;
+  if (!isNaN(hpcMax))   ps.preisMax.HPC = hpcMax;
+
+  _rawSettings = s;
+  settingsData = {
+    auslastungSchwelle: ps.auslastungSchwelle, preisSchritt: ps.auslastungSchritt,
+    gewichtAuslastung: ps.auslastungsGewicht,  gewichtWettbewerb: ps.wettbewerbsGewicht,
+    priceAC: s.preise.AC, acMin: ps.preisMin.AC, acMax: ps.preisMax.AC,
+    priceDC: s.preise.DC, dcMin: ps.preisMin.DC, dcMax: ps.preisMax.DC,
+    priceHPC: s.preise.HPC, hpcMin: ps.preisMin.HPC, hpcMax: ps.preisMax.HPC,
   };
-  Object.entries(fields).forEach(([key, id]) => {
-    const v = parseFloat(document.getElementById(id)?.value);
-    if (!isNaN(v)) s[key] = v;
-  });
-  settingsData = s;
-  await dbSet('cpoSettings', s);
+  await ELMI_DB.saveSettings(s);
+
   const msg = document.getElementById('saveMsg');
   msg.classList.remove('hidden');
   setTimeout(() => msg.classList.add('hidden'), 2500);
@@ -529,8 +546,8 @@ async function processExcel(file) {
         results[sn]={ac:{util:calcU(acR)},dc:{util:calcU(dcR)},hpc:{util:calcU(hpcR)},rowCount:rows.length,fileName:file.name,uploadedAt:new Date().toISOString()};
       });
       const firstSheet = wb.SheetNames[0];
-      const su = {active:results[firstSheet],activeSheetName:firstSheet,fileName:file.name,allSheets:results,uploadedAt:new Date().toISOString()};
-      await dbSet('stationUtilisation', su);
+      const su = {id:'stationUtilisation',active:results[firstSheet],activeSheetName:firstSheet,fileName:file.name,allSheets:results,uploadedAt:new Date().toISOString()};
+      await ELMI_DB.dbPut('settings', su);
       stationData = su.active;
       showStationInfo(su);
       populateSheetSelect(su);
@@ -540,17 +557,17 @@ async function processExcel(file) {
   reader.readAsArrayBuffer(file);
 }
 
-// ─── Output KPIs (header row on Tab 2) ───
+// ─── Output KPIs ───
 function updateOutputKPIs() {
   const hpcUtil = stationData.hpc?.util;
   const c = competitorData;
-  document.getElementById('k-util').textContent = hpcUtil !== null && hpcUtil !== undefined ? hpcUtil.toFixed(1)+' %' : '–';
+  document.getElementById('k-util').textContent = hpcUtil != null ? hpcUtil.toFixed(1)+' %' : '–';
   document.getElementById('k-util').style.color = utilColor(hpcUtil);
   document.getElementById('k-mkt').textContent = c.hpcAvg ? c.hpcAvg.toFixed(3)+' €' : '–';
   document.getElementById('k-station').textContent = stationData.sheetName || '–';
   document.getElementById('k-file').textContent = stationData.fileName || '';
 }
-function utilColor(u){if(u===null||u===undefined)return'var(--text)';if(u>=70)return'var(--green)';if(u>=40)return'var(--orange)';return'var(--red)'}
+function utilColor(u){if(u==null)return'var(--text)';if(u>=70)return'var(--green)';if(u>=40)return'var(--orange)';return'var(--red)'}
 
 // ─── Formula ───
 function calcFormula(type) {
@@ -585,7 +602,6 @@ async function runAnalysis() {
   renderPriceTable();
   document.getElementById('priceCard').classList.remove('hidden');
   document.getElementById('aiCard').classList.remove('hidden');
-  // Update KPI cards
   ['hpc','dc','ac'].forEach(t=>{
     const r=formulaResult[t];
     document.getElementById('k-'+t).textContent=r.recommended.toFixed(3)+' €';
@@ -637,23 +653,30 @@ function renderPriceTable() {
   }).join('');
 }
 
-// ─── Save overrides back to settings ───
+// ─── Save overrides → shared settings ───
 async function saveOverrides(){
-  const s=settingsData||{};
-  ['ac','dc','hpc'].forEach(t=>{const el=document.getElementById('ov_'+t);if(el&&el.value)s['price'+t.toUpperCase()]=parseFloat(el.value)});
-  settingsData=s;await dbSet('cpoSettings',s);
+  const s = _rawSettings || await ELMI_DB.loadSettings();
+  const acEl = document.getElementById('ov_ac');
+  const dcEl = document.getElementById('ov_dc');
+  const hpcEl = document.getElementById('ov_hpc');
+  if (acEl?.value)  s.preise.AC  = parseFloat(acEl.value);
+  if (dcEl?.value)  s.preise.DC  = parseFloat(dcEl.value);
+  if (hpcEl?.value) s.preise.HPC = parseFloat(hpcEl.value);
+  _rawSettings = s;
+  await ELMI_DB.saveSettings(s);
   const btn=document.querySelector('[onclick="saveOverrides()"]');
   const orig=btn.textContent;btn.textContent='✓ Gespeichert!';btn.style.color='var(--green)';
   setTimeout(()=>{btn.textContent=orig;btn.style.color=''},2200);
 }
 
-// ─── Save last rec to IndexedDB for Executive Widget ───
+// ─── Save last rec for Executive widget ───
 async function saveLastRec(){
   try{
-    await dbSet('lastPriceRec',{
-      ac:formulaResult.ac,dc:formulaResult.dc,hpc:formulaResult.hpc,
-      station:stationData.sheetName||document.getElementById('stationSelect')?.value||'–',
-      timestamp:new Date().toISOString()
+    await ELMI_DB.dbPut('wettbewerberMeta', {
+      id: 'lastPriceRec',
+      ac:formulaResult.ac, dc:formulaResult.dc, hpc:formulaResult.hpc,
+      station: document.getElementById('stationSelect')?.value || '–',
+      timestamp: new Date().toISOString()
     });
   }catch(e){}
 }
