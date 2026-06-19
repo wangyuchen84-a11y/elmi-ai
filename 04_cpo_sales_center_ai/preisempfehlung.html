@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Preisempfehlung · CPO Sales Center AI</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--border:#30363d;
+      --accent:#f7c325;--accent2:#e6a817;--text:#e6edf3;--text-muted:#8b949e;
+      --green:#3fb950;--red:#f85149;--blue:#58a6ff;--orange:#d29922;
+      --radius:8px;--font:'Segoe UI',system-ui,-apple-system,sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;min-height:100vh}
+
+    /* Nav */
+    .nav{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--surface)}
+    .nav a{color:var(--text-muted);text-decoration:none;font-size:13px}.nav a:hover{color:var(--text)}
+    .lang-toggle{margin-left:auto;display:flex;gap:6px}
+    .lang-btn{background:none;border:1px solid var(--border);color:var(--text-muted);padding:3px 10px;border-radius:4px;cursor:pointer;font-size:12px}
+    .lang-btn.active{border-color:var(--accent);color:var(--accent)}
+
+    /* Layout */
+    .page{max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+    h1{font-size:22px;font-weight:700;margin-bottom:4px}
+    .subtitle{color:var(--text-muted);font-size:13px;margin-bottom:24px}
+
+    /* Tabs */
+    .tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:24px}
+    .tab{padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+
+    /* Cards */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);display:flex;align-items:center;gap:8px}
+
+    /* Form fields */
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:16px}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-label{font-size:12px;color:var(--text-muted);font-weight:500}
+    input[type=number],input[type=text],select{
+      background:var(--surface2);border:1px solid var(--border);color:var(--text);
+      padding:8px 12px;border-radius:var(--radius);font-size:13px;width:100%
+    }
+    input[type=number]:focus,input[type=text]:focus,select:focus{outline:none;border-color:var(--accent)}
+    .form-divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+    .type-section{margin-bottom:16px}
+    .type-header{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;padding:4px 10px;border-radius:4px;display:inline-block}
+    .type-ac{background:rgba(88,166,255,.15);color:var(--blue)}
+    .type-dc{background:rgba(247,195,37,.12);color:var(--accent)}
+    .type-hpc{background:rgba(248,81,73,.15);color:#ff7b72}
+    .minmax-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    /* Buttons */
+    .btn-primary{background:var(--accent);color:#000;border:none;padding:9px 22px;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;transition:background .15s}
+    .btn-primary:hover{background:var(--accent2)}.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+    .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:7px 16px;border-radius:var(--radius);font-size:13px;cursor:pointer}
+    .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+    /* KPI grid */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+    .kpi-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+    .kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+    .kpi-value{font-size:21px;font-weight:700}
+    .kpi-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+    /* File zone */
+    .file-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:24px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--surface2)}
+    .file-zone:hover{border-color:var(--accent);background:rgba(247,195,37,.04)}
+    .file-zone.has-file{border-color:var(--green);border-style:solid}
+    #fileInput{display:none}
+    .station-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+    .station-row label{color:var(--text-muted);font-size:13px;white-space:nowrap}
+
+    /* Price table */
+    .price-table{width:100%;border-collapse:collapse;font-size:13px}
+    .price-table th{text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);border-bottom:1px solid var(--border)}
+    .price-table td{padding:11px 12px;border-bottom:1px solid rgba(48,54,61,.5);vertical-align:middle}
+    .price-table tr:last-child td{border-bottom:none}
+    .price-table tr:hover td{background:rgba(255,255,255,.02)}
+    .type-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.05em}
+    .badge-ac{background:rgba(88,166,255,.15);color:var(--blue)}
+    .badge-dc{background:rgba(247,195,37,.12);color:var(--accent)}
+    .badge-hpc{background:rgba(248,81,73,.15);color:#ff7b72}
+    .price-cell{font-size:15px;font-weight:700}
+    .delta-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:600}
+    .delta-up{background:rgba(63,185,80,.15);color:var(--green)}
+    .delta-down{background:rgba(248,81,73,.12);color:var(--red)}
+    .delta-flat{background:rgba(139,148,158,.12);color:var(--text-muted)}
+    .override-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:4px;font-size:13px;width:80px;text-align:right}
+    .override-input:focus{outline:none;border-color:var(--accent)}
+    .override-input.overridden{border-color:var(--orange);color:var(--orange)}
+    .conf-bar{width:60px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;display:inline-block}
+    .conf-fill{height:100%;border-radius:3px}
+
+    /* AI box */
+    .ai-box{background:linear-gradient(135deg,rgba(247,195,37,.06) 0%,rgba(247,195,37,.02) 100%);border:1px solid rgba(247,195,37,.25);border-radius:var(--radius);padding:18px 20px;margin-top:14px}
+    .ai-header{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:10px}
+    .ai-text{color:var(--text);font-size:13px;line-height:1.7;white-space:pre-wrap}
+    .ai-thinking{color:var(--text-muted);font-style:italic;animation:pulse 1.4s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+    /* Strategy chips */
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid}
+    .chip-a{background:rgba(248,81,73,.1);color:#ff7b72;border-color:rgba(248,81,73,.3)}
+    .chip-b{background:rgba(63,185,80,.1);color:var(--green);border-color:rgba(63,185,80,.3)}
+    .chip-d{background:rgba(88,166,255,.1);color:var(--blue);border-color:rgba(88,166,255,.3)}
+
+    /* Status / Loading */
+    .status-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius);background:var(--surface2);border:1px solid var(--border);font-size:13px;color:var(--text-muted)}
+    .spinner{width:15px;height:15px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .hidden{display:none}
+
+    /* Power-BI section */
+    .pbi-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px 0;border-top:1px solid var(--border);margin-top:16px;color:var(--text-muted);font-size:13px;user-select:none}
+    .pbi-toggle:hover{color:var(--text)}
+    .pbi-toggle-icon{font-size:11px;transition:transform .2s}
+    .pbi-toggle.open .pbi-toggle-icon{transform:rotate(90deg)}
+    #pbiFrame{width:100%;height:600px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);margin-top:12px;display:none}
+
+    /* Success feedback */
+    .save-feedback{font-size:12px;color:var(--green);font-weight:600}
+
+    .footer{text-align:center;font-size:11px;color:var(--border);margin-top:40px;padding-top:20px;border-top:1px solid var(--border)}
+    @media(max-width:640px){.page{padding:16px 12px 40px}h1{font-size:18px}.price-table{font-size:12px}}
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="../index.html">← Zurück</a>
+  <span style="color:var(--border)">›</span>
+  <span style="color:var(--text);font-size:13px">🎯 Preisempfehlung</span>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('de')">🇩🇪 DE</button>
+    <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+  </div>
+</nav>
+
+<main class="page">
+  <h1>🎯 Preisempfehlung</h1>
+  <p class="subtitle">Parameter konfigurieren · KI-Empfehlung berechnen · Auslastung prüfen</p>
+
+  <!-- Tab Bar -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('params')" id="tab-params">⚙️ Parameter</button>
+    <button class="tab" onclick="switchTab('output')" id="tab-output">🎯 Empfehlung</button>
+    <button class="tab" onclick="switchTab('pbi')" id="tab-pbi">⚡ Auslastung (Power-BI)</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       TAB 1: PARAMETER
+  ════════════════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-params">
+
+    <!-- Stationsdaten / Excel Upload -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📂 Stationsdaten laden</span>
+        <span id="fileStatusBadge" class="hidden" style="font-size:12px;color:var(--green);font-weight:600"></span>
+      </div>
+      <div class="file-zone" id="fileZone" onclick="document.getElementById('fileInput').click()">
+        <div style="font-size:28px;margin-bottom:8px">📂</div>
+        <div style="color:var(--text-muted);font-size:13px">
+          Excel aus <code style="color:var(--accent);font-size:12px">Charging Stations Operating Datas</code> auswählen<br>
+          <span style="font-size:11px;opacity:.6">Auslastung wird automatisch berechnet und für alle Module gespeichert</span>
+        </div>
+        <div id="fileName" class="hidden" style="color:var(--green);font-size:13px;font-weight:600;margin-top:6px"></div>
+      </div>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv"/>
+      <div class="station-row hidden" id="stationRow">
+        <label style="color:var(--text-muted);font-size:13px">Aktive Station:</label>
+        <select id="stationSelect" style="flex:1;min-width:200px"><option value="">– wählen –</option></select>
+      </div>
+      <div id="utilFeedback" class="hidden" style="margin-top:12px;padding:12px 14px;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.25);border-radius:var(--radius);font-size:12px;color:var(--green)"></div>
+    </div>
+
+    <!-- Allgemeine Parameter -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">⚙️ Strategie-Parameter</span></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Auslastungsschwelle (%)</label>
+          <input type="number" id="p-schwelle" min="0" max="100" step="1" placeholder="60"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Preisschritt pro 10 %-Punkte (%)</label>
+          <input type="number" id="p-schritt" min="0" max="50" step="0.5" placeholder="5"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gewicht Auslastung (0–1)</label>
+          <input type="number" id="p-wA" min="0" max="1" step="0.05" placeholder="0.4"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gewicht Wettbewerb (0–1)</label>
+          <input type="number" id="p-wW" min="0" max="1" step="0.05" placeholder="0.6"/>
+        </div>
+      </div>
+
+      <hr class="form-divider"/>
+
+      <!-- Eigene Preise + Min/Max je Ladetyp -->
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Preise je Ladetyp (€/kWh)</div>
+
+      <div class="type-section">
+        <div class="type-header type-ac">AC</div>
+        <div class="form-grid" style="margin-top:8px">
+          <div class="form-group"><label class="form-label">Eigener Preis</label><input type="number" id="p-priceAC" step="0.001" placeholder="0.39"/></div>
+          <div class="form-group"><label class="form-label">Min</label><input type="number" id="p-acMin" step="0.001" placeholder="0.25"/></div>
+          <div class="form-group"><label class="form-label">Max</label><input type="number" id="p-acMax" step="0.001" placeholder="0.55"/></div>
+        </div>
+      </div>
+
+      <div class="type-section">
+        <div class="type-header type-dc">DC</div>
+        <div class="form-grid" style="margin-top:8px">
+          <div class="form-group"><label class="form-label">Eigener Preis</label><input type="number" id="p-priceDC" step="0.001" placeholder="0.49"/></div>
+          <div class="form-group"><label class="form-label">Min</label><input type="number" id="p-dcMin" step="0.001" placeholder="0.35"/></div>
+          <div class="form-group"><label class="form-label">Max</label><input type="number" id="p-dcMax" step="0.001" placeholder="0.70"/></div>
+        </div>
+      </div>
+
+      <div class="type-section">
+        <div class="type-header type-hpc">HPC</div>
+        <div class="form-grid" style="margin-top:8px">
+          <div class="form-group"><label class="form-label">Eigener Preis</label><input type="number" id="p-priceHPC" step="0.001" placeholder="0.59"/></div>
+          <div class="form-group"><label class="form-label">Min</label><input type="number" id="p-hpcMin" step="0.001" placeholder="0.45"/></div>
+          <div class="form-group"><label class="form-label">Max</label><input type="number" id="p-hpcMax" step="0.001" placeholder="0.89"/></div>
+        </div>
+      </div>
+
+      <hr class="form-divider"/>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="saveParams()">💾 Parameter speichern</button>
+        <span id="saveMsg" class="save-feedback hidden">✓ Gespeichert!</span>
+        <button class="btn-secondary" onclick="switchTab('output')">→ Empfehlung berechnen</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       TAB 2: EMPFEHLUNG (Output)
+  ════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-output">
+
+    <!-- Summary KPIs -->
+    <div class="kpi-grid" id="summaryKpis">
+      <div class="kpi-box"><div class="kpi-label">HPC Empfehlung</div><div class="kpi-value" id="k-hpc">–</div><div class="kpi-sub" id="k-hpc-d"></div></div>
+      <div class="kpi-box"><div class="kpi-label">DC Empfehlung</div><div class="kpi-value" id="k-dc">–</div><div class="kpi-sub" id="k-dc-d"></div></div>
+      <div class="kpi-box"><div class="kpi-label">AC Empfehlung</div><div class="kpi-value" id="k-ac">–</div><div class="kpi-sub" id="k-ac-d"></div></div>
+      <div class="kpi-box"><div class="kpi-label">HPC Auslastung</div><div class="kpi-value" id="k-util">–</div><div class="kpi-sub">aus Excel</div></div>
+      <div class="kpi-box"><div class="kpi-label">HPC Markt Ø</div><div class="kpi-value" id="k-mkt">–</div><div class="kpi-sub">Wettbewerber</div></div>
+      <div class="kpi-box"><div class="kpi-label">Aktive Station</div><div class="kpi-value" style="font-size:13px" id="k-station">–</div><div class="kpi-sub" id="k-file"></div></div>
+    </div>
+
+    <!-- Analyse Button -->
+    <div class="card">
+      <div class="btn-row">
+        <button class="btn-primary" id="analyseBtn" onclick="runAnalysis()">🎯 Preisempfehlung berechnen</button>
+        <span style="color:var(--text-muted);font-size:12px">Formel + Claude AI-Kommentar (ca. 10–20 Sek.)</span>
+      </div>
+      <div class="status-bar hidden" id="loadingBar" style="margin-top:14px">
+        <div class="spinner"></div>
+        <span id="loadingMsg">Berechnung läuft…</span>
+      </div>
+    </div>
+
+    <!-- Price Table -->
+    <div class="card hidden" id="priceCard">
+      <div class="card-header">
+        <span class="card-title">🎯 Empfohlene Verkaufspreise</span>
+        <button class="btn-secondary" onclick="saveOverrides()" style="font-size:12px">💾 Übernehmen → Settings</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="price-table">
+          <thead><tr>
+            <th>Typ</th><th>Auslastung</th><th>Marktpreis Ø</th>
+            <th>Formel</th><th>Δ vs. Markt</th><th>Override</th><th>Konfidenz</th>
+          </tr></thead>
+          <tbody id="priceTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI Commentary -->
+    <div class="card hidden" id="aiCard">
+      <div class="card-header">
+        <span class="card-title">🤖 Claude AI Analyse</span>
+        <button class="btn-secondary" onclick="rerunAI()" style="font-size:12px">↻ Neu generieren</button>
+      </div>
+      <div class="ai-box">
+        <div class="ai-header">✦ KI-Preisanalyse</div>
+        <div class="ai-text" id="aiText"><span class="ai-thinking">Warte auf Berechnung…</span></div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:8px">Empfohlene Strategie</div>
+        <div class="chips" id="stratChips"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       TAB 3: POWER-BI AUSLASTUNG
+  ════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-pbi">
+    <div class="card" style="padding:0;overflow:hidden">
+      <iframe
+        id="pbiIframe"
+        src="https://app.powerbi.com/view?r=eyJrIjoiMmRlODdmODUtYzZiNi00MGJjLWE3MGQtZThkNDhkZjQ0ZjI3IiwidCI6ImNjMGY0YTAwLTFiZWMtNGEzZS04NGVkLTNlODdiMjFhZjU2YSJ9"
+        width="100%"
+        height="680"
+        frameborder="0"
+        allowfullscreen
+        style="display:block;border:none"
+      ></iframe>
+    </div>
+    <p style="color:var(--text-muted);font-size:12px;margin-top:8px;text-align:center">
+      Power BI Live-Report · ELMI Power · Auslastungsdaten Echtzeit
+    </p>
+  </div>
+
+</main>
+<footer class="footer">ELMI Power GmbH · Interne Nutzung</footer>
+
+<script>
+// ─── i18n ───
+let currentLang = 'de';
+function setLang(l) {
+  currentLang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
+}
+
+// ─── Tab logic ───
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+// ─── IndexedDB ───
+const DB_NAME = 'elmiCPOSettings', DB_VER = 1;
+let _db = null;
+function openDB() {
+  return new Promise((res, rej) => {
+    if (_db) return res(_db);
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => { const d = e.target.result; if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings'); };
+    req.onsuccess = e => { _db = e.target.result; res(_db); };
+    req.onerror = () => rej(req.error);
+  });
+}
+async function dbGet(k) {
+  const d = await openDB();
+  return new Promise((res, rej) => { const r = d.transaction('settings','readonly').objectStore('settings').get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+}
+async function dbSet(k, v) {
+  const d = await openDB();
+  return new Promise((res, rej) => { const r = d.transaction('settings','readwrite').objectStore('settings').put(v,k); r.onsuccess = () => res(); r.onerror = () => rej(r.error); });
+}
+
+// ─── State ───
+let settingsData = {}, competitorData = {}, stationData = {}, formulaResult = {};
+
+// ─── Load settings into param fields ───
+async function loadParamFields() {
+  const s = await dbGet('cpoSettings') || {};
+  settingsData = s;
+  const fields = {
+    'p-schwelle': s.auslastungSchwelle || '',
+    'p-schritt':  s.preisSchritt || '',
+    'p-wA':       s.gewichtAuslastung || '',
+    'p-wW':       s.gewichtWettbewerb || '',
+    'p-priceAC':  s.priceAC || '',
+    'p-acMin':    s.acMin || '',
+    'p-acMax':    s.acMax || '',
+    'p-priceDC':  s.priceDC || '',
+    'p-dcMin':    s.dcMin || '',
+    'p-dcMax':    s.dcMax || '',
+    'p-priceHPC': s.priceHPC || '',
+    'p-hpcMin':   s.hpcMin || '',
+    'p-hpcMax':   s.hpcMax || '',
+  };
+  Object.entries(fields).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el && val !== '') el.value = val;
+  });
+
+  // Load competitor data
+  const w = await dbGet('wettbewerberJSON') || [];
+  if (w.length) {
+    const ap = [], dp = [], hp = [];
+    w.forEach(c => { if (c.preisAC) ap.push(+c.preisAC); if (c.preisDC) dp.push(+c.preisDC); if (c.preisHPC) hp.push(+c.preisHPC); });
+    const avg = a => a.filter(v => !isNaN(v)).length ? a.reduce((s,v)=>s+v,0)/a.filter(v=>!isNaN(v)).length : null;
+    competitorData = { acAvg: avg(ap), dcAvg: avg(dp), hpcAvg: avg(hp), count: w.length };
+  }
+
+  // Load station utilisation
+  const su = await dbGet('stationUtilisation');
+  if (su && su.active) {
+    stationData = su.active;
+    showStationInfo(su);
+    populateSheetSelect(su);
+  }
+
+  // Update KPI header on output tab
+  updateOutputKPIs();
+}
+
+function showStationInfo(su) {
+  const zone = document.getElementById('fileZone');
+  zone.classList.add('has-file');
+  const fn = document.getElementById('fileName');
+  fn.textContent = '✓ ' + (su.fileName || 'Datei geladen');
+  fn.classList.remove('hidden');
+  document.getElementById('fileStatusBadge').textContent = su.activeSheetName || '';
+  document.getElementById('fileStatusBadge').classList.remove('hidden');
+  document.getElementById('stationRow').classList.remove('hidden');
+
+  const fb = document.getElementById('utilFeedback');
+  const ac = su.active.ac?.util !== null ? su.active.ac.util.toFixed(1)+'%' : '–';
+  const dc = su.active.dc?.util !== null ? su.active.dc.util.toFixed(1)+'%' : '–';
+  const hpc = su.active.hpc?.util !== null ? su.active.hpc.util.toFixed(1)+'%' : '–';
+  fb.innerHTML = `✓ Auslastung aus IndexedDB geladen · <strong>${su.activeSheetName}</strong><br><span style="color:var(--text-muted)">AC: ${ac} · DC: ${dc} · HPC: ${hpc} · Gespeichert: ${su.uploadedAt ? new Date(su.uploadedAt).toLocaleDateString('de-DE') : '–'}</span>`;
+  fb.classList.remove('hidden');
+}
+
+function populateSheetSelect(su) {
+  const sel = document.getElementById('stationSelect');
+  sel.innerHTML = '';
+  if (su.allSheets) {
+    Object.keys(su.allSheets).forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      if (name === su.activeSheetName) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+  sel.onchange = async () => {
+    const su2 = await dbGet('stationUtilisation');
+    if (su2 && su2.allSheets && su2.allSheets[sel.value]) {
+      su2.active = su2.allSheets[sel.value];
+      su2.activeSheetName = sel.value;
+      await dbSet('stationUtilisation', su2);
+      stationData = su2.active;
+      showStationInfo(su2);
+      updateOutputKPIs();
+    }
+  };
+}
+
+// ─── Save params ───
+async function saveParams() {
+  const s = settingsData || {};
+  const fields = {
+    auslastungSchwelle: 'p-schwelle', preisSchritt: 'p-schritt',
+    gewichtAuslastung: 'p-wA', gewichtWettbewerb: 'p-wW',
+    priceAC: 'p-priceAC', acMin: 'p-acMin', acMax: 'p-acMax',
+    priceDC: 'p-priceDC', dcMin: 'p-dcMin', dcMax: 'p-dcMax',
+    priceHPC: 'p-priceHPC', hpcMin: 'p-hpcMin', hpcMax: 'p-hpcMax',
+  };
+  Object.entries(fields).forEach(([key, id]) => {
+    const v = parseFloat(document.getElementById(id)?.value);
+    if (!isNaN(v)) s[key] = v;
+  });
+  settingsData = s;
+  await dbSet('cpoSettings', s);
+  const msg = document.getElementById('saveMsg');
+  msg.classList.remove('hidden');
+  setTimeout(() => msg.classList.add('hidden'), 2500);
+}
+
+// ─── Excel Upload ───
+document.getElementById('fileInput').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (f) await processExcel(f);
+});
+document.getElementById('fileZone').addEventListener('dragover', e => { e.preventDefault(); document.getElementById('fileZone').style.borderColor='var(--accent)'; });
+document.getElementById('fileZone').addEventListener('dragleave', () => { document.getElementById('fileZone').style.borderColor=''; });
+document.getElementById('fileZone').addEventListener('drop', async e => { e.preventDefault(); document.getElementById('fileZone').style.borderColor=''; const f=e.dataTransfer.files[0]; if(f) await processExcel(f); });
+
+async function processExcel(file) {
+  document.getElementById('fileZone').classList.add('has-file');
+  document.getElementById('fileName').textContent = '✓ ' + file.name;
+  document.getElementById('fileName').classList.remove('hidden');
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
+      const results = {};
+      wb.SheetNames.forEach(sn => {
+        const ws = wb.Sheets[sn];
+        const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+        let hr=-1, headers=[];
+        for(let i=0;i<Math.min(15,rows.length);i++){
+          const r=rows[i].map(c=>String(c).toLowerCase());
+          if(r.some(c=>c.includes('power')||c.includes('leistung')||c.includes('kwh')||c.includes('utiliz')||c.includes('auslast')||c.includes('energy'))){hr=i;headers=r;break}
+        }
+        if(hr<0){results[sn]={ac:{util:null},dc:{util:null},hpc:{util:null},rowCount:rows.length,fileName:file.name,uploadedAt:new Date().toISOString()};return}
+        const tI=headers.findIndex(h=>h.includes('type')||h.includes('typ')||h.includes('connector'));
+        const pI=headers.findIndex(h=>h.includes('power')||h.includes('leistung')||h.includes('kw'));
+        const uI=headers.findIndex(h=>h.includes('utiliz')||h.includes('auslast')||h.includes('%'));
+        const eI=headers.findIndex(h=>h.includes('energy')||h.includes('energie')||h.includes('kwh'));
+        const data=rows.slice(hr+1).filter(r=>r.some(c=>c!==''));
+        const acR=[],dcR=[],hpcR=[];
+        data.forEach(row=>{
+          const ts=tI>=0?String(row[tI]||'').toUpperCase():'';
+          const pw=pI>=0?parseFloat(row[pI]):NaN;
+          if(ts.includes('HPC')||ts.includes('ULTRA')||pw>=100)hpcR.push(row);
+          else if(ts.includes('DC')||ts.includes('CCS')||ts.includes('CHAdeMO')||(pw>=20&&pw<100))dcR.push(row);
+          else acR.push(row);
+        });
+        const calcU=rows=>{
+          if(!rows.length)return null;
+          if(uI>=0){const v=rows.map(r=>parseFloat(r[uI])).filter(v=>!isNaN(v));return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
+          if(eI>=0&&pI>=0){const te=rows.reduce((s,r)=>s+(parseFloat(r[eI])||0),0);const mp=parseFloat(rows[0][pI])||50;const he=mp*(rows.length/60);return he>0?Math.min(100,(te/he)*100):null}
+          return null;
+        };
+        results[sn]={ac:{util:calcU(acR)},dc:{util:calcU(dcR)},hpc:{util:calcU(hpcR)},rowCount:rows.length,fileName:file.name,uploadedAt:new Date().toISOString()};
+      });
+      const firstSheet = wb.SheetNames[0];
+      const su = {active:results[firstSheet],activeSheetName:firstSheet,fileName:file.name,allSheets:results,uploadedAt:new Date().toISOString()};
+      await dbSet('stationUtilisation', su);
+      stationData = su.active;
+      showStationInfo(su);
+      populateSheetSelect(su);
+      updateOutputKPIs();
+    } catch(err){alert('Fehler: '+err.message)}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ─── Output KPIs (header row on Tab 2) ───
+function updateOutputKPIs() {
+  const hpcUtil = stationData.hpc?.util;
+  const c = competitorData;
+  document.getElementById('k-util').textContent = hpcUtil !== null && hpcUtil !== undefined ? hpcUtil.toFixed(1)+' %' : '–';
+  document.getElementById('k-util').style.color = utilColor(hpcUtil);
+  document.getElementById('k-mkt').textContent = c.hpcAvg ? c.hpcAvg.toFixed(3)+' €' : '–';
+  document.getElementById('k-station').textContent = stationData.sheetName || '–';
+  document.getElementById('k-file').textContent = stationData.fileName || '';
+}
+function utilColor(u){if(u===null||u===undefined)return'var(--text)';if(u>=70)return'var(--green)';if(u>=40)return'var(--orange)';return'var(--red)'}
+
+// ─── Formula ───
+function calcFormula(type) {
+  const s = settingsData, c = competitorData, sd = stationData[type] || {};
+  const schwelle = +s.auslastungSchwelle||60, schritt = +s.preisSchritt||5;
+  const wW = +s.gewichtWettbewerb||0.6, wA = +s.gewichtAuslastung||0.4;
+  const minP = +s[`${type}Min`]||{ac:0.25,dc:0.35,hpc:0.45}[type];
+  const maxP = +s[`${type}Max`]||{ac:0.55,dc:0.70,hpc:0.89}[type];
+  const ownP = +s[`price${type.toUpperCase()}`]||null;
+  const mktAvg = c[`${type}Avg`]||null;
+  const util = sd.util !== undefined ? sd.util : null;
+  const anchor = mktAvg||(ownP||((minP+maxP)/2));
+  let utilFactor=0, conf=50;
+  if(util!==null){const d=(util-schwelle)/10;utilFactor=d*(schritt/100)*anchor;conf=75+(util<schwelle?-10:10);if(mktAvg)conf+=15}
+  else conf=mktAvg?55:35;
+  conf=Math.min(95,Math.max(20,conf));
+  let rec=util!==null?wA*(anchor+utilFactor)+wW*anchor:anchor;
+  rec=Math.min(maxP,Math.max(minP,rec));
+  return{type,recommended:Math.round(rec*1000)/1000,marketAvg:mktAvg,utilPct:util,confidence:conf,minP,maxP};
+}
+
+// ─── Run Analysis ───
+async function runAnalysis() {
+  document.getElementById('analyseBtn').disabled=true;
+  document.getElementById('loadingBar').classList.remove('hidden');
+  setLoading('Parameter laden…');
+  await saveParams();
+  await sleep(200);
+  setLoading('Formel berechnen…');
+  formulaResult={ac:calcFormula('ac'),dc:calcFormula('dc'),hpc:calcFormula('hpc')};
+  await sleep(200);
+  renderPriceTable();
+  document.getElementById('priceCard').classList.remove('hidden');
+  document.getElementById('aiCard').classList.remove('hidden');
+  // Update KPI cards
+  ['hpc','dc','ac'].forEach(t=>{
+    const r=formulaResult[t];
+    document.getElementById('k-'+t).textContent=r.recommended.toFixed(3)+' €';
+    document.getElementById('k-'+t).style.color='var(--accent)';
+    document.getElementById('k-'+t+'-d').textContent='Δ '+deltaStr(r)+' vs. Markt';
+  });
+  setLoading('Claude AI analysiert… (10–20 Sek.)');
+  await callClaudeAI();
+  await saveLastRec();
+  document.getElementById('loadingBar').classList.add('hidden');
+  document.getElementById('analyseBtn').disabled=false;
+}
+
+async function rerunAI(){
+  document.getElementById('loadingBar').classList.remove('hidden');
+  setLoading('Claude AI neu generieren…');
+  document.getElementById('aiText').innerHTML='<span class="ai-thinking">Analysiere…</span>';
+  await callClaudeAI();
+  document.getElementById('loadingBar').classList.add('hidden');
+}
+
+function setLoading(m){document.getElementById('loadingMsg').textContent=m}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function deltaStr(r){if(!r.marketAvg)return'k.A.';const d=(r.recommended-r.marketAvg)/r.marketAvg*100;return(d>=0?'+':'')+d.toFixed(1)+' %'}
+
+// ─── Price Table ───
+function renderPriceTable() {
+  document.getElementById('priceTableBody').innerHTML=['hpc','dc','ac'].map(t=>{
+    const r=formulaResult[t];
+    const util=r.utilPct!==null?r.utilPct.toFixed(1)+' %':'–';
+    const mkt=r.marketAvg?r.marketAvg.toFixed(3)+' €/kWh':'–';
+    const delta=r.marketAvg?(r.recommended-r.marketAvg)/r.marketAvg*100:null;
+    const dc=delta===null?'delta-flat':delta>1?'delta-up':delta<-1?'delta-down':'delta-flat';
+    const dl=delta===null?'–':(delta>=0?'+':'')+delta.toFixed(1)+' %';
+    const arrow=delta===null?'':delta>1?'↑':delta<-1?'↓':'→';
+    const cc=r.confidence>=75?'var(--green)':r.confidence>=50?'var(--orange)':'var(--red)';
+    return`<tr>
+      <td><span class="type-badge badge-${t}">${t.toUpperCase()}</span></td>
+      <td style="color:${utilColor(r.utilPct)};font-weight:600">${util}</td>
+      <td style="color:var(--text-muted)">${mkt}</td>
+      <td><span class="price-cell" style="color:var(--accent)">${r.recommended.toFixed(3)} €/kWh</span></td>
+      <td><span class="delta-pill ${dc}">${arrow} ${dl}</span></td>
+      <td><input class="override-input" id="ov_${t}" type="number" step="0.001" value="${r.recommended.toFixed(3)}" oninput="this.classList.toggle('overridden',this.value!='${r.recommended.toFixed(3)}')"/></td>
+      <td><div style="display:flex;align-items:center;gap:6px">
+        <div class="conf-bar"><div class="conf-fill" style="width:${r.confidence}%;background:${cc}"></div></div>
+        <span style="font-size:11px;color:${cc}">${r.confidence}%</span>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── Save overrides back to settings ───
+async function saveOverrides(){
+  const s=settingsData||{};
+  ['ac','dc','hpc'].forEach(t=>{const el=document.getElementById('ov_'+t);if(el&&el.value)s['price'+t.toUpperCase()]=parseFloat(el.value)});
+  settingsData=s;await dbSet('cpoSettings',s);
+  const btn=document.querySelector('[onclick="saveOverrides()"]');
+  const orig=btn.textContent;btn.textContent='✓ Gespeichert!';btn.style.color='var(--green)';
+  setTimeout(()=>{btn.textContent=orig;btn.style.color=''},2200);
+}
+
+// ─── Save last rec to IndexedDB for Executive Widget ───
+async function saveLastRec(){
+  try{
+    await dbSet('lastPriceRec',{
+      ac:formulaResult.ac,dc:formulaResult.dc,hpc:formulaResult.hpc,
+      station:stationData.sheetName||document.getElementById('stationSelect')?.value||'–',
+      timestamp:new Date().toISOString()
+    });
+  }catch(e){}
+}
+
+// ─── Claude AI ───
+async function callClaudeAI(){
+  const fr=formulaResult,c=competitorData,s=settingsData;
+  const lines=['ac','dc','hpc'].map(t=>{const r=fr[t];return`- ${t.toUpperCase()}: Auslastung ${r.utilPct!==null?r.utilPct.toFixed(1)+'%':'unbekannt'} | Markt Ø ${r.marketAvg?r.marketAvg.toFixed(3)+' €/kWh':'k.A.'} | Formel ${r.recommended.toFixed(3)} €/kWh | Konfidenz ${r.confidence}%`});
+  const prompt=`Analysiere folgende Pricing-Situation für einen ELMI Power Ladestandort:\n\n**Wettbewerber im Radius:** ${c.count||'unbekannt'}\n\n**Daten je Ladetyp:**\n${lines.join('\n')}\n\n**Parameter:** Schwelle ${s.auslastungSchwelle||60}% · Schritt ${s.preisSchritt||5}% / 10PP · Gewicht ${s.gewichtWettbewerb||0.6} Wettbewerb / ${s.gewichtAuslastung||0.4} Auslastung\n\nBitte:\n1. Kommentiere die Formel-Empfehlungen kritisch – sind sie sinnvoll?\n2. Identifiziere den wichtigsten Preis-Hebel (welcher Ladetyp bietet das größte Optimierungspotenzial?)\n3. Empfehle ggf. angepasste Preise mit konkreter Begründung\n4. Benenne die Marktstrategie (aggressiv / ausgeglichen / defensiv) mit einem Satz Begründung`;
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:'Du bist Experte für EV-Ladeinfrastruktur-Pricing in Deutschland. Gib präzise, handlungsorientierte Preisempfehlungen auf Deutsch. Maximal 350 Wörter.',messages:[{role:'user',content:prompt}]})});
+    const data=await resp.json();
+    const text=data.content?.map(b=>b.text||'').join('')||'Kein Ergebnis.';
+    document.getElementById('aiText').textContent=text;
+    renderStratChips(text);
+  }catch(e){document.getElementById('aiText').textContent='⚠️ Verbindungsfehler zur Claude API.\n\nFormel-Empfehlungen sind oben verfügbar.'}
+}
+
+function renderStratChips(text){
+  const l=text.toLowerCase();const chips=[];
+  if(l.includes('aggressiv'))chips.push({t:'⚡ Aggressiv',c:'chip-a'});
+  else if(l.includes('defensiv'))chips.push({t:'🛡️ Defensiv',c:'chip-d'});
+  else chips.push({t:'⚖️ Ausgeglichen',c:'chip-b'});
+  ['ac','dc','hpc'].forEach(t=>{const r=formulaResult[t];if(!r.marketAvg)return;const d=(r.recommended-r.marketAvg)/r.marketAvg*100;if(d>5)chips.push({t:t.toUpperCase()+' Premium',c:'chip-a'});if(d<-5)chips.push({t:t.toUpperCase()+' Wachstum',c:'chip-d'})});
+  document.getElementById('stratChips').innerHTML=chips.map(c=>`<span class="chip ${c.c}">${c.t}</span>`).join('');
+}
+
+// ─── Init ───
+(async()=>{await loadParamFields()})();
+</script>
+</body>
+</html>
