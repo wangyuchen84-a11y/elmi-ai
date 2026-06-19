@@ -657,17 +657,20 @@ async function saveLastRec(){
 }
 
 // ─── Claude AI ───
+const PROXY_URL = 'https://elmi-claude-proxy.DEIN-SUBDOMAIN.workers.dev'; // ← nach Worker-Deploy ersetzen
+
 async function callClaudeAI(){
   const fr=formulaResult,c=competitorData,s=settingsData;
   const lines=['ac','dc','hpc'].map(t=>{const r=fr[t];return`- ${t.toUpperCase()}: Auslastung ${r.utilPct!==null?r.utilPct.toFixed(1)+'%':'unbekannt'} | Markt Ø ${r.marketAvg?r.marketAvg.toFixed(3)+' €/kWh':'k.A.'} | Formel ${r.recommended.toFixed(3)} €/kWh | Konfidenz ${r.confidence}%`});
   const prompt=`Analysiere folgende Pricing-Situation für einen ELMI Power Ladestandort:\n\n**Wettbewerber im Radius:** ${c.count||'unbekannt'}\n\n**Daten je Ladetyp:**\n${lines.join('\n')}\n\n**Parameter:** Schwelle ${s.auslastungSchwelle||60}% · Schritt ${s.preisSchritt||5}% / 10PP · Gewicht ${s.gewichtWettbewerb||0.6} Wettbewerb / ${s.gewichtAuslastung||0.4} Auslastung\n\nBitte:\n1. Kommentiere die Formel-Empfehlungen kritisch – sind sie sinnvoll?\n2. Identifiziere den wichtigsten Preis-Hebel (welcher Ladetyp bietet das größte Optimierungspotenzial?)\n3. Empfehle ggf. angepasste Preise mit konkreter Begründung\n4. Benenne die Marktstrategie (aggressiv / ausgeglichen / defensiv) mit einem Satz Begründung`;
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:'Du bist Experte für EV-Ladeinfrastruktur-Pricing in Deutschland. Gib präzise, handlungsorientierte Preisempfehlungen auf Deutsch. Maximal 350 Wörter.',messages:[{role:'user',content:prompt}]})});
+    const resp=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:'Du bist Experte für EV-Ladeinfrastruktur-Pricing in Deutschland. Gib präzise, handlungsorientierte Preisempfehlungen auf Deutsch. Maximal 350 Wörter.',messages:[{role:'user',content:prompt}]})});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
     const data=await resp.json();
     const text=data.content?.map(b=>b.text||'').join('')||'Kein Ergebnis.';
     document.getElementById('aiText').textContent=text;
     renderStratChips(text);
-  }catch(e){document.getElementById('aiText').textContent='⚠️ Verbindungsfehler zur Claude API.\n\nFormel-Empfehlungen sind oben verfügbar.'}
+  }catch(e){document.getElementById('aiText').textContent='⚠️ Proxy nicht erreichbar – bitte PROXY_URL in preisempfehlung.html setzen.\n\nFormel-Empfehlungen sind oben verfügbar.'}
 }
 
 function renderStratChips(text){
