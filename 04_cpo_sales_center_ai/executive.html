@@ -158,163 +158,125 @@
 </main>
 <footer class="footer">ELMI Power GmbH · Interne Nutzung</footer>
 
+<script src="js/db.js"></script>
 <script>
-// ── i18n (minimal) ──
-let currentLang = 'de';
-function setLang(l) {
-  currentLang = l;
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
-}
-
-// ── IndexedDB ──
-const DB_NAME = 'elmiCPOSettings', DB_VER = 1;
-let _db = null;
-function openDB() {
-  return new Promise((res, rej) => {
-    if (_db) return res(_db);
-    const req = indexedDB.open(DB_NAME, DB_VER);
-    req.onupgradeneeded = e => { const d = e.target.result; if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings'); };
-    req.onsuccess = e => { _db = e.target.result; res(_db); };
-    req.onerror = () => rej(req.error);
+// ── i18n ──
+window.setLang = ELMI_DB.setLang;
+(function() {
+  const lang = ELMI_DB.getLang();
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes(`'${lang}'`));
   });
-}
-async function dbGet(k) {
-  const d = await openDB();
-  return new Promise((res, rej) => { const tx = d.transaction('settings', 'readonly'); const r = tx.objectStore('settings').get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-}
+})();
 
-// ── Haversine distance (km) ──
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-// ── Init ──
 let map = null;
 
 async function init() {
-  const settings = await dbGet('cpoSettings') || {};
-  const competitors = await dbGet('wettbewerberJSON') || [];
-  const priceRec = await dbGet('lastPriceRec');
+  const settings    = await ELMI_DB.loadSettings();
+  const overrides   = await ELMI_DB.dbGetAll('wettbewerberOverrides');
+  const { standorte, betreiber, meta, source } = await ELMI_DB.loadWettbewerberDaten();
 
-  // Location subtitle
-  if (settings.ort) {
+  // Competitors joined + filtered to radius
+  const comps = ELMI_DB.joinWettbewerber(standorte, betreiber, overrides, settings);
+
+  const st = settings.standort;
+
+  // Subtitle
+  if (st.ort) {
     document.getElementById('locationSubtitle').textContent =
-      `${settings.strasse || ''} ${settings.hausnummer || ''}, ${settings.plz || ''} ${settings.ort} · Radius: ${settings.radius || 10} km`;
+      `${st.strasse || ''} ${st.hausnummer || ''}, ${st.plz || ''} ${st.ort} · Radius: ${settings.radiusKm || 10} km` +
+      (source === 'cache' ? ' · (Offline-Cache)' : '');
   } else {
     document.getElementById('locationSubtitle').innerHTML =
       'Kein Standort konfiguriert. Bitte <a href="settings.html" style="color:var(--accent)">Settings</a> ausfüllen.';
   }
 
-  // KPIs from competitor data
-  if (competitors.length > 0) renderKPIs(competitors, settings);
+  renderKPIs(comps, settings);
+  initMap(st, comps, settings.preise);
+  renderCompList(comps, settings.preise);
+  renderClusters(comps);
 
-  // Map
-  initMap(settings, competitors);
-
-  // Competitor list
-  renderCompList(competitors, settings);
-
-  // Cluster
-  renderClusters(competitors, settings);
-
-  // Price rec widget
+  // Price rec: stored by empfohlener-verkaufspreis.html under key 'lastPriceRec' in wettbewerberMeta store or similar
+  const priceRec = await ELMI_DB.dbGet('wettbewerberMeta', 'lastPriceRec');
   if (priceRec) renderPriceRec(priceRec);
 }
 
 function renderKPIs(comps, settings) {
-  const ownLat = parseFloat(settings.lat);
-  const ownLon = parseFloat(settings.lon);
-  const hasCoords = !isNaN(ownLat) && !isNaN(ownLon);
-
+  const ownPreise = settings.preise || {};
   let hpcCount = 0, dcCount = 0, acCount = 0;
-  const hpcSites = new Set(), dcSites = new Set(), acSites = new Set();
   const operators = new Set();
   const hpcPrices = [];
   let nearest = null, nearestDist = Infinity;
 
-  comps.forEach((c, i) => {
-    const type = (c.ladetyp || c.type || '').toUpperCase();
-    if (type.includes('HPC') || parseFloat(c.leistung || 0) >= 100) { hpcCount++; hpcSites.add(c.standort || i); }
-    else if (type.includes('DC') || parseFloat(c.leistung || 0) >= 20) { dcCount++; dcSites.add(c.standort || i); }
-    else { acCount++; acSites.add(c.standort || i); }
+  comps.forEach(c => {
+    const t = (c.ladetyp || '').toUpperCase();
+    if (t === 'HPC') hpcCount++;
+    else if (t === 'DC') dcCount++;
+    else acCount++;
     if (c.betreiber) operators.add(c.betreiber);
-    if (c.preisHPC) hpcPrices.push(parseFloat(c.preisHPC));
-    if (hasCoords && c.lat && c.lon) {
-      const d = haversine(ownLat, ownLon, parseFloat(c.lat), parseFloat(c.lon));
-      if (d < nearestDist) { nearestDist = d; nearest = c; }
-    }
+    if (t === 'HPC' && c.preis_aktuell) hpcPrices.push(parseFloat(c.preis_aktuell));
+    if (c.distanzKm < nearestDist) { nearestDist = c.distanzKm; nearest = c; }
   });
 
   document.getElementById('k-hpc').textContent = hpcCount;
-  document.getElementById('k-hpc-s').textContent = `${hpcSites.size} Standorte`;
+  document.getElementById('k-hpc-s').textContent = `${hpcCount} Standorte`;
   document.getElementById('k-dc').textContent = dcCount;
-  document.getElementById('k-dc-s').textContent = `${dcSites.size} Standorte`;
+  document.getElementById('k-dc-s').textContent = `${dcCount} Standorte`;
   document.getElementById('k-ac').textContent = acCount;
-  document.getElementById('k-ac-s').textContent = `${acSites.size} Standorte`;
+  document.getElementById('k-ac-s').textContent = `${acCount} Standorte`;
   document.getElementById('k-ops').textContent = operators.size || comps.length;
 
   if (hpcPrices.length) {
     const avg = hpcPrices.reduce((a,b)=>a+b,0)/hpcPrices.length;
     document.getElementById('k-hpc-price').textContent = avg.toFixed(3) + ' €';
   }
-
-  if (nearest && nearestDist < Infinity) {
+  if (nearest) {
     document.getElementById('k-nearest').textContent = nearestDist.toFixed(1) + ' km';
-    document.getElementById('k-nearest-name').textContent = nearest.betreiber || nearest.name || 'Wettbewerber';
+    document.getElementById('k-nearest-name').textContent = nearest.betreiber || 'Wettbewerber';
   }
 }
 
-function initMap(settings, comps) {
-  const ownLat = parseFloat(settings.lat) || 51.0;
-  const ownLon = parseFloat(settings.lon) || 9.5;
+function initMap(st, comps, preise) {
+  const ownLat = st.lat || 51.0;
+  const ownLon = st.lng || 9.5;
 
   map = L.map('map').setView([ownLat, ownLon], 12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
-    maxZoom: 18
+    attribution: '© OpenStreetMap', maxZoom: 18
   }).addTo(map);
 
   // Own marker
-  const ownIcon = L.divIcon({
-    className: '',
-    html: `<div style="background:#f7c325;border:3px solid #fff;width:18px;height:18px;border-radius:50%;box-shadow:0 0 8px rgba(247,195,37,.6)"></div>`,
-    iconSize: [18,18], iconAnchor: [9,9]
-  });
-  if (!isNaN(parseFloat(settings.lat)) && !isNaN(parseFloat(settings.lon))) {
+  if (st.lat) {
+    const ownIcon = L.divIcon({
+      className: '',
+      html: `<div style="background:#f7c325;border:3px solid #fff;width:18px;height:18px;border-radius:50%;box-shadow:0 0 8px rgba(247,195,37,.6)"></div>`,
+      iconSize: [18,18], iconAnchor: [9,9]
+    });
     L.marker([ownLat, ownLon], {icon: ownIcon})
       .addTo(map)
-      .bindPopup('<b style="color:#f7c325">ELMI Power</b><br>' + (settings.ort ? `${settings.strasse || ''}, ${settings.ort}` : 'Eigener Standort'));
+      .bindPopup(`<b style="color:#f7c325">ELMI Power</b><br>${st.strasse || ''}, ${st.ort || ''}`);
   }
 
   // Competitor markers
-  const ownHPCPrice = parseFloat(settings.priceHPC) || null;
+  const ownHPCPrice = preise && preise.HPC ? parseFloat(preise.HPC) : null;
   comps.forEach(c => {
-    if (!c.lat || !c.lon) return;
-    const lat = parseFloat(c.lat), lon = parseFloat(c.lon);
-    if (isNaN(lat) || isNaN(lon)) return;
-
-    const compPrice = parseFloat(c.preisHPC || c.preisDC || 0);
-    let color = '#8b949e'; // neutral
+    if (!c.lat || !c.lng) return;
+    const compPrice = parseFloat(c.preis_aktuell || 0);
+    let color = '#8b949e';
     if (ownHPCPrice && compPrice) {
       const delta = (compPrice - ownHPCPrice) / ownHPCPrice * 100;
       color = delta > 5 ? '#3fb950' : delta < -5 ? '#f85149' : '#f7c325';
     }
-
     const icon = L.divIcon({
       className: '',
       html: `<div style="background:${color};border:2px solid #fff;width:12px;height:12px;border-radius:50%;opacity:.85"></div>`,
       iconSize: [12,12], iconAnchor: [6,6]
     });
-    const popupContent = `<b>${c.betreiber || c.name || 'Wettbewerber'}</b><br>` +
-      (c.ladetyp ? `Typ: ${c.ladetyp}<br>` : '') +
-      (c.leistung ? `Leistung: ${c.leistung} kW<br>` : '') +
-      (c.preisHPC ? `HPC: ${parseFloat(c.preisHPC).toFixed(3)} €/kWh<br>` : '') +
-      (c.preisDC  ? `DC: ${parseFloat(c.preisDC).toFixed(3)} €/kWh<br>`  : '') +
-      (c.preisAC  ? `AC: ${parseFloat(c.preisAC).toFixed(3)} €/kWh`       : '');
-    L.marker([lat, lon], {icon}).addTo(map).bindPopup(popupContent);
+    const popup = `<b>${c.betreiber || 'Wettbewerber'}</b><br>` +
+      `Typ: ${c.ladetyp || '–'}<br>` +
+      (c.preis_aktuell ? `Preis: ${parseFloat(c.preis_aktuell).toFixed(3)} €/kWh<br>` : '') +
+      `${c.distanzKm} km entfernt`;
+    L.marker([c.lat, c.lng], {icon}).addTo(map).bindPopup(popup);
   });
 
   // Legend
@@ -323,7 +285,7 @@ function initMap(settings, comps) {
     const div = L.DomUtil.create('div');
     div.style.cssText = 'background:rgba(22,27,34,.9);padding:10px 14px;border-radius:6px;font-size:11px;color:#e6edf3;border:1px solid #30363d';
     div.innerHTML = `
-      <div style="margin-bottom:4px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.05em">Preisvergleich HPC</div>
+      <div style="margin-bottom:4px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.05em">Preisvergleich</div>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div style="width:10px;height:10px;border-radius:50%;background:#3fb950"></div> Teurer als ELMI</div>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div style="width:10px;height:10px;border-radius:50%;background:#f7c325"></div> Gleicher Preis</div>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div style="width:10px;height:10px;border-radius:50%;background:#f85149"></div> Günstiger als ELMI</div>
@@ -333,34 +295,25 @@ function initMap(settings, comps) {
   legend.addTo(map);
 }
 
-function renderCompList(comps, settings) {
+function renderCompList(comps, preise) {
   const el = document.getElementById('compList');
   if (!comps.length) return;
+  const ownHPCPrice = preise && preise.HPC ? parseFloat(preise.HPC) : null;
 
-  const ownLat = parseFloat(settings.lat), ownLon = parseFloat(settings.lon);
-  const ownHPCPrice = parseFloat(settings.priceHPC) || null;
-  const hasCoords = !isNaN(ownLat) && !isNaN(ownLon);
-
-  const sorted = [...comps].map(c => {
-    const dist = (hasCoords && c.lat && c.lon) ? haversine(ownLat, ownLon, parseFloat(c.lat), parseFloat(c.lon)) : Infinity;
-    return {...c, _dist: dist};
-  }).sort((a,b) => a._dist - b._dist).slice(0, 20);
-
-  el.innerHTML = sorted.map(c => {
-    const price = parseFloat(c.preisHPC || c.preisDC || c.preisAC || 0);
+  el.innerHTML = comps.slice(0, 20).map(c => {
+    const price = parseFloat(c.preis_aktuell || 0);
     let pillClass = 'pill-parity', pillText = '≈';
     if (ownHPCPrice && price) {
       const d = (price - ownHPCPrice) / ownHPCPrice * 100;
       if (d > 5)  { pillClass = 'pill-cheap';     pillText = `+${d.toFixed(0)}%`; }
-      if (d < -5) { pillClass = 'pill-expensive'; pillText = `${d.toFixed(0)}%`;  }
+      else if (d < -5) { pillClass = 'pill-expensive'; pillText = `${d.toFixed(0)}%`; }
       else { pillText = `±${Math.abs(d).toFixed(0)}%`; }
     }
-    const distStr = c._dist < Infinity ? ` · ${c._dist.toFixed(1)} km` : '';
     const priceStr = price ? `${price.toFixed(3)} €/kWh` : '–';
     return `<div class="comp-item">
       <div>
-        <div class="comp-name">${c.betreiber || c.name || 'Unbekannt'}</div>
-        <div class="comp-meta">${c.ladetyp || ''} · ${c.leistung ? c.leistung+'kW' : ''}${distStr}</div>
+        <div class="comp-name">${c.betreiber || 'Unbekannt'}</div>
+        <div class="comp-meta">${c.ladetyp || ''} · ${c.distanzKm} km</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <span style="font-size:12px;color:var(--text-muted)">${priceStr}</span>
@@ -370,11 +323,10 @@ function renderCompList(comps, settings) {
   }).join('');
 }
 
-function renderClusters(comps, settings) {
+function renderClusters(comps) {
   const el = document.getElementById('clusterGrid');
   if (!comps.length) return;
-
-  const prices = comps.map(c => parseFloat(c.preisHPC || c.preisDC || c.preisAC || 0)).filter(p => p > 0);
+  const prices = comps.map(c => parseFloat(c.preis_aktuell || 0)).filter(p => p > 0);
   if (!prices.length) return;
 
   const avg = prices.reduce((a,b)=>a+b,0)/prices.length;
@@ -382,9 +334,9 @@ function renderClusters(comps, settings) {
   const q33 = sorted[Math.floor(sorted.length*0.33)];
   const q66 = sorted[Math.floor(sorted.length*0.66)];
 
-  const premium = comps.filter(c => parseFloat(c.preisHPC||c.preisDC||c.preisAC||0) >= q66);
-  const mid     = comps.filter(c => { const p=parseFloat(c.preisHPC||c.preisDC||c.preisAC||0); return p>=q33&&p<q66; });
-  const budget  = comps.filter(c => parseFloat(c.preisHPC||c.preisDC||c.preisAC||0) < q33);
+  const premium = comps.filter(c => parseFloat(c.preis_aktuell||0) >= q66);
+  const mid     = comps.filter(c => { const p=parseFloat(c.preis_aktuell||0); return p>=q33&&p<q66; });
+  const budget  = comps.filter(c => parseFloat(c.preis_aktuell||0) > 0 && parseFloat(c.preis_aktuell||0) < q33);
 
   el.innerHTML = `
     <span class="cluster-badge cluster-premium">⚡ Premium ≥ ${q66.toFixed(3)} €/kWh · ${premium.length} CPO</span>
@@ -397,22 +349,22 @@ function renderPriceRec(rec) {
   if (!rec) return;
   const rows = document.getElementById('priceRecRows');
   const meta = document.getElementById('priceRecMeta');
-  const types = ['hpc','dc','ac'];
+  const types = ['HPC','DC','AC'];
 
   rows.innerHTML = types.map(t => {
-    const r = rec[t];
+    const r = rec[t] || rec[t.toLowerCase()];
     if (!r || !r.recommended) return '';
     const delta = r.marketAvg ? (r.recommended - r.marketAvg) / r.marketAvg * 100 : null;
     const arrow = delta === null ? '' : delta > 1 ? '↑' : delta < -1 ? '↓' : '→';
     const dColor = delta === null ? 'var(--text-muted)' : delta > 1 ? 'var(--green)' : delta < -1 ? 'var(--red)' : 'var(--text-muted)';
     const cc = r.confidence >= 75 ? '#3fb950' : r.confidence >= 50 ? '#d29922' : '#f85149';
     return `<div class="price-rec-row">
-      <span class="type-tag tag-${t}">${t.toUpperCase()}</span>
+      <span class="type-tag tag-${t.toLowerCase()}">${t}</span>
       <span style="font-size:15px;font-weight:700;color:var(--accent);min-width:95px">${r.recommended.toFixed(3)} €/kWh</span>
       <span style="font-size:12px;color:${dColor}">${arrow} ${delta!==null?(delta>=0?'+':'')+delta.toFixed(1)+' % vs. Markt':''}</span>
       <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
-        <div class="conf-bar"><div class="conf-fill" style="width:${r.confidence}%;background:${cc}"></div></div>
-        <span style="font-size:11px;color:var(--text-muted)">${r.confidence}%</span>
+        <div class="conf-bar"><div class="conf-fill" style="width:${r.confidence||0}%;background:${cc}"></div></div>
+        <span style="font-size:11px;color:var(--text-muted)">${r.confidence||0}%</span>
       </div>
     </div>`;
   }).join('');
@@ -420,7 +372,7 @@ function renderPriceRec(rec) {
   if (rec.timestamp) {
     const d = new Date(rec.timestamp);
     meta.style.display = 'block';
-    meta.textContent = `Berechnet: ${d.toLocaleDateString('de-DE')} ${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} · Station: ${rec.station||'–'}`;
+    meta.textContent = `Berechnet: ${d.toLocaleDateString('de-DE')} ${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}`;
   }
 }
 
