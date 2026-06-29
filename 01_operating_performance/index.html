@@ -374,27 +374,59 @@ async function exportAllPagesPDF(){
     var views=tabs.map(function(t){return t.getAttribute('data-view');}).filter(Boolean);
     var activeTab=document.querySelector('.tab.active');
     var activeView=activeTab?activeTab.getAttribute('data-view'):(views[0]||null);
-    var content=document.getElementById('content')||document.querySelector('.page')||document.body;
+
+    /* Elemente die beim Screenshot ausgeblendet werden sollen */
+    var SKIP_IDS=['elmi-pdf-export-btn','elmi-lang-toggle','elmi-back-btn','elmiLoginOverlay'];
+    function shouldIgnore(el){
+      if(!el||!el.id)return false;
+      return SKIP_IDS.indexOf(el.id)>=0;
+    }
+
     for(var i=0;i<views.length;i++){
       var view=views[i];
+      /* Tab umschalten */
       tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-view')===view);});
       if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
-      await new Promise(function(r){setTimeout(r,700);});
+      /* Warten bis Charts rendern */
+      await new Promise(function(r){setTimeout(r,900);});
       window.scrollTo(0,0);
-      var canvas=await html2canvas(content,{
-        scale:2,useCORS:true,allowTaint:true,
+
+      /* Capture-Ziel: #content falls vorhanden, sonst document.body */
+      var captureTarget=document.getElementById('content')||document.body;
+
+      var canvas=await html2canvas(captureTarget,{
+        scale:1.5,
+        useCORS:true,
+        allowTaint:true,
         backgroundColor:'#FAF9F7',
-        scrollX:0,scrollY:-window.scrollY,
-        windowWidth:content.scrollWidth,
-        windowHeight:content.scrollHeight,
-        logging:false
+        scrollX:0,
+        scrollY:0,
+        x:0,
+        y:0,
+        logging:false,
+        ignoreElements:shouldIgnore,
+        onclone:function(doc){
+          /* Login-Overlay im geklonten Dokument ausblenden */
+          var ov=doc.getElementById('elmiLoginOverlay');
+          if(ov)ov.style.display='none';
+          var bk=doc.getElementById('elmi-back-btn');
+          if(bk)bk.style.display='none';
+        }
       });
-      var imgData=canvas.toDataURL('image/jpeg',0.92);
+
+      /* Sicherheits-Check: leeres Canvas überspringen */
+      if(!canvas||canvas.width<10||canvas.height<10){
+        console.warn('PDF: leeres Canvas für View',view,'– übersprungen');
+        continue;
+      }
+
+      var imgData=canvas.toDataURL('image/jpeg',0.88);
       var margin=10;
       var maxW=PAGE_W-margin*2,maxH=PAGE_H-margin*2;
       var ratio=Math.min(maxW/canvas.width,maxH/canvas.height);
       var drawW=canvas.width*ratio,drawH=canvas.height*ratio;
       var offsetX=margin+(maxW-drawW)/2,offsetY=margin+(maxH-drawH)/2;
+
       if(!firstPage)pdf.addPage();
       firstPage=false;
       pdf.setFillColor(250,249,247);
@@ -403,10 +435,12 @@ async function exportAllPagesPDF(){
       pdf.setFontSize(8);pdf.setTextColor(150);
       pdf.text((i+1)+' / '+views.length,PAGE_W-margin,PAGE_H-4,{align:'right'});
     }
+
     if(activeView){
       tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-view')===activeView);});
       if(window.ELMI&&ELMI.pages&&ELMI.pages[activeView])ELMI.pages[activeView]();
     }
+
     var now=new Date();
     var ds=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
     pdf.save('ELMI_Operating_Performance_'+ds+'.pdf');
