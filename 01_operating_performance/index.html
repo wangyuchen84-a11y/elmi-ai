@@ -377,8 +377,9 @@ async function exportAllPagesPDF(){
         .map(function(t){return t.getAttribute('data-view')||t.getAttribute('data-id')||t.getAttribute('data-tab');})
         .filter(Boolean);
     }
-    var activeView=views[0]||null;
-    showPdfToast('v13 | views:'+views.length+' | '+views.slice(0,3).join(','));
+    /* Erster nicht-input View als Restore-Ziel */
+    var activeView=views.find(function(v){return v!=='input';})||null;
+    showPdfToast('v15 | views:'+views.length+' | '+views.slice(0,3).join(','));
 
     /* Inline-Styles aus dem Dokument (nur <style>-Elemente, keine externen Sheets) */
     var inlineCSS='';
@@ -474,7 +475,11 @@ async function exportAllPagesPDF(){
     }
 
     /* Tabs wiederherstellen */
-    if(activeView&&window.ELMI&&ELMI.pages&&ELMI.pages[activeView])ELMI.pages[activeView]();
+    /* Zum ersten Tab zurücknavigieren via DOM-Click */
+    if(activeView&&window.ELMI&&ELMI.app&&ELMI.app.TABS){
+      var restoreIdx=ELMI.app.TABS.findIndex(function(t){return t.id===activeView;});
+      if(restoreIdx>=0&&domTabs[restoreIdx])domTabs[restoreIdx].click();
+    }
 
     /* Blob-URL mit Self-Print */
     var printCSS=[
