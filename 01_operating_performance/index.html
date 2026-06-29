@@ -371,13 +371,16 @@ async function exportAllPagesPDF(){
     var activeTab=document.querySelector('.tab.active');
     var activeView=activeTab?activeTab.getAttribute('data-view'):(views[0]||null);
 
-    /* Alle Stylesheets als Text sammeln */
-    var cssText='';
-    Array.from(document.styleSheets).forEach(function(ss){
-      try{
-        Array.from(ss.cssRules||[]).forEach(function(r){ cssText+=r.cssText+'\n'; });
-      }catch(e){}
-    });
+    /* Inline-Styles aus dem Dokument (nur <style>-Elemente, keine externen Sheets) */
+    var inlineCSS='';
+    document.querySelectorAll('style').forEach(function(s){ inlineCSS+=s.innerHTML+'\n'; });
+
+    /* Absolute URLs für externe Stylesheets */
+    var base=location.origin+location.pathname.replace(/\/[^/]*$/,'/');
+    var cssLinks=[
+      '<link rel="stylesheet" href="'+base+'../design.css">',
+      '<link rel="stylesheet" href="'+base+'../assets/css/responsive.css">'
+    ].join('');
 
     /* Alle Tabs als HTML-Snapshots erfassen */
     var pageHtmls=[];
@@ -387,14 +390,13 @@ async function exportAllPagesPDF(){
       if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
       await new Promise(function(r){setTimeout(r,1000);});
 
-      var src=document.getElementById('content')||document.querySelector('.page')||document.body;
+      /* Nur #content klonen – KEIN body (enthält Login-Overlay!) */
+      var src=document.getElementById('content')||document.querySelector('.page');
+      if(!src){ console.warn('[PDF] #content nicht gefunden für view',view); continue; }
 
-      /* Canvas → Data-URL bevor clone */
+      /* Canvas → Data-URL vor clone */
       src.querySelectorAll('canvas').forEach(function(c){
-        try{
-          var d=c.toDataURL('image/png');
-          c.setAttribute('data-pdf-src',d);
-        }catch(e){}
+        try{ c.setAttribute('data-pdf-src',c.toDataURL('image/png')); }catch(e){}
       });
 
       var clone=src.cloneNode(true);
@@ -406,10 +408,15 @@ async function exportAllPagesPDF(){
         img.style.cssText='width:'+c.width+'px;height:'+c.height+'px;display:block;max-width:100%;';
         c.parentNode.replaceChild(img,c);
       });
-      /* Original canvas-Attribute aufräumen */
       src.querySelectorAll('canvas[data-pdf-src]').forEach(function(c){ c.removeAttribute('data-pdf-src'); });
 
       pageHtmls.push('<div class="elmi-pdf-page">'+clone.outerHTML+'</div>');
+    }
+
+    if(!pageHtmls.length){
+      showPdfToast('Kein Inhalt gefunden – #content Element fehlt','error');
+      setPdfBtnState(btn,false);
+      return;
     }
 
     /* Tabs wiederherstellen */
@@ -418,19 +425,20 @@ async function exportAllPagesPDF(){
       if(window.ELMI&&ELMI.pages&&ELMI.pages[activeView])ELMI.pages[activeView]();
     }
 
-    /* Blob-URL mit Self-Print – umgeht document.write-Limit */
+    /* Blob-URL mit Self-Print */
     var printCSS=[
-      cssText,
+      inlineCSS,
       'body{margin:0;padding:0;background:#fff;}',
-      '.elmi-pdf-page{page-break-after:always;box-sizing:border-box;padding:8mm;background:#fff;width:100%;}',
+      '.elmi-pdf-page{page-break-after:always;box-sizing:border-box;padding:8mm;background:#fff;min-height:180mm;}',
       '.elmi-pdf-page:last-child{page-break-after:avoid;}',
       '@page{size:A4 landscape;margin:10mm;}'
     ].join('\n');
 
     var fullHtml=[
       '<!DOCTYPE html><html><head><meta charset="utf-8">',
+      cssLinks,
       '<style>',printCSS,'</style>',
-      '<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},800);});<\/script>',
+      '<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},1200);});<\/script>',
       '</head><body>',
       pageHtmls.join(''),
       '</body></html>'
