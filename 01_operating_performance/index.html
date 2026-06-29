@@ -366,13 +366,19 @@ async function exportAllPagesPDF(){
   setPdfBtnState(btn,true);
   showPdfToast('PDF wird vorbereitet…');
   try{
-    var tabs=Array.from(document.querySelectorAll('.tab[data-view]'));
-    var views=tabs.map(function(t){return t.getAttribute('data-view');}).filter(Boolean);
-    var activeTab=document.querySelector('.tab.active');
-    var activeView=activeTab?activeTab.getAttribute('data-view'):(views[0]||null);
-
-    /* ── DIAGNOSE-TOAST v12 ── */
-    showPdfToast('v12 | tabs:'+tabs.length+' | views:'+views.slice(0,3).join(','));
+    /* Views aus ELMI.app.TABS — unabhängig von DOM-Attributen */
+    var views=[];
+    if(window.ELMI&&ELMI.app&&ELMI.app.TABS){
+      views=ELMI.app.TABS.map(function(t){return t.id;}).filter(Boolean);
+    }
+    if(!views.length){
+      /* Fallback: DOM-Tabs */
+      views=Array.from(document.querySelectorAll('.tab[data-view],.tab[data-id],.tab[data-tab]'))
+        .map(function(t){return t.getAttribute('data-view')||t.getAttribute('data-id')||t.getAttribute('data-tab');})
+        .filter(Boolean);
+    }
+    var activeView=views[0]||null;
+    showPdfToast('v13 | views:'+views.length+' | '+views.slice(0,3).join(','));
 
     /* Inline-Styles aus dem Dokument (nur <style>-Elemente, keine externen Sheets) */
     var inlineCSS='';
@@ -389,7 +395,6 @@ async function exportAllPagesPDF(){
     var pageHtmls=[];
     for(var i=0;i<views.length;i++){
       var view=views[i];
-      tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-view')===view);});
       if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
       await new Promise(function(r){setTimeout(r,1000);});
 
@@ -450,10 +455,7 @@ async function exportAllPagesPDF(){
     }
 
     /* Tabs wiederherstellen */
-    if(activeView){
-      tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-view')===activeView);});
-      if(window.ELMI&&ELMI.pages&&ELMI.pages[activeView])ELMI.pages[activeView]();
-    }
+    if(activeView&&window.ELMI&&ELMI.pages&&ELMI.pages[activeView])ELMI.pages[activeView]();
 
     /* Blob-URL mit Self-Print */
     var printCSS=[
