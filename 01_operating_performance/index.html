@@ -364,86 +364,88 @@ async function exportAllPagesPDF(){
   var btn=document.getElementById('elmi-pdf-export-btn');
   if(!btn||btn.disabled)return;
   setPdfBtnState(btn,true);
-  showPdfToast('PDF wird erstellt…');
+  showPdfToast('PDF wird vorbereitet…');
   try{
-    var jsPDF=window.jspdf.jsPDF;
-    var PAGE_W=297,PAGE_H=210,margin=10;
-    var pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-    var firstPage=true;
-
     var tabs=Array.from(document.querySelectorAll('.tab[data-view]'));
     var views=tabs.map(function(t){return t.getAttribute('data-view');}).filter(Boolean);
     var activeTab=document.querySelector('.tab.active');
     var activeView=activeTab?activeTab.getAttribute('data-view'):(views[0]||null);
 
-    /* UI-Chrome per visibility verstecken (bewahrt Layout) */
-    var HIDE_IDS=['elmi-pdf-export-btn','elmi-lang-toggle','elmi-back-btn','elmiLoginOverlay'];
-    HIDE_IDS.forEach(function(id){var el=document.getElementById(id);if(el)el.style.visibility='hidden';});
+    /* Print-Container aufbauen */
+    var printWrap=document.createElement('div');
+    printWrap.id='elmi-pdf-print-wrap';
+    document.body.appendChild(printWrap);
 
     for(var i=0;i<views.length;i++){
       var view=views[i];
       tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-view')===view);});
       if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
-      await new Promise(function(r){setTimeout(r,1200);});
-      window.scrollTo(0,0);
+      await new Promise(function(r){setTimeout(r,1000);});
 
-      var target=document.getElementById('content')||document.body;
-      console.log('[PDF] view:',view,'el:',target.id||target.tagName,'offsetSize:',target.offsetWidth,'x',target.offsetHeight);
+      var src=document.getElementById('content')||document.querySelector('.page');
+      if(!src)continue;
 
-      var canvas=await html2canvas(target,{
-        scale:1,
-        useCORS:true,
-        allowTaint:false,
-        backgroundColor:'#FAF9F7',
-        logging:false
+      /* Canvas-Elemente → <img> konvertieren (Charts) */
+      var liveCanvases=src.querySelectorAll('canvas');
+      var snapshots=[];
+      liveCanvases.forEach(function(c){
+        try{ snapshots.push({el:c,dataUrl:c.toDataURL('image/png')}); }catch(e){ snapshots.push({el:c,dataUrl:null}); }
       });
 
-      console.log('[PDF] canvas:',canvas.width,'x',canvas.height);
+      var clone=src.cloneNode(true);
+      var cloneCanvases=clone.querySelectorAll('canvas');
+      snapshots.forEach(function(s,idx){
+        if(!s.dataUrl||!cloneCanvases[idx])return;
+        var img=document.createElement('img');
+        img.src=s.dataUrl;
+        img.style.cssText='width:'+s.el.offsetWidth+'px;height:'+s.el.offsetHeight+'px;display:block;';
+        cloneCanvases[idx].parentNode.replaceChild(img,cloneCanvases[idx]);
+      });
 
-      if(canvas.width<10||canvas.height<10){
-        console.warn('[PDF] skip – canvas zu klein');
-        continue;
-      }
-
-      var imgData;
-      try{ imgData=canvas.toDataURL('image/jpeg',0.85); }
-      catch(te){ console.warn('[PDF] toDataURL fehlgeschlagen:',te.message); continue; }
-
-      var cw=canvas.width,ch=canvas.height;
-      var ratio=Math.min((PAGE_W-margin*2)/cw,(PAGE_H-margin*2)/ch);
-      var dw=cw*ratio,dh=ch*ratio;
-      var ox=margin+((PAGE_W-margin*2)-dw)/2,oy=margin+((PAGE_H-margin*2)-dh)/2;
-
-      if(!firstPage)pdf.addPage();
-      firstPage=false;
-      /* Hintergrund */
-      pdf.setFillColor(250,249,247);
-      pdf.rect(0,0,PAGE_W,PAGE_H,'F');
-      /* Test-Balken oben – erscheint auch wenn Screenshot leer ist */
-      pdf.setFillColor(243,154,58);
-      pdf.rect(0,0,PAGE_W,6,'F');
-      pdf.setTextColor(255,255,255);
-      pdf.setFontSize(8);
-      pdf.text('ELMI Operating Performance  |  '+view+'  |  Seite '+(i+1)+' / '+views.length, margin, 4);
-      /* Screenshot */
-      pdf.addImage(imgData,'JPEG',ox,oy+6,dw,dh-6);
-      pdf.setFontSize(7);pdf.setTextColor(180);
-      pdf.text((i+1)+' / '+views.length,PAGE_W-margin,PAGE_H-2,{align:'right'});
+      var pageDiv=document.createElement('div');
+      pageDiv.className='elmi-pdf-page';
+      pageDiv.appendChild(clone);
+      printWrap.appendChild(pageDiv);
     }
 
-    HIDE_IDS.forEach(function(id){var el=document.getElementById(id);if(el)el.style.visibility='';});
+    /* Druckstyle injizieren */
+    var style=document.createElement('style');
+    style.id='elmi-pdf-print-style';
+    style.innerHTML=[
+      '@media print{',
+      '  body>*:not(#elmi-pdf-print-wrap){display:none!important}',
+      '  #elmi-pdf-print-wrap{display:block!important;margin:0;padding:0}',
+      '  .elmi-pdf-page{page-break-after:always;width:100%;box-sizing:border-box;padding:10mm}',
+      '  .elmi-pdf-page:last-child{page-break-after:avoid}',
+      '  @page{size:A4 landscape;margin:0}',
+      '}'
+    ].join('');
+    document.head.appendChild(style);
+
+    /* Tabs wiederherstellen */
     if(activeView){
       tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-view')===activeView);});
       if(window.ELMI&&ELMI.pages&&ELMI.pages[activeView])ELMI.pages[activeView]();
     }
 
-    var now=new Date();
-    var ds=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
-    pdf.save('ELMI_Operating_Performance_'+ds+'.pdf');
-    showPdfToast('PDF exportiert ✓','ok');
+    showPdfToast('Druckdialog öffnet — Ziel: "Als PDF speichern"','ok');
+    setTimeout(function(){
+      window.print();
+      /* Aufräumen nach Druckdialog */
+      setTimeout(function(){
+        var w=document.getElementById('elmi-pdf-print-wrap');
+        var s=document.getElementById('elmi-pdf-print-style');
+        if(w)w.remove();
+        if(s)s.remove();
+      },1000);
+    },200);
+
   }catch(err){
     console.error('[PDF] Fehler:',err);
     showPdfToast('Fehler: '+err.message,'error');
+    var w=document.getElementById('elmi-pdf-print-wrap');
+    var s=document.getElementById('elmi-pdf-print-style');
+    if(w)w.remove();if(s)s.remove();
   }finally{
     setPdfBtnState(btn,false);
   }
