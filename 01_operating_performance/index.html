@@ -32,7 +32,7 @@
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
   <!-- PDF Export libs -->
-  <script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@3.4.0/dist/dom-to-image-more.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -367,71 +367,57 @@ async function exportAllPagesPDF(){
   showPdfToast('PDF wird erstellt…');
   try{
     var jsPDF=window.jspdf.jsPDF;
-    var PAGE_W=297,PAGE_H=210;
+    var PAGE_W=297,PAGE_H=210,margin=10;
     var pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
     var firstPage=true;
+
     var tabs=Array.from(document.querySelectorAll('.tab[data-view]'));
     var views=tabs.map(function(t){return t.getAttribute('data-view');}).filter(Boolean);
     var activeTab=document.querySelector('.tab.active');
     var activeView=activeTab?activeTab.getAttribute('data-view'):(views[0]||null);
 
-    /* Elemente die beim Screenshot ausgeblendet werden sollen */
-    var SKIP_IDS=['elmi-pdf-export-btn','elmi-lang-toggle','elmi-back-btn','elmiLoginOverlay'];
-    function shouldIgnore(el){
-      if(!el||!el.id)return false;
-      return SKIP_IDS.indexOf(el.id)>=0;
-    }
+    /* UI-Chrome per visibility verstecken (bewahrt Layout) */
+    var HIDE_IDS=['elmi-pdf-export-btn','elmi-lang-toggle','elmi-back-btn','elmiLoginOverlay'];
+    HIDE_IDS.forEach(function(id){var el=document.getElementById(id);if(el)el.style.visibility='hidden';});
 
     for(var i=0;i<views.length;i++){
       var view=views[i];
-      /* Tab umschalten */
       tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-view')===view);});
       if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
-      /* Warten bis Charts rendern */
-      await new Promise(function(r){setTimeout(r,900);});
+      await new Promise(function(r){setTimeout(r,1200);});
       window.scrollTo(0,0);
 
-      /* Capture-Ziel: #content falls vorhanden, sonst document.body */
-      /* Elemente temporär ausblenden */
-      var hiddenEls=[];
-      SKIP_IDS.forEach(function(id){
-        var el=document.getElementById(id);
-        if(el&&el.style.display!=='none'){el._pdfDisplay=el.style.display;el.style.display='none';hiddenEls.push(el);}
+      var target=document.getElementById('content')||document.body;
+      console.log('[PDF] view:',view,'el:',target.id||target.tagName,'offsetSize:',target.offsetWidth,'x',target.offsetHeight);
+
+      var canvas=await html2canvas(target,{
+        scale:1,
+        allowTaint:true,
+        backgroundColor:'#FAF9F7'
       });
 
-      var captureEl=document.getElementById('content')||document.body;
-      var imgData=await domtoimage.toJpeg(captureEl,{
-        quality:0.88,
-        bgcolor:'#FAF9F7',
-        width:captureEl.scrollWidth||window.innerWidth,
-        height:captureEl.scrollHeight||window.innerHeight,
-        style:{overflow:'visible'}
-      });
+      console.log('[PDF] canvas:',canvas.width,'x',canvas.height,'dataLen:',canvas.toDataURL('image/jpeg',0.5).length);
 
-      /* Elemente wieder einblenden */
-      hiddenEls.forEach(function(el){el.style.display=el._pdfDisplay||'';delete el._pdfDisplay;});
-
-      if(!imgData||imgData.length<200){
-        console.warn('PDF: leeres Bild für View',view,'– übersprungen');
+      if(canvas.width<10||canvas.height<10){
+        console.warn('[PDF] skip – canvas zu klein');
         continue;
       }
-      var margin=10;
-      var maxW=PAGE_W-margin*2,maxH=PAGE_H-margin*2;
-      var captureW=captureEl.scrollWidth||window.innerWidth;
-      var captureH=captureEl.scrollHeight||window.innerHeight;
-      var ratio=Math.min(maxW/captureW,maxH/captureH);
-      var drawW=captureW*ratio,drawH=captureH*ratio;
-      var offsetX=margin+(maxW-drawW)/2,offsetY=margin+(maxH-drawH)/2;
+
+      var cw=canvas.width,ch=canvas.height;
+      var ratio=Math.min((PAGE_W-margin*2)/cw,(PAGE_H-margin*2)/ch);
+      var dw=cw*ratio,dh=ch*ratio;
+      var ox=margin+((PAGE_W-margin*2)-dw)/2,oy=margin+((PAGE_H-margin*2)-dh)/2;
 
       if(!firstPage)pdf.addPage();
       firstPage=false;
       pdf.setFillColor(250,249,247);
       pdf.rect(0,0,PAGE_W,PAGE_H,'F');
-      pdf.addImage(imgData,'JPEG',offsetX,offsetY,drawW,drawH);
+      pdf.addImage(canvas.toDataURL('image/jpeg',0.85),'JPEG',ox,oy,dw,dh);
       pdf.setFontSize(8);pdf.setTextColor(150);
       pdf.text((i+1)+' / '+views.length,PAGE_W-margin,PAGE_H-4,{align:'right'});
     }
 
+    HIDE_IDS.forEach(function(id){var el=document.getElementById(id);if(el)el.style.visibility='';});
     if(activeView){
       tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-view')===activeView);});
       if(window.ELMI&&ELMI.pages&&ELMI.pages[activeView])ELMI.pages[activeView]();
@@ -440,10 +426,10 @@ async function exportAllPagesPDF(){
     var now=new Date();
     var ds=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
     pdf.save('ELMI_Operating_Performance_'+ds+'.pdf');
-    showPdfToast('PDF erfolgreich exportiert ✓','ok');
+    showPdfToast('PDF exportiert ✓','ok');
   }catch(err){
-    console.error('PDF Export Fehler:',err);
-    showPdfToast('Fehler beim Erstellen des PDFs','error');
+    console.error('[PDF] Fehler:',err);
+    showPdfToast('Fehler: '+err.message,'error');
   }finally{
     setPdfBtnState(btn,false);
   }
