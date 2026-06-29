@@ -418,28 +418,35 @@ async function exportAllPagesPDF(){
       if(window.ELMI&&ELMI.pages&&ELMI.pages[activeView])ELMI.pages[activeView]();
     }
 
-    /* Popup-Fenster mit allen Styles + Inhalten */
-    var printWin=window.open('','_blank','width=1400,height=900,toolbar=0,menubar=0,scrollbars=1');
-    if(!printWin){
-      showPdfToast('Popup blockiert – bitte Popups erlauben','error');
-      setPdfBtnState(btn,false);
-      return;
-    }
+    /* Blob-URL mit Self-Print – umgeht document.write-Limit */
     var printCSS=[
       cssText,
       'body{margin:0;padding:0;background:#fff;}',
       '.elmi-pdf-page{page-break-after:always;box-sizing:border-box;padding:8mm;background:#fff;width:100%;}',
       '.elmi-pdf-page:last-child{page-break-after:avoid;}',
-      '@page{size:A4 landscape;margin:0;}'
+      '@page{size:A4 landscape;margin:10mm;}'
     ].join('\n');
 
-    printWin.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>'+printCSS+'</style></head><body>'+pageHtmls.join('')+'</body></html>');
-    printWin.document.close();
+    var fullHtml=[
+      '<!DOCTYPE html><html><head><meta charset="utf-8">',
+      '<style>',printCSS,'</style>',
+      '<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},800);});<\/script>',
+      '</head><body>',
+      pageHtmls.join(''),
+      '</body></html>'
+    ].join('');
 
-    showPdfToast('Druckfenster öffnet – "Als PDF speichern" wählen','ok');
-    setTimeout(function(){
-      try{ printWin.focus(); printWin.print(); }catch(e){}
-    },1500);
+    var blob=new Blob([fullHtml],{type:'text/html;charset=utf-8'});
+    var blobUrl=URL.createObjectURL(blob);
+    var opened=window.open(blobUrl,'_blank');
+    if(!opened){
+      showPdfToast('Popup blockiert – bitte Popups für diese Seite erlauben','error');
+      URL.revokeObjectURL(blobUrl);
+      setPdfBtnState(btn,false);
+      return;
+    }
+    setTimeout(function(){ URL.revokeObjectURL(blobUrl); },30000);
+    showPdfToast('Druckfenster öffnet – "Als PDF speichern" wählen ✓','ok');
 
   }catch(err){
     console.error('[PDF] Fehler:',err);
