@@ -392,16 +392,22 @@ async function exportAllPagesPDF(){
 
       var canvas=await html2canvas(target,{
         scale:1,
-        allowTaint:true,
-        backgroundColor:'#FAF9F7'
+        useCORS:true,
+        allowTaint:false,
+        backgroundColor:'#FAF9F7',
+        logging:false
       });
 
-      console.log('[PDF] canvas:',canvas.width,'x',canvas.height,'dataLen:',canvas.toDataURL('image/jpeg',0.5).length);
+      console.log('[PDF] canvas:',canvas.width,'x',canvas.height);
 
       if(canvas.width<10||canvas.height<10){
         console.warn('[PDF] skip – canvas zu klein');
         continue;
       }
+
+      var imgData;
+      try{ imgData=canvas.toDataURL('image/jpeg',0.85); }
+      catch(te){ console.warn('[PDF] toDataURL fehlgeschlagen:',te.message); continue; }
 
       var cw=canvas.width,ch=canvas.height;
       var ratio=Math.min((PAGE_W-margin*2)/cw,(PAGE_H-margin*2)/ch);
@@ -412,7 +418,7 @@ async function exportAllPagesPDF(){
       firstPage=false;
       pdf.setFillColor(250,249,247);
       pdf.rect(0,0,PAGE_W,PAGE_H,'F');
-      pdf.addImage(canvas.toDataURL('image/jpeg',0.85),'JPEG',ox,oy,dw,dh);
+      pdf.addImage(imgData,'JPEG',ox,oy,dw,dh);
       pdf.setFontSize(8);pdf.setTextColor(150);
       pdf.text((i+1)+' / '+views.length,PAGE_W-margin,PAGE_H-4,{align:'right'});
     }
