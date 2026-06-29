@@ -371,56 +371,46 @@ async function exportAllPagesPDF(){
     var activeTab=document.querySelector('.tab.active');
     var activeView=activeTab?activeTab.getAttribute('data-view'):(views[0]||null);
 
-    /* Print-Container aufbauen */
-    var printWrap=document.createElement('div');
-    printWrap.id='elmi-pdf-print-wrap';
-    document.body.appendChild(printWrap);
+    /* Alle Stylesheets als Text sammeln */
+    var cssText='';
+    Array.from(document.styleSheets).forEach(function(ss){
+      try{
+        Array.from(ss.cssRules||[]).forEach(function(r){ cssText+=r.cssText+'\n'; });
+      }catch(e){}
+    });
 
+    /* Alle Tabs als HTML-Snapshots erfassen */
+    var pageHtmls=[];
     for(var i=0;i<views.length;i++){
       var view=views[i];
       tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-view')===view);});
       if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
       await new Promise(function(r){setTimeout(r,1000);});
 
-      var src=document.getElementById('content')||document.querySelector('.page');
-      if(!src)continue;
+      var src=document.getElementById('content')||document.querySelector('.page')||document.body;
 
-      /* Canvas-Elemente → <img> konvertieren (Charts) */
-      var liveCanvases=src.querySelectorAll('canvas');
-      var snapshots=[];
-      liveCanvases.forEach(function(c){
-        try{ snapshots.push({el:c,dataUrl:c.toDataURL('image/png')}); }catch(e){ snapshots.push({el:c,dataUrl:null}); }
+      /* Canvas → Data-URL bevor clone */
+      src.querySelectorAll('canvas').forEach(function(c){
+        try{
+          var d=c.toDataURL('image/png');
+          c.setAttribute('data-pdf-src',d);
+        }catch(e){}
       });
 
       var clone=src.cloneNode(true);
-      var cloneCanvases=clone.querySelectorAll('canvas');
-      snapshots.forEach(function(s,idx){
-        if(!s.dataUrl||!cloneCanvases[idx])return;
+
+      /* Im Clone: canvas durch <img> ersetzen */
+      clone.querySelectorAll('canvas[data-pdf-src]').forEach(function(c){
         var img=document.createElement('img');
-        img.src=s.dataUrl;
-        img.style.cssText='width:'+s.el.offsetWidth+'px;height:'+s.el.offsetHeight+'px;display:block;';
-        cloneCanvases[idx].parentNode.replaceChild(img,cloneCanvases[idx]);
+        img.src=c.getAttribute('data-pdf-src');
+        img.style.cssText='width:'+c.width+'px;height:'+c.height+'px;display:block;max-width:100%;';
+        c.parentNode.replaceChild(img,c);
       });
+      /* Original canvas-Attribute aufräumen */
+      src.querySelectorAll('canvas[data-pdf-src]').forEach(function(c){ c.removeAttribute('data-pdf-src'); });
 
-      var pageDiv=document.createElement('div');
-      pageDiv.className='elmi-pdf-page';
-      pageDiv.appendChild(clone);
-      printWrap.appendChild(pageDiv);
+      pageHtmls.push('<div class="elmi-pdf-page">'+clone.outerHTML+'</div>');
     }
-
-    /* Druckstyle injizieren */
-    var style=document.createElement('style');
-    style.id='elmi-pdf-print-style';
-    style.innerHTML=[
-      '@media print{',
-      '  body>*:not(#elmi-pdf-print-wrap){display:none!important}',
-      '  #elmi-pdf-print-wrap{display:block!important;margin:0;padding:0}',
-      '  .elmi-pdf-page{page-break-after:always;width:100%;box-sizing:border-box;padding:10mm}',
-      '  .elmi-pdf-page:last-child{page-break-after:avoid}',
-      '  @page{size:A4 landscape;margin:0}',
-      '}'
-    ].join('');
-    document.head.appendChild(style);
 
     /* Tabs wiederherstellen */
     if(activeView){
@@ -428,24 +418,32 @@ async function exportAllPagesPDF(){
       if(window.ELMI&&ELMI.pages&&ELMI.pages[activeView])ELMI.pages[activeView]();
     }
 
-    showPdfToast('Druckdialog öffnet — Ziel: "Als PDF speichern"','ok');
+    /* Popup-Fenster mit allen Styles + Inhalten */
+    var printWin=window.open('','_blank','width=1400,height=900,toolbar=0,menubar=0,scrollbars=1');
+    if(!printWin){
+      showPdfToast('Popup blockiert – bitte Popups erlauben','error');
+      setPdfBtnState(btn,false);
+      return;
+    }
+    var printCSS=[
+      cssText,
+      'body{margin:0;padding:0;background:#fff;}',
+      '.elmi-pdf-page{page-break-after:always;box-sizing:border-box;padding:8mm;background:#fff;width:100%;}',
+      '.elmi-pdf-page:last-child{page-break-after:avoid;}',
+      '@page{size:A4 landscape;margin:0;}'
+    ].join('\n');
+
+    printWin.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>'+printCSS+'</style></head><body>'+pageHtmls.join('')+'</body></html>');
+    printWin.document.close();
+
+    showPdfToast('Druckfenster öffnet – "Als PDF speichern" wählen','ok');
     setTimeout(function(){
-      window.print();
-      /* Aufräumen nach Druckdialog */
-      setTimeout(function(){
-        var w=document.getElementById('elmi-pdf-print-wrap');
-        var s=document.getElementById('elmi-pdf-print-style');
-        if(w)w.remove();
-        if(s)s.remove();
-      },1000);
-    },200);
+      try{ printWin.focus(); printWin.print(); }catch(e){}
+    },1500);
 
   }catch(err){
     console.error('[PDF] Fehler:',err);
     showPdfToast('Fehler: '+err.message,'error');
-    var w=document.getElementById('elmi-pdf-print-wrap');
-    var s=document.getElementById('elmi-pdf-print-style');
-    if(w)w.remove();if(s)s.remove();
   }finally{
     setPdfBtnState(btn,false);
   }
