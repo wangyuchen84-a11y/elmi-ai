@@ -416,11 +416,19 @@ async function exportAllPagesPDF(){
 
       if(!firstPage)pdf.addPage();
       firstPage=false;
+      /* Hintergrund */
       pdf.setFillColor(250,249,247);
       pdf.rect(0,0,PAGE_W,PAGE_H,'F');
-      pdf.addImage(imgData,'JPEG',ox,oy,dw,dh);
-      pdf.setFontSize(8);pdf.setTextColor(150);
-      pdf.text((i+1)+' / '+views.length,PAGE_W-margin,PAGE_H-4,{align:'right'});
+      /* Test-Balken oben – erscheint auch wenn Screenshot leer ist */
+      pdf.setFillColor(243,154,58);
+      pdf.rect(0,0,PAGE_W,6,'F');
+      pdf.setTextColor(255,255,255);
+      pdf.setFontSize(8);
+      pdf.text('ELMI Operating Performance  |  '+view+'  |  Seite '+(i+1)+' / '+views.length, margin, 4);
+      /* Screenshot */
+      pdf.addImage(imgData,'JPEG',ox,oy+6,dw,dh-6);
+      pdf.setFontSize(7);pdf.setTextColor(180);
+      pdf.text((i+1)+' / '+views.length,PAGE_W-margin,PAGE_H-2,{align:'right'});
     }
 
     HIDE_IDS.forEach(function(id){var el=document.getElementById(id);if(el)el.style.visibility='';});
