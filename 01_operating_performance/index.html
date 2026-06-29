@@ -31,6 +31,9 @@
   </noscript>
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
+  <!-- PDF Export libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <style id="elmi-login-css">
@@ -338,6 +341,106 @@ function injectLangToggle(){
   updateLangBtns();
 }
 
+/* ---------- PDF Export ---------- */
+function showPdfToast(msg,type){
+  var host=document.querySelector('.toast-host');
+  if(!host){host=document.createElement('div');host.className='toast-host';document.body.appendChild(host);}
+  var t=document.createElement('div');
+  t.className='toast '+(type||'');
+  t.innerHTML='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 5v4m0 2h.01"/></svg><span>'+msg+'</span>';
+  host.appendChild(t);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('in');});});
+  setTimeout(function(){t.classList.remove('in');setTimeout(function(){t.remove();},400);},3500);
+}
+
+function setPdfBtnState(btn,busy){
+  btn.disabled=busy;
+  btn.innerHTML=busy
+    ?'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6" stroke-dasharray="20" stroke-dashoffset="10"><animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.8s" repeatCount="indefinite"/></circle></svg> Exportiere…'
+    :'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h10M8 3v7M5 7l3 3 3-3"/></svg> Export PDF';
+}
+
+async function exportAllPagesPDF(){
+  var btn=document.getElementById('elmi-pdf-export-btn');
+  if(!btn||btn.disabled)return;
+  setPdfBtnState(btn,true);
+  showPdfToast('PDF wird erstellt…');
+  try{
+    var jsPDF=window.jspdf.jsPDF;
+    var PAGE_W=297,PAGE_H=210;
+    var pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    var firstPage=true;
+    var tabs=Array.from(document.querySelectorAll('.tab[data-view]'));
+    var views=tabs.map(function(t){return t.getAttribute('data-view');}).filter(Boolean);
+    var activeTab=document.querySelector('.tab.active');
+    var activeView=activeTab?activeTab.getAttribute('data-view'):(views[0]||null);
+    var content=document.getElementById('content')||document.querySelector('.page')||document.body;
+    for(var i=0;i<views.length;i++){
+      var view=views[i];
+      tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-view')===view);});
+      if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
+      await new Promise(function(r){setTimeout(r,700);});
+      window.scrollTo(0,0);
+      var canvas=await html2canvas(content,{
+        scale:2,useCORS:true,allowTaint:true,
+        backgroundColor:'#FAF9F7',
+        scrollX:0,scrollY:-window.scrollY,
+        windowWidth:content.scrollWidth,
+        windowHeight:content.scrollHeight,
+        logging:false
+      });
+      var imgData=canvas.toDataURL('image/jpeg',0.92);
+      var margin=10;
+      var maxW=PAGE_W-margin*2,maxH=PAGE_H-margin*2;
+      var ratio=Math.min(maxW/canvas.width,maxH/canvas.height);
+      var drawW=canvas.width*ratio,drawH=canvas.height*ratio;
+      var offsetX=margin+(maxW-drawW)/2,offsetY=margin+(maxH-drawH)/2;
+      if(!firstPage)pdf.addPage();
+      firstPage=false;
+      pdf.setFillColor(250,249,247);
+      pdf.rect(0,0,PAGE_W,PAGE_H,'F');
+      pdf.addImage(imgData,'JPEG',offsetX,offsetY,drawW,drawH);
+      pdf.setFontSize(8);pdf.setTextColor(150);
+      pdf.text((i+1)+' / '+views.length,PAGE_W-margin,PAGE_H-4,{align:'right'});
+    }
+    if(activeView){
+      tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-view')===activeView);});
+      if(window.ELMI&&ELMI.pages&&ELMI.pages[activeView])ELMI.pages[activeView]();
+    }
+    var now=new Date();
+    var ds=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+    pdf.save('ELMI_Operating_Performance_'+ds+'.pdf');
+    showPdfToast('PDF erfolgreich exportiert ✓','ok');
+  }catch(err){
+    console.error('PDF Export Fehler:',err);
+    showPdfToast('Fehler beim Erstellen des PDFs','error');
+  }finally{
+    setPdfBtnState(btn,false);
+  }
+}
+
+function injectPdfExportBtn(){
+  if(document.getElementById('elmi-pdf-export-btn'))return;
+  var target=document.querySelector('.appbar-top')||document.querySelector('.appbar');
+  if(!target){
+    var _lp=0,_lpi=setInterval(function(){
+      _lp++;
+      if(document.getElementById('elmi-pdf-export-btn')||_lp>60){clearInterval(_lpi);return;}
+      var g=document.querySelector('.appbar-top')||document.querySelector('.appbar');
+      if(g){clearInterval(_lpi);injectPdfExportBtn();}
+    },100);
+    return;
+  }
+  var btn=document.createElement('button');
+  btn.id='elmi-pdf-export-btn';
+  btn.className='btn sm ghost';
+  btn.title='Alle Seiten als PDF exportieren';
+  btn.style.cssText='gap:6px;white-space:nowrap;display:inline-flex;align-items:center;';
+  btn.innerHTML='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><path d="M3 12h10M8 3v7M5 7l3 3 3-3"/></svg> Export PDF';
+  btn.addEventListener('click',exportAllPagesPDF);
+  target.appendChild(btn);
+}
+
 /* ---------- Settings card ---------- */
 function injectSettingsCard(){
   if(document.getElementById('elmi-fp-card'))return;
@@ -545,6 +648,7 @@ function hookElmi(){
   }
 
   injectLangToggle();
+  injectPdfExportBtn();
 
   if(location.hash==='#input')setTimeout(injectSettingsCard,100);
   if(location.hash==='#roadmap')renderFP(ELMI.app.metrics());
