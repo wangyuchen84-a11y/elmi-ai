@@ -395,7 +395,14 @@ async function exportAllPagesPDF(){
     var pageHtmls=[];
     for(var i=0;i<views.length;i++){
       var view=views[i];
-      if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
+      /* Settings/Input-Tab überspringen – braucht Argumente und gehört nicht ins PDF */
+      if(view==='input')continue;
+      try{
+        if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
+      }catch(e){
+        console.warn('[PDF] skip view',view,e.message);
+        continue;
+      }
       await new Promise(function(r){setTimeout(r,1000);});
 
       /* Haupt-Container suchen */
