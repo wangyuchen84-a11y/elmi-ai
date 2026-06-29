@@ -392,25 +392,31 @@ async function exportAllPagesPDF(){
       window.scrollTo(0,0);
 
       /* Capture-Ziel: #content falls vorhanden, sonst document.body */
-      var captureTarget=document.getElementById('content')||document.body;
-
-      var canvas=await html2canvas(captureTarget,{
+      var canvas=await html2canvas(document.body,{
         scale:1.5,
         useCORS:true,
         allowTaint:true,
+        foreignObjectRendering:true,
         backgroundColor:'#FAF9F7',
         scrollX:0,
         scrollY:0,
         x:0,
         y:0,
-        logging:false,
+        width:window.innerWidth,
+        height:window.innerHeight,
+        windowWidth:window.innerWidth,
+        windowHeight:window.innerHeight,
+        logging:true,
         ignoreElements:shouldIgnore,
         onclone:function(doc){
-          /* Login-Overlay im geklonten Dokument ausblenden */
           var ov=doc.getElementById('elmiLoginOverlay');
           if(ov)ov.style.display='none';
           var bk=doc.getElementById('elmi-back-btn');
           if(bk)bk.style.display='none';
+          var pdfBtn=doc.getElementById('elmi-pdf-export-btn');
+          if(pdfBtn)pdfBtn.style.display='none';
+          var lt=doc.getElementById('elmi-lang-toggle');
+          if(lt)lt.style.display='none';
         }
       });
 
