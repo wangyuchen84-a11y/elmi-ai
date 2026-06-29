@@ -390,9 +390,36 @@ async function exportAllPagesPDF(){
       if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
       await new Promise(function(r){setTimeout(r,1000);});
 
-      /* Nur #content klonen – KEIN body (enthält Login-Overlay!) */
-      var src=document.getElementById('content')||document.querySelector('.page');
-      if(!src){ console.warn('[PDF] #content nicht gefunden für view',view); continue; }
+      /* Haupt-Container suchen */
+      var src=document.getElementById('content')
+        ||document.querySelector('main')
+        ||document.querySelector('.main-content')
+        ||document.querySelector('.app-content')
+        ||document.querySelector('.view-content')
+        ||document.querySelector('[class*="content"]:not([id*="login"]):not([id*="overlay"])')
+        ||document.querySelector('.page');
+
+      if(!src){
+        /* Letzter Ausweg: body-Clone ohne Overlay */
+        var overlay=document.getElementById('elmiLoginOverlay');
+        var backBtn=document.getElementById('elmi-back-btn');
+        var oParent=overlay&&overlay.parentNode;var oSib=overlay&&overlay.nextSibling;
+        var bParent=backBtn&&backBtn.parentNode;var bSib=backBtn&&backBtn.nextSibling;
+        if(overlay)oParent.removeChild(overlay);
+        if(backBtn)bParent.removeChild(backBtn);
+        src=document.body;
+        var bodyClone=src.cloneNode(true);
+        if(overlay)oParent.insertBefore(overlay,oSib);
+        if(backBtn)bParent.insertBefore(backBtn,bSib);
+        /* Login-Reste im Clone entfernen */
+        ['elmiLoginOverlay','elmi-back-btn','elmi-pdf-export-btn','elmi-lang-toggle'].forEach(function(id){
+          var el=bodyClone.querySelector('#'+id);if(el)el.remove();
+        });
+        pageHtmls.push('<div class="elmi-pdf-page">'+bodyClone.innerHTML+'</div>');
+        console.log('[PDF] fallback body used für view',view);
+        continue;
+      }
+      console.log('[PDF] container:',src.tagName,src.id||src.className.slice(0,30),'für view',view);
 
       /* Canvas → Data-URL vor clone */
       src.querySelectorAll('canvas').forEach(function(c){
