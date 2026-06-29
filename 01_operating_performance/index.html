@@ -371,6 +371,9 @@ async function exportAllPagesPDF(){
     var activeTab=document.querySelector('.tab.active');
     var activeView=activeTab?activeTab.getAttribute('data-view'):(views[0]||null);
 
+    /* ── DIAGNOSE-TOAST v12 ── */
+    showPdfToast('v12 | tabs:'+tabs.length+' | views:'+views.slice(0,3).join(','));
+
     /* Inline-Styles aus dem Dokument (nur <style>-Elemente, keine externen Sheets) */
     var inlineCSS='';
     document.querySelectorAll('style').forEach(function(s){ inlineCSS+=s.innerHTML+'\n'; });
