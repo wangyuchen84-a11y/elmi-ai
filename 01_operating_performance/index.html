@@ -32,7 +32,7 @@
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
   <!-- PDF Export libs -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@3.4.0/dist/dom-to-image-more.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -392,45 +392,35 @@ async function exportAllPagesPDF(){
       window.scrollTo(0,0);
 
       /* Capture-Ziel: #content falls vorhanden, sonst document.body */
-      var canvas=await html2canvas(document.body,{
-        scale:1.5,
-        useCORS:true,
-        allowTaint:true,
-        foreignObjectRendering:true,
-        backgroundColor:'#FAF9F7',
-        scrollX:0,
-        scrollY:0,
-        x:0,
-        y:0,
-        width:window.innerWidth,
-        height:window.innerHeight,
-        windowWidth:window.innerWidth,
-        windowHeight:window.innerHeight,
-        logging:true,
-        ignoreElements:shouldIgnore,
-        onclone:function(doc){
-          var ov=doc.getElementById('elmiLoginOverlay');
-          if(ov)ov.style.display='none';
-          var bk=doc.getElementById('elmi-back-btn');
-          if(bk)bk.style.display='none';
-          var pdfBtn=doc.getElementById('elmi-pdf-export-btn');
-          if(pdfBtn)pdfBtn.style.display='none';
-          var lt=doc.getElementById('elmi-lang-toggle');
-          if(lt)lt.style.display='none';
-        }
+      /* Elemente temporär ausblenden */
+      var hiddenEls=[];
+      SKIP_IDS.forEach(function(id){
+        var el=document.getElementById(id);
+        if(el&&el.style.display!=='none'){el._pdfDisplay=el.style.display;el.style.display='none';hiddenEls.push(el);}
       });
 
-      /* Sicherheits-Check: leeres Canvas überspringen */
-      if(!canvas||canvas.width<10||canvas.height<10){
-        console.warn('PDF: leeres Canvas für View',view,'– übersprungen');
+      var captureEl=document.getElementById('content')||document.body;
+      var imgData=await domtoimage.toJpeg(captureEl,{
+        quality:0.88,
+        bgcolor:'#FAF9F7',
+        width:captureEl.scrollWidth||window.innerWidth,
+        height:captureEl.scrollHeight||window.innerHeight,
+        style:{overflow:'visible'}
+      });
+
+      /* Elemente wieder einblenden */
+      hiddenEls.forEach(function(el){el.style.display=el._pdfDisplay||'';delete el._pdfDisplay;});
+
+      if(!imgData||imgData.length<200){
+        console.warn('PDF: leeres Bild für View',view,'– übersprungen');
         continue;
       }
-
-      var imgData=canvas.toDataURL('image/jpeg',0.88);
       var margin=10;
       var maxW=PAGE_W-margin*2,maxH=PAGE_H-margin*2;
-      var ratio=Math.min(maxW/canvas.width,maxH/canvas.height);
-      var drawW=canvas.width*ratio,drawH=canvas.height*ratio;
+      var captureW=captureEl.scrollWidth||window.innerWidth;
+      var captureH=captureEl.scrollHeight||window.innerHeight;
+      var ratio=Math.min(maxW/captureW,maxH/captureH);
+      var drawW=captureW*ratio,drawH=captureH*ratio;
       var offsetX=margin+(maxW-drawW)/2,offsetY=margin+(maxH-drawH)/2;
 
       if(!firstPage)pdf.addPage();
