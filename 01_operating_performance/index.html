@@ -391,19 +391,31 @@ async function exportAllPagesPDF(){
       '<link rel="stylesheet" href="'+base+'../assets/css/responsive.css">'
     ].join('');
 
+    /* DOM-Tab-Buttons für Klick-Navigation */
+    var domTabs=Array.from(document.querySelectorAll('.tab'));
+
     /* Alle Tabs als HTML-Snapshots erfassen */
     var pageHtmls=[];
     for(var i=0;i<views.length;i++){
       var view=views[i];
-      /* Settings/Input-Tab überspringen – braucht Argumente und gehört nicht ins PDF */
+      /* Settings/Input-Tab überspringen */
       if(view==='input')continue;
-      try{
-        if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
-      }catch(e){
-        console.warn('[PDF] skip view',view,e.message);
-        continue;
+
+      /* Tab per DOM-Click navigieren (ELMI lädt dann selbst die nötigen Daten) */
+      var tabIdx=window.ELMI&&ELMI.app&&ELMI.app.TABS
+        ?ELMI.app.TABS.findIndex(function(t){return t.id===view;}):-1;
+      var domTab=tabIdx>=0?domTabs[tabIdx]:null;
+      if(domTab){
+        domTab.click();
+      }else{
+        try{
+          if(window.ELMI&&ELMI.pages&&ELMI.pages[view])ELMI.pages[view]();
+        }catch(e){
+          console.warn('[PDF] skip view',view,e.message);
+          continue;
+        }
       }
-      await new Promise(function(r){setTimeout(r,1000);});
+      await new Promise(function(r){setTimeout(r,1500);});
 
       /* Haupt-Container suchen */
       var src=document.getElementById('content')
