@@ -2,7 +2,34 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Bundled Page</title>
+  <title>⚡ ELMI CPO</title>
+  <link rel="icon" type="image/png" href="/elmi-ai/assets/logo-elmi-gradient.png">
+  <script>
+  /* ELMI: keep tab title + favicon after the bundler runs document.documentElement.replaceWith() */
+  (function () {
+    var TITLE = '⚡ ELMI CPO';
+    var ICON = '/elmi-ai/assets/logo-elmi-gradient.png';
+    function apply() {
+      try {
+        if (document.title !== TITLE) document.title = TITLE;
+        var head = document.head || document.documentElement;
+        if (!head) return;
+        var link = document.querySelector('link[rel~="icon"]');
+        if (!link) {
+          link = document.createElement('link');
+          link.setAttribute('rel', 'icon');
+          link.setAttribute('type', 'image/png');
+          head.appendChild(link);
+        }
+        if (link.getAttribute('href') !== ICON) link.setAttribute('href', ICON);
+      } catch (e) {}
+    }
+    apply();
+    try { new MutationObserver(apply).observe(document, { childList: true }); } catch (e) {}
+    document.addEventListener('DOMContentLoaded', apply);
+    var n = 0, iv = setInterval(function () { apply(); if (++n > 30) clearInterval(iv); }, 200);
+  })();
+  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0E0E14; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
