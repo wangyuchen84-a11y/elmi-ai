@@ -1,77 +1,77 @@
 {
-  "IONITY GmbH": {
-    "HPC": { "preis": 0.69, "quelle": "https://www.ionity.eu/de/ionity/pressemitteilungen/ionity-senkt-preise-fur-spontanes-laden (Direct Tarif ohne App/Registrierung, offiziell seit 12.02.2026)" }
+  "Hamburger Energiewerke Mobil GmbH": {
+    "HPC": { "preis": 0.69, "quelle": "https://www.hamburger-energiewerke.de/e-mobilitaet/private-e-mobilitaet/ladestromtarife (offizielle Preisseite, Tarif Basis, Ad-hoc DC/Schnellladen, 2026-07-13)" }
   },
-  "Vattenfall Smarter Living GmbH": {
-    "HPC": { "preis": 0.49, "quelle": "https://www.electrive.net/2026/03/26/vattenfall-incharge-senkt-preise-am-schnelllader-auf-044-bis-049-euro-kwh/ (InCharge Ad-hoc HPC, seit 23.03.2026)" }
+  "Plenitude On The Road  S.r.l.": {
+    "HPC": { "preis": 0.50, "quelle": "https://eniplenitude.de/elektromobilitaet/tarife (offizielle Preisseite, einheitlicher Tarif AC/DC/UltraFast, 2026-07-13)" }
   },
-  "Mer Germany GmbH": {
-    "HPC": { "preis": 0.79, "quelle": "https://de.mer.eco/ (Ad-hoc HPC >150 kW, recherchiert 2026-06-18)" }
+  "enercity AG": {
+    "HPC": { "preis": 0.52, "quelle": "App-Tarif: https://www.enercity.de/privatkunden/produkte/elektromobilitaet/easygo (easyGo FixLaden, kein netzweiter fester Ad-hoc-Preis auffindbar, 2026-07-13)" }
   },
-  "ALDI SÜD Immobilienverwaltungs-GmbH & Co. oHG": {
-    "HPC": { "preis": 0.47, "quelle": "https://ladesofort.de/betreiber/aldi-sued (Ad-hoc HPC ab 150 kW, kein Vertrag/App nötig, 2026)" }
+  "Q1 Energie AG": {
+    "HPC": { "preis": 0.539, "quelle": "App-Tarif: https://www.goingelectric.de/stromtankstellen/anbieter/angebot/Q1-Card-Q1-Energie-AG/730/ (Q1 Card, registrierungspflichtig, kein reiner Ad-hoc-Preis auffindbar, 2026-07-13)" }
   },
-  "TEAG Mobil GmbH": {
-    "HPC": { "preis": 0.49, "quelle": "https://www.teag-mobil.de/ (Ad-hoc ohne App/Registrierung, DC/HPC, 2026)" }
+  "amperio GmbH": {
+    "HPC": { "preis": 0.69, "quelle": "https://amperio.eu/e-autofahrerinnen/informationen-zum-laden/ (offizielle Preisseite, Ad-hoc-Richtpreis ohne App/Registrierung, 2026-07-13)" }
   },
-  "E.ON Drive Infrastructure GmbH": {
-    "HPC": { "preis": 0.59, "quelle": "https://www.edri.com/de-de/tariffs (Ad-hoc HPC, Mitte der Bandbreite 0,55–0,61 €/kWh, edri.com 2026)" }
+  "Tank & Rast Entwicklungsgesellschaft mbH": {
+    "HPC": { "preis": 0.59, "quelle": "https://mblty.de (Tank & Rast-Tochter mblty GmbH, offizielle Preisseite, Ad-hoc ohne Registrierung, 2026-07-13)" }
   },
-  "Citywatt GmbH": {
-    "HPC": { "preis": 0.65, "quelle": "https://www.citywatt.de/ (Ad-hoc HPC, regulärer Tarif 0,59 €/kWh DC, Ad-hoc 0,65 €/kWh, 2026)" }
+  "team energie GmbH & Co. KG": {
+    "HPC": { "preis": 0.69, "quelle": "App-Tarif: https://www.team.de/produkte-und-services/energie/tankstellen/e-auto-laden (team Mobility Card, kein reiner registrierungsfreier Ad-hoc-Tarif auffindbar, 2026-07-13)" }
   },
-  "TotalEnergies Charging Solutions Deutschland GmbH": {
-    "HPC": { "preis": 0.59, "quelle": "https://evcharge.totalenergies.com/de (öffentlicher Ad-hoc-Preis HPC, 2026)" }
+  "MVV Energie AG": {
+    "HPC": { "preis": 0.56, "quelle": "App-Tarif: https://www.mvv.de/e-mobilitaet/emotion-app (MVV eMotion Classic, App-Registrierung noetig, 2026-07-13)" }
   },
-  "Comfortcharge GmbH": {
-    "HPC": { "preis": null, "quelle": "Kein öffentlicher Tarif gefunden – Preis wird nur am Display/per QR-Code angezeigt (comfortcharge.de, recherchiert 2026-06-18)" }
+  "Fred Pfennings GmbH & Co. KG": {
+    "HPC": { "preis": null, "quelle": "Kein öffentlicher Tarif gefunden (betreibt Numbat-HPC-Ladesäulen an Shell-/PM-Tankstellen, kein eigener €/kWh-Preis auffindbar, 2026-07-13)" }
   },
-  "Circle K Deutschland GmbH": {
-    "HPC": { "preis": null, "quelle": "Kein öffentlicher Ad-hoc-Tarif gefunden – Preis nur in App und an Säule angezeigt (circlek-deutschland.de, recherchiert 2026-06-18)" }
+  "Numbat Schnellladenetz GmbH & Co. KG": {
+    "HPC": { "preis": null, "quelle": "Kein öffentlicher Tarif gefunden (Muttergesellschaft Numbat GmbH seit 2024-08 insolvent, Betriebsstatus/Preis unklar, 2026-07-13)" }
   },
-  "Fastned Deutschland GmbH & Co. KG": {
-    "HPC": { "preis": 0.69, "quelle": "https://www.fastnedcharging.com/hq/preissenkung-bei-fastned-schnelles-laden-bereits-ab-048-kwh (Ad-hoc ohne Abo, seit 01.04.2026)" }
+  "Stark Energy GmbH": {
+    "HPC": { "preis": 0.49, "quelle": "https://www.stark-energy.de/laden-mit-stark-energy (offizielle Preisseite, Ad-hoc via Kreditkarte/QR-Code inkl. MwSt., 2026-07-13)" }
   },
-  "Bilkraft GmbH": {
-    "HPC": { "preis": null, "quelle": "Kein öffentlicher Ad-hoc-Tarif gefunden (recherchiert 2026-06-18)" }
+  "Greenman Energy Operations GmbH & Co. KG": {
+    "HPC": { "preis": null, "quelle": "Kein öffentlicher Tarif gefunden (Tarife nur in SPARK-App einsehbar, keine öffentlichen kWh-Preise, 2026-07-13)" }
   },
-  "Autostrom plus GmbH": {
-    "HPC": { "preis": 0.69, "quelle": "https://autostrom.plus/ladetarife/tarifupdate-bei-autostrom-plus-zum-jahreswechsel-069-e-kwh-und-schluss-mit-der-blockiergebuehr/ (Ad-hoc ohne Blockiergebühr, seit 01.01.2026)" }
+  "ALDI Nord Deutschland Stiftung & Co. KG": {
+    "HPC": { "preis": 0.47, "quelle": "https://ladesofort.de/betreiber/aldi-nord (Ultraschnellladen HPC ab 150 kW, ohne App/Vertrag, 2026-07-13)" }
   },
-  "SachsenEnergie AG": {
-    "HPC": { "preis": 0.50, "quelle": "https://www.sachsenenergie.de/ (Ad-hoc HPC, recherchiert 2026-06-18)" }
+  "Mainova AG": {
+    "HPC": { "preis": 0.76, "quelle": "https://www.mainova.de/de/loesungen/elektromobilitaet/ladestationen (offizielle Preisseite, Ad-hoc DC via QR-Code, 2026-07-13)" }
   },
-  "EWE Go HOCHTIEF Ladepartner GmbH & Co. KG": {
-    "HPC": { "preis": 0.62, "quelle": "https://www.ewego-hochtief.de/ (HPC Ad-hoc, Niedrigpreis-Kategorie laut elektroautomobil.com, 2025/2026)" }
+  "NEW Niederrhein Energie und Wasser GmbH": {
+    "HPC": { "preis": null, "quelle": "Kein öffentlicher Tarif gefunden (keine konkreten €/kWh-Werte auf offizieller Seite, überwiegend 50 kW-Lader statt HPC >149 kW, 2026-07-13)" }
   },
-  "Mercedes-Benz High-Power Charging Europe GmbH": {
-    "HPC": { "preis": null, "quelle": "Kein fester Ad-hoc-Tarif öffentlich – flexible Preise seit 01.12.2025, werden in App/an Säule angezeigt (eu.charge.mercedes-benz.com/web/de/mb-de/tariffs)" }
+  "eliso GmbH": {
+    "HPC": { "preis": 0.49, "quelle": "https://ecomento.de/2026/02/27/eliso-elektrifiziert-mehrere-famila-standorte-44-ultra-schnellladepunkte-bundesweit/ (Presseartikel, Ad-hoc-Tarif an Ultra-Schnellladestandorten, 2026-07-13)" }
   },
-  "Jolt Energy GmbH": {
-    "HPC": { "preis": 0.79, "quelle": "https://jolt.energy/de-de/preise/ (Ad-hoc ohne App/Vertrag; App-Tarif: 0,45–0,49 €/kWh, 2026-06-18)" }
+  "Numbat GmbH": {
+    "HPC": { "preis": null, "quelle": "Kein öffentlicher Tarif gefunden (Insolvenz seit 2024-08, Betriebsstatus 2026 unklar, 2026-07-13)" }
   },
-  "JET Tankstellen Deutschland GmbH": {
-    "HPC": { "preis": 0.49, "quelle": "https://www.jet.de/jetstrom (Ad-hoc ohne App/Vertrag/Grundgebühr, HPC bis 400 kW, 2026)" }
+  "LEW Natur GmbH": {
+    "HPC": { "preis": 0.88, "quelle": "https://www.lew.de/fuer-zuhause/e-mobility/autostromtarife/lew-drive (offizielle Preisseite, Ad-hoc DC zzgl. 0,58 EUR Sitzungsgebuehr, 2026-07-13)" }
   },
-  "EAM Natur Energie GmbH": {
-    "HPC": { "preis": null, "quelle": "Kein öffentlicher HPC-Ad-hoc-Tarif gefunden (eam.de, recherchiert 2026-06-18)" }
+  "mblty GmbH": {
+    "HPC": { "preis": 0.59, "quelle": "https://mblty.de/faq (offizielle FAQ-Seite, Ad-hoc DC/Schnellladen ohne Vertrag, 2026-07-13)" }
   },
-  "EDEKA-MIHA Charge GmbH": {
-    "HPC": { "preis": null, "quelle": "Kein öffentlicher HPC-Ad-hoc-Tarif gefunden (elis.edeka, recherchiert 2026-06-18)" }
+  "E-Merge Mobility GmbH": {
+    "HPC": { "preis": null, "quelle": "Kein öffentlicher Tarif gefunden (Standortentwickler fuer Ladeinfrastruktur, kein CPO mit Endkundentarif, 2026-07-13)" }
   },
-  "Energie Südbayern GmbH": {
-    "HPC": { "preis": 0.49, "quelle": "https://www.esb.de/privatkunden/mobilitaet/unser-ladestrom (DC/HPC Tagespreis 0,49 €/kWh 07–20 Uhr, esb.de 2026)" }
+  "Stadtwerke Würzburg AG": {
+    "HPC": { "preis": 0.69, "quelle": "https://www.wvv.de/ladepreis/ (offizielle Preisseite, Tarif charge it easy, Ad-hoc ohne Vertrag/App, 2026-07-13)" }
   },
-  "GP Joule Connect GmbH": {
-    "HPC": { "preis": null, "quelle": "Kein einheitlicher kWh-Preis öffentlich – standortabhängig, z.T. minutenbasiert (connect-gp-joule.de, recherchiert 2026-06-18)" }
+  "Stadtwerke Bochum GmbH": {
+    "HPC": { "preis": 0.50, "quelle": "App-Tarif: https://www.stadtwerke-bochum.de/privatkunden/produkte/elektromobilitaet/tarife-und-ladekarte (Stadtwerkedrive-Tarif, Karte/Registrierung noetig, 2026-07-13)" }
   },
-  "Claus Heinemann Elektroanlagen GmbH": {
-    "HPC": { "preis": null, "quelle": "Kein öffentlicher HPC-Ad-hoc-Tarif gefunden (ChargeOne-Marke, heinemann-elektro.de, recherchiert 2026-06-18)" }
+  "Westfalen AG": {
+    "HPC": { "preis": 0.47, "quelle": "App-Tarif: https://westfalen.com/de/de/mobilitaet-tankstellen/alternative-kraftstoffe-fuer-zukunftsfaehige-mobilitaet/e-mobilitaet-fuer-unternehmen/e-auto-unterwegs-laden (Westfalen Service Card + eCharge, 2026-07-13)" }
   },
-  "Electra Germany GmbH": {
-    "HPC": { "preis": 0.69, "quelle": "https://www.go-electra.com/en/price/ (Ad-hoc via Kreditkarte ohne Abo, 2026)" }
+  "Energieversorgung Mittelrhein AG": {
+    "HPC": { "preis": 0.56, "quelle": "https://www.evm.de/privatkunden/loesungen-fuer-zu-hause/elektromobilitaet/ladestationen-elektroauto/ (offizielle Preisseite, DC-Ladestationen, 2026-07-13)" }
   },
-  "BayWa Mobility Solutions GmbH": {
-    "HPC": { "preis": 0.79, "quelle": "https://www.baywa-mobility.de/ladeparks (Ad-hoc HPC Deutschlandnetz, 2026)" }
+  "Chargeforce GmbH & CO. KG": {
+    "HPC": { "preis": 0.88, "quelle": "https://www.goingelectric.de/stromtankstellen/anbieter/angebot/CutPower-ChargeForce-GmbH-Co-KG/689/ (Marke CutPower, allgemeiner Stationstarif, nicht explizit als HPC bestaetigt, Stand 2024-07-03, abgerufen 2026-07-13)" }
   }
 }

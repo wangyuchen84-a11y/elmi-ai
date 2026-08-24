@@ -53,6 +53,21 @@
     .toast.show { opacity: 1; }
     .preis-cell { font-weight: 600; }
     .preis-null { color: #9A9AA5; font-style: italic; }
+    tbody tr.expandable { cursor: pointer; }
+    tr.detail-row td { background: #FAFAFB; padding: 16px 20px; }
+    .pd-summary { display: flex; gap: 24px; margin-bottom: 10px; flex-wrap: wrap; }
+    .pd-kpi-label { font-size: 10px; color: #9A9AA5; text-transform: uppercase; letter-spacing: .4px; }
+    .pd-kpi-value { font-size: 16px; font-weight: 800; color: #0E0E14; }
+    .pd-mini-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+    .pd-mini-table col.pd-col-anbieter { width: 32%; }
+    .pd-mini-table col.pd-col-produkt { width: 48%; }
+    .pd-mini-table col.pd-col-preis { width: 20%; }
+    .pd-mini-table th { text-align: left; padding: 5px 8px; font-size: 10px; color: #9A9AA5; text-transform: uppercase; border-bottom: 1px solid #E7E7EB; }
+    .pd-mini-table td { padding: 5px 8px; border-bottom: 1px solid #F4F4F6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pd-mini-table td:last-child { text-align: right; font-weight: 600; }
+    .pd-mini-label { font-size: 11px; font-weight: 800; color: #9B59B6; text-transform: uppercase; margin: 10px 0 2px; }
+    .pd-mini-label:first-child { margin-top: 0; }
+    .expand-hint { font-size: 10px; color: #9B59B6; }
   </style>
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="elmi-brand.css">
@@ -132,6 +147,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="js/db.js"></script>
+  <script src="js/eco-api.js"></script>
   <script>
   (function(){
     const lang = ELMI_DB.getLang();
@@ -145,12 +161,14 @@
     let allRows = [];
     let sortCol = 'distanzKm', sortAsc = true;
     let overrideMap = {};
+    let currentSettings = null;
+    let expandedLocationId = null;
+    let stationPriceSummaries = {};
 
     async function init() {
-      const [settings, wettData] = await Promise.all([
-        ELMI_DB.loadSettings(),
-        ELMI_DB.loadWettbewerberDaten()
-      ]);
+      const settings = await ELMI_DB.loadSettings();
+      currentSettings = settings;
+      const wettData = await ELMI_DB.loadCompetitorData(settings);
       const { standorte, betreiber, meta, source } = wettData;
 
       const notice = document.getElementById('data-notice');
@@ -174,6 +192,33 @@
       render();
       bindFilters();
       bindSort();
+
+      if (settings.dataSource === 'api') startBackgroundPriceload();
+    }
+
+    async function startBackgroundPriceload() {
+      const token = ELMI_ECO.getEcoToken();
+      if (!token) return;
+      const ids = [...new Set(allRows.filter(r => r._locationId).map(r => r._locationId))];
+      await ELMI_ECO.preloadStationPrices(token, ids, (locationId, summary) => {
+        if (!summary) return;
+        stationPriceSummaries[locationId] = summary;
+        updateRowPriceCell(locationId);
+      });
+    }
+
+    function updateRowPriceCell(locationId) {
+      const row = document.querySelector(`tr[data-loc="${locationId}"]`);
+      if (!row) return;
+      const summary = stationPriceSummaries[locationId];
+      if (!summary) return;
+      const cell = row.children[5]; // Preis-Spalte
+      if (!cell) return;
+      const price = summary.adhocPrice != null ? summary.adhocPrice : summary.medianRoaming;
+      const label = summary.adhocPrice != null ? '' : ' (Median)';
+      cell.innerHTML = price != null
+        ? `<span class="preis-cell">${price.toFixed(3)} €${label}</span>`
+        : `<span class="preis-null">–</span>`;
     }
 
     function getFiltered() {
@@ -216,15 +261,21 @@
         const hasOv = Object.keys(ov).length > 0;
         const typBadge = `<span class="badge badge-${r.ladetyp.toLowerCase()}">${r.ladetyp}</span>`;
         const ovBadge  = hasOv ? '<span class="badge badge-ov">✏ manuell</span>' : '';
+        const apiSummary = r._locationId ? stationPriceSummaries[r._locationId] : null;
+        const apiPrice = apiSummary ? (apiSummary.adhocPrice != null ? apiSummary.adhocPrice : apiSummary.medianRoaming) : null;
+        const apiLabel = apiSummary && apiSummary.adhocPrice == null && apiSummary.medianRoaming != null ? ' (Median)' : '';
         const preisDisplay = r.preis_aktuell != null
           ? `<span class="preis-cell">${r.preis_aktuell.toFixed(2)} €</span>`
-          : `<span class="preis-null">–</span>`;
+          : apiPrice != null
+            ? `<span class="preis-cell">${apiPrice.toFixed(3)} €${apiLabel}</span>`
+            : (r._locationId ? `<span class="expand-hint">▸ lädt / Preise anzeigen</span>` : `<span class="preis-null">–</span>`);
 
         const selectOpts = KATEGORIEN.map(k =>
           `<option value="${k}" ${r.preisstrategie_kategorie === k ? 'selected' : ''}>${k}</option>`
         ).join('');
 
-        return `<tr>
+        const rowAttrs = r._locationId ? ` class="expandable" onclick="toggleDetail('${r._locationId}', event)"` : '';
+        const mainRow = `<tr${rowAttrs} data-loc="${r._locationId || ''}">
           <td>${r.betreiber}${ovBadge}</td>
           <td>${typBadge}</td>
           <td>${r.ladepunkte}</td>
@@ -233,7 +284,7 @@
           <td>${preisDisplay}</td>
           <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.preisstrategie_kategorie}</td>
           <td style="white-space:nowrap;color:#6B6B76;font-size:11px">${r.recherche_datum || '–'}</td>
-          <td>
+          <td onclick="event.stopPropagation()">
             <div class="override-row">
               <input class="ov-input" type="number" step="0.01" placeholder="Preis" value="${ov.preis_aktuell != null ? ov.preis_aktuell : ''}" id="ov-preis-${idx}">
               <select class="ov-select" id="ov-kat-${idx}">${selectOpts}</select>
@@ -242,10 +293,79 @@
             </div>
           </td>
         </tr>`;
+
+        const detailRow = r._locationId ? `<tr class="detail-row" data-detail-for="${r._locationId}" style="display:none"><td colspan="9" id="detail-body-${r._locationId}"></td></tr>` : '';
+        return mainRow + detailRow;
       }).join('');
 
       // store row data for override saves
       window._filteredRows = filtered;
+    }
+
+    // ── Preisdetails ausklappen (API-Modus) ──
+    window.toggleDetail = async function(locationId, evt) {
+      if (evt) evt.preventDefault();
+      const row = document.querySelector(`tr.detail-row[data-detail-for="${locationId}"]`);
+      if (!row) return;
+
+      if (expandedLocationId && expandedLocationId !== locationId) {
+        const prev = document.querySelector(`tr.detail-row[data-detail-for="${expandedLocationId}"]`);
+        if (prev) prev.style.display = 'none';
+      }
+
+      if (row.style.display === 'none') {
+        row.style.display = '';
+        expandedLocationId = locationId;
+        await loadDetailInto(locationId);
+      } else {
+        row.style.display = 'none';
+        expandedLocationId = null;
+      }
+    };
+
+    async function loadDetailInto(locationId) {
+      const cell = document.getElementById('detail-body-' + locationId);
+      if (!cell) return;
+      cell.innerHTML = '<span class="status-hint">Lade Preise…</span>';
+      const token = ELMI_ECO.getEcoToken();
+      if (!token) {
+        cell.innerHTML = '<span class="preis-null">Kein eco-movement API-Token hinterlegt. Bitte in <a href="settings.html">Settings</a> eintragen.</span>';
+        return;
+      }
+      try {
+        const result = await ELMI_ECO.getStationPrices(token, locationId, {
+          onProgress: msg => { cell.innerHTML = `<span class="status-hint">${msg}</span>`; }
+        });
+        const { adhoc, msp, sub } = ELMI_ECO.groupStationPrices(result.items);
+        const roaming = msp.map(ELMI_ECO.energyPriceOf).filter(p => p != null);
+        const medianRoaming = ELMI_ECO.medianOf(roaming);
+        const adhocPrice = adhoc.length ? ELMI_ECO.energyPriceOf(adhoc[0]) : null;
+
+        const colgroup = '<colgroup><col class="pd-col-anbieter"><col class="pd-col-produkt"><col class="pd-col-preis"></colgroup>';
+        const miniTable = (items, label) => {
+          if (!items.length) return '';
+          return `<div class="pd-mini-label">${label} (${items.length})</div>
+            <table class="pd-mini-table">${colgroup}<thead><tr><th>Anbieter</th><th>Produkt</th><th>€/kWh</th></tr></thead><tbody>
+            ${items.map(it => `<tr><td>${it.partner||''}</td><td>${(it.product&&it.product.name)||''}</td><td>${ELMI_ECO.energyPriceOf(it)!=null?ELMI_ECO.energyPriceOf(it).toFixed(4):'–'}</td></tr>`).join('')}
+            </tbody></table>`;
+        };
+
+        cell.innerHTML = `
+          <div style="font-size:11px;color:#9A9AA5;margin-bottom:8px">Quelle: ${result.source==='cache'?'Cache':'Live'} · ${new Date(result.fetchedAt).toLocaleString('de-DE')}</div>
+          <div class="pd-summary">
+            <div><div class="pd-kpi-label">Ad-hoc</div><div class="pd-kpi-value">${adhocPrice!=null?adhocPrice.toFixed(3)+' €/kWh':'–'}</div></div>
+            <div><div class="pd-kpi-label">Median Roaming</div><div class="pd-kpi-value">${medianRoaming!=null?medianRoaming.toFixed(3)+' €/kWh':'–'}</div></div>
+          </div>
+          ${miniTable(adhoc,'Ad-hoc')}
+          ${miniTable(sub,'CPO-Abo')}
+          ${miniTable(msp,'Roaming / MSP')}
+          ${!result.items.length ? '<span class="preis-null">Keine Preisdaten gefunden.</span>' : ''}
+        `;
+        stationPriceSummaries[locationId] = { adhocPrice, medianRoaming, roamingCount: roaming.length };
+        updateRowPriceCell(locationId);
+      } catch (e) {
+        cell.innerHTML = `<span class="preis-null">⚠ ${e.message}</span>`;
+      }
     }
 
     function escKey(k) { return k.replace(/'/g, "\\'"); }
@@ -281,10 +401,9 @@
       });
       delete overrideMap[key];
       // reload original data
-      const wettData = await ELMI_DB.loadWettbewerberDaten();
-      const settings = await ELMI_DB.loadSettings();
+      const wettData = await ELMI_DB.loadCompetitorData(currentSettings);
       const overrides = await ELMI_DB.dbGetAll('wettbewerberOverrides');
-      allRows = ELMI_DB.joinWettbewerber(wettData.standorte, wettData.betreiber, overrides, settings);
+      allRows = ELMI_DB.joinWettbewerber(wettData.standorte, wettData.betreiber, overrides, currentSettings);
       render();
       showToast('↺ Override zurückgesetzt');
     };

@@ -86,6 +86,26 @@
     .link-detail{font-size:12px;color:var(--text-muted);text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:4px}
     .link-detail:hover{color:var(--accent);border-color:var(--accent)}
     .footer{text-align:center;font-size:11px;color:var(--text-dim);margin-top:40px;padding-top:20px;border-top:1px solid var(--border)}
+
+    /* Preisdetails (API-Modus) */
+    .comp-item.selectable{cursor:pointer}
+    .comp-item.selectable:hover{background:var(--surface2)}
+    .comp-item.selected{background:rgba(247,195,37,.08);border-left:2px solid var(--accent)}
+    #priceDetailSummary{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:14px}
+    .pd-kpi{display:flex;flex-direction:column;gap:2px}
+    .pd-kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+    .pd-kpi-value{font-size:19px;font-weight:700}
+    /* table-layout:fixed + identische col-Breiten in allen drei Gruppen (Ad-hoc/CPO-Abo/Roaming),
+       damit Anbieter/Produkt/Preis-Spalten untereinander ausgerichtet sind */
+    .pd-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;margin-top:6px}
+    .pd-table col.pd-col-anbieter{width:32%}
+    .pd-table col.pd-col-produkt{width:48%}
+    .pd-table col.pd-col-preis{width:20%}
+    .pd-table th{text-align:left;padding:6px 10px;font-size:10px;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border)}
+    .pd-table td{padding:6px 10px;border-bottom:1px solid var(--border);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .pd-table td:last-child{text-align:right;font-weight:600}
+    .pd-group-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);margin:14px 0 4px}
+    .pd-group-label:first-child{margin-top:0}
   </style>
   <link rel="stylesheet" href="elmi-brand.css">
 </head>
@@ -161,10 +181,19 @@
     </div>
   </div>
 
+  <!-- Detailinformationen zu den Preisen (API-Modus) -->
+  <div class="card" id="priceDetailCard" style="margin-top:16px;display:none">
+    <div class="card-title">💶 Detailinformationen zu den Preisen</div>
+    <div id="priceDetailBody">
+      <p class="status-hint">Bitte wählen Sie einen Standort aus.</p>
+    </div>
+  </div>
+
 </main>
 <footer class="footer">ELMI Power GmbH · Interne Nutzung</footer>
 
 <script src="js/db.js"></script>
+<script src="js/eco-api.js"></script>
 <script>
 // ── i18n ──
 window.setLang = ELMI_DB.setLang;
@@ -176,11 +205,16 @@ window.setLang = ELMI_DB.setLang;
 })();
 
 let map = null;
+let currentSettings = null;
+let selectedLocationId = null;
+let stationPriceSummaries = {}; // locationId -> {adhocPrice, medianRoaming, roamingCount}
+let markersByLocationId = {};
 
 async function init() {
   const settings    = await ELMI_DB.loadSettings();
+  currentSettings   = settings;
   const overrides   = await ELMI_DB.dbGetAll('wettbewerberOverrides');
-  const { standorte, betreiber, meta, source } = await ELMI_DB.loadWettbewerberDaten();
+  const { standorte, betreiber, meta, source } = await ELMI_DB.loadCompetitorData(settings);
 
   // Competitors joined + filtered to radius
   const comps = ELMI_DB.joinWettbewerber(standorte, betreiber, overrides, settings);
@@ -191,7 +225,8 @@ async function init() {
   if (st.ort) {
     document.getElementById('locationSubtitle').textContent =
       `${st.strasse || ''} ${st.hausnummer || ''}, ${st.plz || ''} ${st.ort} · Radius: ${settings.radiusKm || 10} km` +
-      (source === 'cache' ? ' · (Offline-Cache)' : '');
+      (source === 'cache' ? ' · (Offline-Cache)' : '') +
+      (settings.dataSource === 'api' ? ' · Quelle: eco-movement API' : '');
   } else {
     document.getElementById('locationSubtitle').innerHTML =
       'Kein Standort konfiguriert. Bitte <a href="settings.html" style="color:var(--accent)">Settings</a> ausfüllen.';
@@ -202,9 +237,55 @@ async function init() {
   renderCompList(comps, settings.preise);
   renderClusters(comps);
 
+  if (settings.dataSource === 'api') {
+    document.getElementById('priceDetailCard').style.display = 'block';
+    startBackgroundPriceload(comps);
+  }
+
   // Price rec: stored by empfohlener-verkaufspreis.html under key 'lastPriceRec' in wettbewerberMeta store or similar
   const priceRec = await ELMI_DB.dbGet('wettbewerberMeta', 'lastPriceRec');
   if (priceRec) renderPriceRec(priceRec);
+}
+
+// Laedt Preise fuer alle Standorte im Radius im Hintergrund, aktualisiert
+// Liste + Karte sobald je ein Standort fertig ist. Klickt der Nutzer auf
+// einen Standort, dessen Preise noch nicht da sind, greift der normale
+// selectStation()-Ablauf (zeigt "Lade..." und cacht wie gewohnt).
+async function startBackgroundPriceload(comps) {
+  const token = ELMI_ECO.getEcoToken();
+  if (!token) return;
+  const ids = [...new Set(comps.filter(c => c._locationId).map(c => c._locationId))];
+  await ELMI_ECO.preloadStationPrices(token, ids, (locationId, summary) => {
+    if (!summary) return;
+    stationPriceSummaries[locationId] = summary;
+    renderCompList(_compListCache, currentSettings.preise);
+    renderKPIs(_compListCache, currentSettings);
+    updateMarkerPrice(locationId, summary);
+  });
+}
+
+function updateMarkerPrice(locationId, summary) {
+  const entry = markersByLocationId[locationId];
+  if (!entry) return;
+  const { marker, comp } = entry;
+  const adhocStr = summary.adhocPrice != null ? summary.adhocPrice.toFixed(3) + ' €/kWh (Ad-hoc)' : '';
+  const roamingStr = summary.medianRoaming != null ? summary.medianRoaming.toFixed(3) + ' €/kWh (Median Roaming)' : '';
+  const popup = `<b>${comp.betreiber || 'Wettbewerber'}</b><br>` +
+    `Typ: ${comp.ladetyp || '–'}<br>` +
+    (adhocStr ? `${adhocStr}<br>` : '') +
+    (roamingStr ? `${roamingStr}<br>` : '') +
+    `${comp.distanzKm} km entfernt`;
+  marker.setPopupContent(popup);
+  const colorPrice = summary.adhocPrice != null ? summary.adhocPrice : summary.medianRoaming;
+  if (colorPrice != null) {
+    const ownHPCPrice = currentSettings.preise && currentSettings.preise.HPC ? parseFloat(currentSettings.preise.HPC) : null;
+    let color = '#8b949e';
+    if (ownHPCPrice) {
+      const delta = (colorPrice - ownHPCPrice) / ownHPCPrice * 100;
+      color = delta > 5 ? '#3fb950' : delta < -5 ? '#f85149' : '#9A9AA5';
+    }
+    marker.setIcon(L.divIcon({ className: '', html: `<div style="background:${color};border:2px solid #fff;width:12px;height:12px;border-radius:50%;opacity:.85"></div>`, iconSize: [12,12], iconAnchor: [6,6] }));
+  }
 }
 
 function renderKPIs(comps, settings) {
@@ -220,7 +301,16 @@ function renderKPIs(comps, settings) {
     else if (t === 'DC') dcCount++;
     else acCount++;
     if (c.betreiber) operators.add(c.betreiber);
-    if (t === 'HPC' && c.preis_aktuell) hpcPrices.push(parseFloat(c.preis_aktuell));
+    if (t === 'HPC') {
+      if (c.preis_aktuell) {
+        hpcPrices.push(parseFloat(c.preis_aktuell));
+      } else if (c._locationId) {
+        // API-Modus: kein preis_aktuell vorab, aber ggf. schon per Preload geladen
+        const s = stationPriceSummaries[c._locationId];
+        const p = s ? (s.adhocPrice != null ? s.adhocPrice : s.medianRoaming) : null;
+        if (p != null) hpcPrices.push(p);
+      }
+    }
     if (c.distanzKm < nearestDist) { nearestDist = c.distanzKm; nearest = c; }
   });
 
@@ -235,6 +325,8 @@ function renderKPIs(comps, settings) {
   if (hpcPrices.length) {
     const avg = hpcPrices.reduce((a,b)=>a+b,0)/hpcPrices.length;
     document.getElementById('k-hpc-price').textContent = avg.toFixed(3) + ' €';
+  } else {
+    document.getElementById('k-hpc-price').textContent = '–';
   }
   if (nearest) {
     document.getElementById('k-nearest').textContent = nearestDist.toFixed(1) + ' km';
@@ -278,11 +370,20 @@ function initMap(st, comps, preise) {
       html: `<div style="background:${color};border:2px solid #fff;width:12px;height:12px;border-radius:50%;opacity:.85"></div>`,
       iconSize: [12,12], iconAnchor: [6,6]
     });
+    const summary = c._locationId ? stationPriceSummaries[c._locationId] : null;
+    const adhocStr = summary && summary.adhocPrice != null ? `${summary.adhocPrice.toFixed(3)} €/kWh (Ad-hoc)<br>` : '';
+    const roamingStr = summary && summary.medianRoaming != null ? `${summary.medianRoaming.toFixed(3)} €/kWh (Median Roaming)<br>` : '';
     const popup = `<b>${c.betreiber || 'Wettbewerber'}</b><br>` +
       `Typ: ${c.ladetyp || '–'}<br>` +
       (c.preis_aktuell ? `Preis: ${parseFloat(c.preis_aktuell).toFixed(3)} €/kWh<br>` : '') +
-      `${c.distanzKm} km entfernt`;
-    L.marker([c.lat, c.lng], {icon}).addTo(map).bindPopup(popup);
+      adhocStr + roamingStr +
+      `${c.distanzKm} km entfernt` +
+      (c._locationId && !summary ? `<br><span style="color:#E32028;font-weight:600">→ Preise werden unten angezeigt</span>` : '');
+    const marker = L.marker([c.lat, c.lng], {icon}).addTo(map).bindPopup(popup);
+    if (c._locationId) {
+      marker.on('click', () => selectStation(c));
+      markersByLocationId[c._locationId] = { marker, comp: c };
+    }
   });
 
   // Legend
@@ -301,13 +402,20 @@ function initMap(st, comps, preise) {
   legend.addTo(map);
 }
 
+let _compListCache = [];
+
 function renderCompList(comps, preise) {
+  _compListCache = comps;
   const el = document.getElementById('compList');
   if (!comps.length) return;
   const ownHPCPrice = preise && preise.HPC ? parseFloat(preise.HPC) : null;
 
-  el.innerHTML = comps.slice(0, 20).map(c => {
-    const price = parseFloat(c.preis_aktuell || 0);
+  el.innerHTML = comps.slice(0, 20).map((c, idx) => {
+    const summary = c._locationId ? stationPriceSummaries[c._locationId] : null;
+    const usingMedian = summary && summary.adhocPrice == null && summary.medianRoaming != null;
+    const price = summary
+      ? (summary.adhocPrice != null ? summary.adhocPrice : summary.medianRoaming)
+      : parseFloat(c.preis_aktuell || 0);
     let pillClass = 'pill-parity', pillText = '≈';
     if (ownHPCPrice && price) {
       const d = (price - ownHPCPrice) / ownHPCPrice * 100;
@@ -315,8 +423,9 @@ function renderCompList(comps, preise) {
       else if (d < -5) { pillClass = 'pill-expensive'; pillText = `${d.toFixed(0)}%`; }
       else { pillText = `±${Math.abs(d).toFixed(0)}%`; }
     }
-    const priceStr = price ? `${price.toFixed(3)} €/kWh` : '–';
-    return `<div class="comp-item">
+    const priceStr = price != null ? `${price.toFixed(3)} €/kWh${usingMedian ? ' (Median)' : ''}` : (c._locationId && !summary ? 'lädt…' : '–');
+    const selectable = c._locationId ? ' selectable' : '';
+    return `<div class="comp-item${selectable}" ${c._locationId ? `onclick="selectStation(_compListCache[${idx}])"` : ''} data-loc="${c._locationId || ''}">
       <div>
         <div class="comp-name">${c.betreiber || 'Unbekannt'}</div>
         <div class="comp-meta">${c.ladetyp || ''} · ${c.distanzKm} km</div>
@@ -380,6 +489,62 @@ function renderPriceRec(rec) {
     meta.style.display = 'block';
     meta.textContent = `Berechnet: ${d.toLocaleDateString('de-DE')} ${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}`;
   }
+}
+
+// ── Detailinformationen zu den Preisen (API-Modus) ──
+window.selectStation = async function(c) {
+  if (!c || !c._locationId) return;
+  selectedLocationId = c._locationId;
+  document.querySelectorAll('.comp-item').forEach(el => el.classList.toggle('selected', el.dataset.loc === c._locationId));
+
+  const body = document.getElementById('priceDetailBody');
+  body.innerHTML = `<p class="status-hint">Lade Preise für <strong>${c.betreiber || c._locationName || 'Standort'}</strong> …</p>`;
+
+  const token = ELMI_ECO.getEcoToken();
+  if (!token) {
+    body.innerHTML = `<p class="status-hint">Kein eco-movement API-Token hinterlegt. Bitte in <a href="settings.html" style="color:var(--accent)">Settings</a> eintragen.</p>`;
+    return;
+  }
+  try {
+    const result = await ELMI_ECO.getStationPrices(token, c._locationId, {
+      onProgress: msg => { body.innerHTML = `<p class="status-hint">${msg}</p>`; }
+    });
+    renderPriceDetail(c, result);
+  } catch (e) {
+    body.innerHTML = `<p class="status-hint">⚠ Fehler beim Laden der Preise: ${e.message}</p>`;
+  }
+};
+
+function priceTableColgroup() {
+  return '<colgroup><col class="pd-col-anbieter"><col class="pd-col-produkt"><col class="pd-col-preis"></colgroup>';
+}
+
+function renderPriceDetail(c, result) {
+  const body = document.getElementById('priceDetailBody');
+  const { adhoc, msp, sub } = ELMI_ECO.groupStationPrices(result.items);
+  const roamingPrices = msp.map(ELMI_ECO.energyPriceOf).filter(p => p != null);
+  const medianRoaming = ELMI_ECO.medianOf(roamingPrices);
+  const adhocPrice = adhoc.length ? ELMI_ECO.energyPriceOf(adhoc[0]) : null;
+
+  const groupTable = (items, title) => {
+    if (!items.length) return '';
+    return `<div class="pd-group-label">${title} (${items.length})</div>
+      <table class="pd-table">${priceTableColgroup()}<thead><tr><th>Anbieter</th><th>Produkt</th><th>€/kWh</th></tr></thead><tbody>
+      ${items.map(it => `<tr><td>${it.partner || ''}</td><td>${(it.product && it.product.name) || ''}</td><td>${ELMI_ECO.energyPriceOf(it) != null ? ELMI_ECO.energyPriceOf(it).toFixed(4) : '–'}</td></tr>`).join('')}
+      </tbody></table>`;
+  };
+
+  body.innerHTML = `
+    <p style="font-size:13px;margin-bottom:12px"><strong>${c.betreiber || c._locationName || 'Standort'}</strong> · ${c.distanzKm} km entfernt · Quelle: ${result.source === 'cache' ? 'Cache' : 'Live'} (${new Date(result.fetchedAt).toLocaleString('de-DE')})</p>
+    <div id="priceDetailSummary">
+      <div class="pd-kpi"><div class="pd-kpi-label">Ad-hoc-Preis</div><div class="pd-kpi-value">${adhocPrice != null ? adhocPrice.toFixed(3) + ' €/kWh' : '–'}</div></div>
+      <div class="pd-kpi"><div class="pd-kpi-label">Median Roaming-Preis</div><div class="pd-kpi-value">${medianRoaming != null ? medianRoaming.toFixed(3) + ' €/kWh' : '–'} </div><div class="kpi-sub">${roamingPrices.length} Tarife</div></div>
+    </div>
+    ${groupTable(adhoc, 'Ad-hoc')}
+    ${groupTable(sub, 'CPO-Abo')}
+    ${groupTable(msp, 'Roaming / MSP')}
+    ${!result.items.length ? '<p class="status-hint">Keine Preisdaten für diesen Standort gefunden.</p>' : ''}
+  `;
 }
 
 init().catch(console.error);

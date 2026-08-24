@@ -67,6 +67,23 @@
     footer { text-align: center; margin-top: 40px; font-size: 12px; color: #9A9AA5; }
     .progress-bar { height: 4px; background: rgba(109,42,153,.2); border-radius: 2px; margin-top: 10px; overflow: hidden; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, #6D2A99, #9B59B6); border-radius: 2px; transition: width .3s; }
+    .ds-toggle { display: flex; gap: 0; background: #F4F4F6; border: 1px solid #E7E7EB; border-radius: 10px; padding: 4px; margin-bottom: 12px; }
+    .ds-toggle button { flex: 1; padding: 10px 16px; border: 2px solid transparent; background: transparent; border-radius: 7px; cursor: pointer; font: 700 13px 'Maven Pro', system-ui, sans-serif; color: #6B6B76; transition: all .15s; }
+    .ds-toggle button:hover:not(.active) { background: rgba(109,42,153,.08); color: #6D2A99; }
+    .ds-toggle button.active { background: linear-gradient(135deg, #6D2A99, #9B59B6); color: #FFFFFF; box-shadow: 0 2px 8px rgba(109,42,153,.35); }
+    .ds-toggle button.active::before { content: "✓ "; }
+    .ds-active-label { font-size: 12px; color: #6B6B76; margin-bottom: 20px; }
+    .ds-active-label strong { color: #6D2A99; }
+    .api-only, .own-only { }
+    .api-only[data-hidden], .own-only[data-hidden] { display: none !important; }
+    .token-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 14px; }
+    .token-row .field { flex: 1; min-width: 220px; }
+    input[type=password] { background: #F4F4F6; border: 1px solid #D1D1D8; border-radius: 8px; color: #0E0E14; font: 400 14px 'Maven Pro', system-ui, sans-serif; padding: 9px 12px; width: 100%; }
+    .ausl-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+    .ausl-row .field { min-width: 180px; }
+    .period-btns { display: flex; gap: 6px; }
+    .period-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid #D1D1D8; background: #FFFFFF; color: #4A4A55; font: 600 12px 'Maven Pro', system-ui, sans-serif; cursor: pointer; }
+    .period-btn.active { background: #6D2A99; border-color: #6D2A99; color: #fff; }
   </style>
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="elmi-brand.css">
@@ -90,6 +107,13 @@
 
   <div class="page-wrap">
     <h1>⚙️ Settings</h1>
+
+    <!-- Datenquellen-Umschalter -->
+    <div class="ds-toggle">
+      <button id="ds-btn-api" onclick="setDataSource('api')">🌐 API Data</button>
+      <button id="ds-btn-own" onclick="setDataSource('own')">📊 Own Analysis</button>
+    </div>
+    <div class="ds-active-label">Aktive Datenquelle: <strong id="ds-active-text">–</strong></div>
 
     <!-- 1.1 Preise -->
     <div class="section">
@@ -203,12 +227,52 @@
     <!-- 1.5 Datenquelle-Status -->
     <div class="section">
       <div class="section-title">🌐 Wettbewerberdaten</div>
+
+      <div class="api-only" id="eco-token-row">
+        <div class="token-row">
+          <div class="field">
+            <label>eco-movement API-Token</label>
+            <input type="password" id="eco-token" placeholder="Token einfügen">
+          </div>
+          <button class="btn btn-secondary" onclick="saveEcoToken()">💾 Token speichern</button>
+        </div>
+        <div style="font-size:11px;color:#9A9AA5;margin-bottom:14px">Token wird nur für diese Browser-Sitzung gespeichert (sessionStorage), nicht im Repo.</div>
+      </div>
+
       <div class="status-strip">
         <div class="dot" id="wett-dot"></div>
         <span id="wett-status">Wird geladen …</span>
       </div>
       <div class="btn-row">
         <button class="btn btn-secondary" id="btn-refresh" onclick="refreshWettbewerber()">🔄 Jetzt aktualisieren</button>
+      </div>
+    </div>
+
+    <!-- 1.6 Auslastungsdaten (API-Modus) -->
+    <div class="section api-only" id="ausl-api-section">
+      <div class="section-title">⚡ Auslastungsdaten (eigene Station, API)</div>
+      <div class="status-strip">
+        <div class="dot" id="ausl-dot"></div>
+        <span id="ausl-status">Noch keine Auslastungsdaten abgerufen.</span>
+      </div>
+      <div class="ausl-row" style="margin-top:14px">
+        <div class="field">
+          <label>Standort (Seriennummer)</label>
+          <select id="ausl-device"></select>
+        </div>
+        <div class="field">
+          <label>Dashboard-Key</label>
+          <input type="password" id="ausl-key" placeholder="Dashboard-Key einmalig">
+        </div>
+        <div class="field">
+          <label>Zeitraum</label>
+          <div class="period-btns">
+            <button class="period-btn active" data-period="7d" onclick="setAuslPeriod('7d')">Letzte 7 Tage</button>
+            <button class="period-btn" data-period="month" onclick="setAuslPeriod('month')">Letzter Monat</button>
+            <button class="period-btn" data-period="year" onclick="setAuslPeriod('year')">Letztes Jahr</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="ausl-refresh-btn" onclick="refreshAuslastungApi()">🔄 Refresh</button>
       </div>
     </div>
 
@@ -234,6 +298,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="js/db.js"></script>
+  <script src="js/eco-api.js"></script>
   <script>
   (function(){
     const lang = ELMI_DB.getLang();
@@ -250,7 +315,143 @@
       settings = await ELMI_DB.loadSettings();
       fillForm(settings);
       await loadUploadList();
+      applyDataSourceUi(settings.dataSource || 'own');
       await updateWettStatus();
+      initAuslastungApiUi();
+    }
+
+    // ══════════════════════════ Datenquellen-Umschalter ══════════════════════════
+    window.setDataSource = async function(ds) {
+      settings.dataSource = ds;
+      await ELMI_DB.saveSettings(settings);
+      applyDataSourceUi(ds);
+      await updateWettStatus();
+    };
+
+    function applyDataSourceUi(ds) {
+      document.getElementById('ds-btn-api').classList.toggle('active', ds === 'api');
+      document.getElementById('ds-btn-own').classList.toggle('active', ds === 'own');
+      document.getElementById('ds-active-text').textContent = ds === 'api' ? 'API Data (eco-movement)' : 'Own Analysis (eigene Recherche)';
+      document.querySelectorAll('.api-only').forEach(el => { if (ds === 'api') el.removeAttribute('data-hidden'); else el.setAttribute('data-hidden', '1'); });
+      document.querySelectorAll('.own-only').forEach(el => { if (ds === 'own') el.removeAttribute('data-hidden'); else el.setAttribute('data-hidden', '1'); });
+    }
+
+    window.saveEcoToken = function() {
+      const val = document.getElementById('eco-token').value.trim();
+      if (!val) return;
+      ELMI_ECO.setEcoToken(val);
+      showToast('✓ Token gespeichert (nur diese Sitzung)');
+      updateWettStatus(true);
+    };
+
+    // ══════════════════════════ Auslastungsdaten (API) ══════════════════════════
+    const AUSL_WORKER_BASE = 'https://elmi-device-analysis.wangyuchen84.workers.dev';
+    const AUSL_KEY_SS = 'elmi.apiKey'; // gleicher Key wie Operating Performance – wird dort ggf. schon gesetzt
+    const AUSL_DEVICES = ['A111120000001251128001','A131120000001251225002','A131120000001251225004','A131120000001251225005','A131120000002251225003'];
+    let auslPeriod = '7d';
+
+    function initAuslastungApiUi() {
+      const sel = document.getElementById('ausl-device');
+      sel.innerHTML = AUSL_DEVICES.map(sn => `<option value="${sn}">${sn}</option>`).join('');
+      const savedKey = sessionStorage.getItem(AUSL_KEY_SS);
+      if (savedKey) document.getElementById('ausl-key').value = savedKey;
+      renderAuslStatusFromStore();
+    }
+
+    async function renderAuslStatusFromStore() {
+      const rec = await ELMI_DB.dbGet('ownUtilisationApi', 'main');
+      if (rec) renderAuslStatus(rec);
+    }
+
+    window.setAuslPeriod = function(p) {
+      auslPeriod = p;
+      document.querySelectorAll('.period-btn').forEach(b => b.classList.toggle('active', b.dataset.period === p));
+    };
+
+    function getAuslPeriodRange() {
+      const now = new Date();
+      if (auslPeriod === '7d') {
+        const from = new Date(now); from.setDate(from.getDate() - 7);
+        return { from, to: now };
+      }
+      if (auslPeriod === 'month') {
+        const to = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+        const from = new Date(to.getFullYear(), to.getMonth(), 1, 0, 0, 0);
+        return { from, to };
+      }
+      const to = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+      const from = new Date(now.getFullYear() - 1, 0, 1, 0, 0, 0);
+      return { from, to };
+    }
+
+    // Best-effort: Feldnamen im Response sind nicht dokumentiert bekannt,
+    // daher tolerante Erkennung analog zur Excel-Spaltenerkennung oben.
+    function computeUtilizationFromRows(rows) {
+      if (!rows || !rows.length) return null;
+      const keys = Object.keys(rows[0] || {});
+      const findKey = (...cands) => keys.find(k => cands.some(c => k.toLowerCase().includes(c)));
+      const statusKey = findKey('status', 'state');
+      const powerKey  = findKey('power', 'leistung', 'kw');
+      const energyKey = findKey('energy', 'energie', 'kwh');
+      if (statusKey) {
+        const chargingWords = ['charging', 'laden', 'active', 'in_use'];
+        const n = rows.filter(r => chargingWords.some(w => String(r[statusKey] || '').toLowerCase().includes(w))).length;
+        return Math.round((n / rows.length) * 1000) / 10;
+      }
+      if (energyKey && powerKey) {
+        const totalEnergy = rows.reduce((s, r) => s + (parseFloat(r[energyKey]) || 0), 0);
+        const maxPower = Math.max(...rows.map(r => parseFloat(r[powerKey]) || 0), 1);
+        const theoretical = maxPower * rows.length;
+        return theoretical > 0 ? Math.round(Math.min(100, (totalEnergy / theoretical) * 100) * 10) / 10 : null;
+      }
+      return null;
+    }
+
+    window.refreshAuslastungApi = async function() {
+      const dot = document.getElementById('ausl-dot');
+      const status = document.getElementById('ausl-status');
+      const btn = document.getElementById('ausl-refresh-btn');
+      const sn = document.getElementById('ausl-device').value;
+      const key = document.getElementById('ausl-key').value.trim();
+      if (!key) { status.textContent = 'Bitte Dashboard-Key eingeben.'; dot.className = 'dot'; return; }
+      if (!sn)  { status.textContent = 'Bitte Standort auswählen.'; dot.className = 'dot'; return; }
+      sessionStorage.setItem(AUSL_KEY_SS, key);
+      btn.disabled = true;
+      dot.className = 'dot';
+      status.textContent = 'Verbinde mit Server…';
+      try {
+        const { from, to } = getAuslPeriodRange();
+        const url = AUSL_WORKER_BASE + '/device-analysis'
+          + '?sn=' + encodeURIComponent(sn)
+          + '&startTime=' + encodeURIComponent(from.toISOString())
+          + '&endTime=' + encodeURIComponent(to.toISOString());
+        const res = await fetch(url, { headers: { 'X-ELMI-Key': key } });
+        let body = null; try { body = await res.json(); } catch(e) {}
+        if (res.status === 401) throw new Error('Dashboard-Key fehlt oder ist ungültig');
+        if (!res.ok) throw new Error((body && body.msg) || ('HTTP ' + res.status));
+        const rows = (body && body.rows) || [];
+        const util = computeUtilizationFromRows(rows);
+        const record = { id: 'main', sn, period: auslPeriod, from: from.toISOString(), to: to.toISOString(), rowCount: rows.length, util, fetchedAt: new Date().toISOString() };
+        await ELMI_DB.dbPut('ownUtilisationApi', record);
+        renderAuslStatus(record);
+      } catch(e) {
+        dot.className = 'dot';
+        const hint = /localhost|127\.0\.0\.1/.test(location.hostname) ? ' (Hinweis: lokal evtl. durch CORS blockiert – Worker erlaubt nur die Live-Domain)' : '';
+        status.textContent = 'Fehler: ' + e.message + hint;
+      }
+      btn.disabled = false;
+    };
+
+    function renderAuslStatus(rec) {
+      const dot = document.getElementById('ausl-dot');
+      const status = document.getElementById('ausl-status');
+      if (rec.util != null) {
+        dot.className = 'dot ok';
+        status.textContent = `${rec.sn} · Auslastung: ${rec.util.toFixed(1)} % · ${rec.rowCount} Datensätze · Abgerufen: ${new Date(rec.fetchedAt).toLocaleString('de-DE')}`;
+      } else {
+        dot.className = 'dot warn';
+        status.textContent = `${rec.sn} · ${rec.rowCount} Datensätze geladen, Auslastung nicht berechenbar (unbekanntes Antwortformat)`;
+      }
     }
 
     function fillForm(s) {
@@ -366,9 +567,29 @@
       const btn  = document.getElementById('btn-refresh');
       btn.disabled = true;
       text.textContent = 'Wird geladen …';
+
+      if (settings.dataSource === 'api') {
+        const savedToken = ELMI_ECO.getEcoToken();
+        if (savedToken) document.getElementById('eco-token').value = savedToken;
+      }
+
       try {
-        const { meta, source } = await ELMI_DB.loadWettbewerberDaten(forceRefresh);
-        if (source === 'network' && meta) {
+        const { standorte, meta, source, apiError } = await ELMI_DB.loadCompetitorData(settings, forceRefresh);
+        if (settings.dataSource === 'api') {
+          if (apiError === 'NOKEY') {
+            dot.className = 'dot';
+            text.textContent = 'Kein eco-movement API-Token hinterlegt – bitte oben eingeben.';
+          } else if (source === 'network' && meta) {
+            dot.className = 'dot ok';
+            text.textContent = `eco-movement API · ${meta.anzahl_standorte} Standorte geladen (Token-Scope) · abgerufen ${meta.analyse_datum}`;
+          } else if (source === 'cache' && meta) {
+            dot.className = 'dot warn';
+            text.textContent = `eco-movement API (Cache) · ${standorte.length} Standorte`;
+          } else {
+            dot.className = 'dot';
+            text.textContent = 'Keine API-Standorte verfügbar' + (apiError ? ` (${apiError})` : '');
+          }
+        } else if (source === 'network' && meta) {
           dot.className = 'dot ok';
           text.textContent = `Stand: ${meta.analyse_datum} · Register: ${meta.register_datum} · ${(meta.anzahl_standorte||0).toLocaleString('de')} Standorte · ${meta.anzahl_betreiber_tier_a || 0} Betreiber (Tier A) mit Preisdaten`;
         } else if (source === 'cache' && meta) {

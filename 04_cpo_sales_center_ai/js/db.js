@@ -12,7 +12,7 @@
    ========================================================= */
 
 const DB_NAME    = 'elmi_cpo_sales';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let _db = null;
 
@@ -36,6 +36,13 @@ function openDB() {
         db.createObjectStore('auslastungsKennzahlen', { keyPath: 'key' });
       if (!db.objectStoreNames.contains('wettbewerberMeta'))
         db.createObjectStore('wettbewerberMeta', { keyPath: 'id' });
+      // v2: eco-movement API Anbindung
+      if (!db.objectStoreNames.contains('ecoLocations'))
+        db.createObjectStore('ecoLocations', { keyPath: '_idx', autoIncrement: true });
+      if (!db.objectStoreNames.contains('apiPriceCache'))
+        db.createObjectStore('apiPriceCache', { keyPath: 'location_id' });
+      if (!db.objectStoreNames.contains('ownUtilisationApi'))
+        db.createObjectStore('ownUtilisationApi', { keyPath: 'id' });
     };
     req.onsuccess = e => { _db = e.target.result; resolve(_db); };
     req.onerror   = e => reject(e.target.error);
@@ -98,6 +105,7 @@ async function dbBulkPut(store, records) {
 const SETTINGS_ID = 'main';
 const DEFAULT_SETTINGS = {
   id: SETTINGS_ID,
+  dataSource: 'own', // 'own' = wettbewerber_analyse.json, 'api' = eco-movement API
   preise: { AC: 0.45, DC: 0.55, HPC: 0.65 },
   standort: { strasse: '', hausnummer: '', plz: '', ort: '', land: 'Deutschland', lat: null, lng: null, landkreis: '' },
   radiusKm: 10,
@@ -212,6 +220,53 @@ async function loadWettbewerberDaten(forceRefresh = false) {
   return { standorte: [], betreiber: [], kennzahlen: [], meta: null, source: 'none', fetchError };
 }
 
+/* ---- Wettbewerberdaten: Own Analysis ODER eco-movement API, je nach settings.dataSource ----
+   Rueckgabeform identisch zu loadWettbewerberDaten, damit alle Seiten nur den
+   Funktionsaufruf tauschen muessen (joinWettbewerber() bleibt unveraendert).
+   Im API-Modus ist "betreiber" bewusst leer: eco-movement liefert keine
+   Preise pro Betreiber vorab, sondern nur pro Standort auf Anfrage
+   (siehe ELMI_ECO.getStationPrices). preis_aktuell bleibt daher fuer
+   API-Standorte in den comps leer, bis der Nutzer den Standort auswaehlt. */
+async function loadCompetitorData(settings, forceRefresh = false) {
+  if (settings.dataSource !== 'api') {
+    return await loadWettbewerberDaten(forceRefresh);
+  }
+  if (!window.ELMI_ECO) {
+    return { standorte: [], betreiber: [], meta: null, source: 'none', apiError: 'NOMODULE' };
+  }
+  const token = window.ELMI_ECO.getEcoToken();
+  if (!token) {
+    const cached = await dbGetAll('ecoLocations');
+    if (cached.length) return { standorte: cached, betreiber: [], meta: { id: 'main', quelle: 'eco-movement API (Cache)' }, source: 'cache' };
+    return { standorte: [], betreiber: [], meta: null, source: 'none', apiError: 'NOKEY' };
+  }
+  try {
+    let standorte;
+    if (!forceRefresh) {
+      const cached = await dbGetAll('ecoLocations');
+      if (cached.length) standorte = cached;
+    }
+    if (!standorte) {
+      standorte = await window.ELMI_ECO.fetchEcoLocations(token);
+      await dbClear('ecoLocations');
+      await dbBulkPut('ecoLocations', standorte.map((s, i) => ({ ...s, _idx: i + 1 })));
+    }
+    const meta = {
+      id: 'main',
+      analyse_datum: new Date().toISOString().slice(0, 10),
+      anzahl_standorte: standorte.length,
+      quelle: 'eco-movement API'
+    };
+    return { standorte, betreiber: [], meta, source: 'network' };
+  } catch (e) {
+    const cached = await dbGetAll('ecoLocations');
+    if (cached.length) {
+      return { standorte: cached, betreiber: [], meta: { id: 'main', quelle: 'eco-movement API (Cache)' }, source: 'cache', fetchError: e };
+    }
+    return { standorte: [], betreiber: [], meta: null, source: 'none', fetchError: e };
+  }
+}
+
 /* ---- Geo helpers ---- */
 
 function haversineKm(lat1, lng1, lat2, lng2) {
@@ -285,7 +340,7 @@ function applyLangButtons(lang) {
 window.ELMI_DB = {
   openDB, dbGet, dbPut, dbGetAll, dbClear, dbBulkPut,
   loadSettings, saveSettings,
-  loadWettbewerberDaten,
+  loadWettbewerberDaten, loadCompetitorData,
   haversineKm, geocode, joinWettbewerber,
   getLang, setLang, applyLangButtons,
   DEFAULT_SETTINGS

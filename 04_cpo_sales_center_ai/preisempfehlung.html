@@ -7,7 +7,9 @@
   <title>⚡ ELMI CPO · Preisempfehlung</title>
   <link rel="icon" type="image/png" href="/elmi-ai/assets/elmi-icon.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="js/db.js"></script>
+  <script src="js/eco-api.js"></script>
   <style>
     :root {
       --green: var(--success);
@@ -163,6 +165,7 @@
   <div class="tabs">
     <button class="tab active" onclick="switchTab('params')" id="tab-params">⚙️ Parameter</button>
     <button class="tab" onclick="switchTab('output')" id="tab-output">🎯 Empfehlung</button>
+    <button class="tab" onclick="switchTab('dynamic')" id="tab-dynamic">📈 Dynamische Preisempfehlung</button>
     <button class="tab" onclick="switchTab('pbi')" id="tab-pbi">⚡ Auslastung (Power-BI)</button>
   </div>
 
@@ -315,6 +318,33 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════
+       TAB 2b: DYNAMISCHE PREISEMPFEHLUNG
+       Statisch: Marktmittelwert ± 10 Cent je nach historischer Auslastung
+  ════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-dynamic">
+    <div class="card">
+      <div class="card-header"><span class="card-title">📈 Dynamische Preisempfehlung</span></div>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:14px">
+        Einfaches Modell: Marktmittelwert je Ladetyp, bei hoher historischer Auslastung (≥ Auslastungsschwelle aus Parameter-Tab) +10 Ct/kWh, bei geringer Auslastung −10 Ct/kWh.
+      </p>
+      <div class="kpi-grid" id="dynKpiGrid">
+        <div class="kpi-box"><div class="kpi-label">AC</div><div class="kpi-value" id="dyn-ac">–</div><div class="kpi-sub" id="dyn-ac-s"></div></div>
+        <div class="kpi-box"><div class="kpi-label">DC</div><div class="kpi-value" id="dyn-dc">–</div><div class="kpi-sub" id="dyn-dc-s"></div></div>
+        <div class="kpi-box"><div class="kpi-label">HPC</div><div class="kpi-value" id="dyn-hpc">–</div><div class="kpi-sub" id="dyn-hpc-s"></div></div>
+      </div>
+      <button class="btn-secondary" onclick="renderDynamicRec()">🔄 Neu berechnen</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">📊 Tagesverlauf</span></div>
+      <p style="color:var(--text-muted);font-size:11px;margin-bottom:10px">
+        Illustrative Modellkurve (keine gemessenen Stundenwerte): typische Tagesnachfrage skaliert auf den berechneten Preis je Ladetyp.
+      </p>
+      <canvas id="dynDayChart" height="90"></canvas>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
        TAB 3: POWER-BI AUSLASTUNG
   ════════════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-pbi">
@@ -347,6 +377,7 @@ function switchTab(id) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
   document.getElementById('tab-' + id).classList.add('active');
+  if (id === 'dynamic') renderDynamicRec();
 }
 
 // ─── State ───
@@ -681,6 +712,90 @@ function renderStratChips(text){
   else chips.push({t:'⚖️ Ausgeglichen',c:'chip-b'});
   ['ac','dc','hpc'].forEach(t=>{const r=formulaResult[t];if(!r.marketAvg)return;const d=(r.recommended-r.marketAvg)/r.marketAvg*100;if(d>5)chips.push({t:t.toUpperCase()+' Premium',c:'chip-a'});if(d<-5)chips.push({t:t.toUpperCase()+' Wachstum',c:'chip-d'})});
   document.getElementById('stratChips').innerHTML=chips.map(c=>`<span class="chip ${c.c}">${c.t}</span>`).join('');
+}
+
+// ─── Dynamische Preisempfehlung (statisch: Marktmittel ± 10 Ct nach Auslastung) ───
+let dynChartInstance = null;
+
+window.renderDynamicRec = async function() {
+  const s = _rawSettings || await ELMI_DB.loadSettings();
+  let utilOverride = null;
+  if (s.dataSource === 'api') {
+    const rec = await ELMI_DB.dbGet('ownUtilisationApi', 'main');
+    if (rec && rec.util != null) utilOverride = rec.util;
+  }
+  const schwelle = settingsData.auslastungSchwelle || 60;
+  const types = ['ac', 'dc', 'hpc'];
+  const results = {};
+  types.forEach(t => {
+    const mkt  = competitorData[t + 'Avg'];
+    const util = utilOverride != null ? utilOverride : (stationData[t] && stationData[t].util);
+    const base = mkt != null ? mkt : (settingsData['price' + t.toUpperCase()] || null);
+    let rec = base, adj = 0;
+    if (base != null && util != null) {
+      adj = util >= schwelle ? 0.10 : -0.10;
+      rec = base + adj;
+    }
+    results[t] = { base, util, adj, rec };
+  });
+
+  types.forEach(t => {
+    const r = results[t];
+    const el  = document.getElementById('dyn-' + t);
+    const sub = document.getElementById('dyn-' + t + '-s');
+    if (r.rec != null) {
+      el.textContent = r.rec.toFixed(3) + ' €';
+      sub.textContent = `Basis ${r.base.toFixed(3)} € ${r.adj > 0 ? '+' : r.adj < 0 ? '−' : '±'} ${Math.abs(r.adj).toFixed(2)} € · Auslastung ${r.util != null ? r.util.toFixed(1) + ' %' : 'k.A.'}`;
+    } else {
+      el.textContent = '–';
+      sub.textContent = r.base == null ? 'Kein Marktpreis verfügbar' : 'Keine Auslastungsdaten verfügbar';
+    }
+  });
+
+  renderDayChart(results);
+};
+
+// Einfache Glockenkurve: Peak ca. 14 Uhr, Minimum nachts — reine Modellkurve,
+// keine gemessenen Stundenwerte (die App hat keine stündliche Auflösung).
+function dayShape(hour) {
+  const x = (hour - 14) / 6;
+  return Math.max(0.25, Math.exp(-x * x / 2));
+}
+
+function renderDayChart(results) {
+  const canvas = document.getElementById('dynDayChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+  const hours = Array.from({ length: 24 }, (_, h) => h);
+  const shape = hours.map(dayShape);
+  const shapeAvg = shape.reduce((a, b) => a + b, 0) / shape.length;
+  const colors = { ac: '#58a6ff', dc: '#f7c325', hpc: '#ff7b72' };
+
+  const datasets = ['ac', 'dc', 'hpc']
+    .filter(t => results[t].rec != null)
+    .map(t => ({
+      label: t.toUpperCase(),
+      data: shape.map(v => Math.round(results[t].rec * (v / shapeAvg) * 1000) / 1000),
+      borderColor: colors[t],
+      backgroundColor: colors[t] + '22',
+      tension: .35,
+      pointRadius: 0,
+      borderWidth: 2
+    }));
+
+  if (dynChartInstance) dynChartInstance.destroy();
+  if (!datasets.length) return;
+  dynChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: { labels: hours.map(h => h + ':00'), datasets },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { color: '#8b949e' } } },
+      scales: {
+        x: { ticks: { color: '#8b949e', maxTicksLimit: 12 }, grid: { display: false } },
+        y: { ticks: { color: '#8b949e' }, title: { display: true, text: '€/kWh (Modell)', color: '#8b949e' } }
+      }
+    }
+  });
 }
 
 // ─── Init ───
