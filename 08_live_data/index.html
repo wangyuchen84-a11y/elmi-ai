@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ ELMI Live Data</title>
+  <link rel="icon" type="image/png" href="/elmi-ai/assets/elmi-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    :root {
+      --elmi-orange:     #F39A3A;
+      --elmi-tangerine:  #EC6A2A;
+      --elmi-red:        #E32028;
+      --elmi-magenta:    #B5188B;
+      --elmi-purple:     #6D2A99;
+      --elmi-gradient:   linear-gradient(90deg, #F39A3A 0%, #EC6A2A 22%, #E32028 48%, #B5188B 78%, #6D2A99 100%);
+      --elmi-accent:     #E32028;
+
+      --neutral-0:   #FFFFFF;
+      --neutral-50:  #FAFAFB;
+      --neutral-100: #F4F4F6;
+      --neutral-200: #E7E7EB;
+      --neutral-300: #D1D1D8;
+      --neutral-400: #9A9AA5;
+      --neutral-500: #6B6B76;
+      --neutral-600: #4A4A55;
+      --neutral-700: #2E2E36;
+      --neutral-800: #1B1B22;
+      --neutral-900: #0E0E14;
+
+      --fg1: var(--neutral-900);
+      --fg2: var(--neutral-600);
+      --fg3: var(--neutral-400);
+      --bg1: var(--neutral-0);
+      --bg2: var(--neutral-50);
+      --bg3: var(--neutral-100);
+      --border-1: var(--neutral-200);
+      --border-2: var(--neutral-300);
+
+      --font-body: "Maven Pro", system-ui, sans-serif;
+
+      --radius-sm:   8px;
+      --radius-md:   14px;
+      --radius-lg:   22px;
+      --radius-pill: 999px;
+
+      --shadow-1: 0 1px 2px rgba(14,14,20,.06);
+      --shadow-2: 0 4px 12px rgba(14,14,20,.08);
+
+      --ease-out: cubic-bezier(.22,1,.36,1);
+
+      --green: #1F9D55;
+      --grey:  var(--neutral-400);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg2);
+      color: var(--fg1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+
+    .appbar {
+      width: 100%;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-1);
+    }
+    .appbar-top {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 28px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+    .appbar-meta .title { font-size: 14px; font-weight: 700; color: var(--fg1); }
+    .appbar-meta .sub { font-size: 12px; color: var(--fg2); }
+    .gbar { height: 3px; background: var(--elmi-gradient); }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: var(--neutral-100);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius-pill);
+      color: var(--fg2);
+      font: 13px/1 var(--font-body);
+      font-weight: 600;
+      text-decoration: none;
+      transition: background .2s, color .2s;
+    }
+    .back-btn:hover { background: var(--neutral-200); color: var(--fg1); }
+
+    .lang-toggle { display:flex; align-items:center; gap:2px; padding:3px; border:1px solid var(--border-1); border-radius:var(--radius-pill); background:#fff; }
+    .lang-btn { background:transparent; border:0; border-radius:var(--radius-pill); padding:6px 13px; cursor:pointer; font:700 12px/1 var(--font-body); color:var(--fg2); letter-spacing:.04em; transition:background .14s,color .14s; }
+    .lang-btn:hover { color:var(--fg1); }
+    .lang-btn.active { background:var(--neutral-900); color:#fff; }
+    .ab-brand { display:flex; align-items:center; gap:11px; text-decoration:none; }
+    .brand-logo { height:26px; display:block; }
+    .brand-div { width:1px; height:22px; background:var(--border-1); display:block; }
+    .brand-ai { font-family:var(--font-body); font-weight:800; font-size:18px; letter-spacing:.02em; color:var(--fg1); }
+
+    .content {
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 32px 28px 80px;
+      flex: 1;
+    }
+
+    /* ── Connection status ── */
+    .status-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 10px 16px; border-radius: var(--radius-md);
+      background: var(--bg1); border: 1px solid var(--border-1);
+      font-size: 12.5px; color: var(--fg2); margin-bottom: 20px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--grey); flex-shrink: 0; }
+    .dot.ok { background: var(--green); box-shadow: 0 0 0 3px rgba(31,157,85,.15); }
+    .status-sep { color: var(--border-2); }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--bg1); border: 1px solid var(--border-1);
+      border-radius: var(--radius-lg); padding: 20px 22px; margin-bottom: 16px;
+      box-shadow: var(--shadow-1);
+    }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--fg2); display: flex; align-items: center; gap: 8px; }
+    .card-hint { font-size: 11.5px; color: var(--fg3); margin-bottom: 12px; }
+
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 20px; }
+
+    .kpi-grid { display: grid; gap: 10px; }
+    .kpi-box { background: var(--bg2); border: 1px solid var(--border-1); border-radius: var(--radius-sm); padding: 10px 13px; }
+    .kpi-label { font-size: 10.5px; color: var(--fg3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+    .kpi-value { font-size: 19px; font-weight: 700; font-family: 'JetBrains Mono', 'Courier New', monospace; color: var(--fg1); }
+    .kpi-value .unit { font-size: 12px; font-weight: 500; color: var(--fg3); margin-left: 3px; }
+    .kpi-value.stale { color: var(--fg3); }
+
+    .chart-wrap { position: relative; height: 320px; }
+    .empty-hint { text-align: center; padding: 60px 0; color: var(--fg3); font-size: 13px; }
+
+    .update-info { font-size: 11.5px; color: var(--fg3); margin: -8px 0 18px; }
+
+    footer { margin-top: 40px; font-size: 12px; color: var(--fg3); text-align: center; line-height: 1.6; }
+
+    @media (max-width: 700px) {
+      .appbar-top { padding: 10px 16px; flex-wrap: wrap; }
+      .content { padding: 24px 16px 60px; }
+      .stat-row { grid-template-columns: 1fr 1fr; }
+      .chart-wrap { height: 260px; }
+    }
+  </style>
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+
+  <header class="appbar">
+    <div class="appbar-top">
+      <a class="ab-brand" href="../"><img class="brand-logo" src="../assets/logo-elmi-gradient.png" alt="ELMI"><span class="brand-div"></span><span class="brand-ai">AI</span></a>
+      <div class="appbar-meta">
+        <div class="title">Live Data</div>
+        <div class="sub" id="subtitle-text">Live Standortdaten – Echtzeit-Dashboard per MQTT</div>
+      </div>
+      <div style="flex:1"></div>
+      <a class="back-btn" id="back-btn" href="../">← <span id="back-label">Zurück</span></a>
+      <div class="lang-toggle">
+        <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">DE</button>
+        <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+    <div class="gbar"></div>
+  </header>
+
+  <div class="content">
+
+    <div class="status-bar">
+      <div class="dot" id="conn-dot"></div>
+      <span id="conn-text">Verbinde...</span>
+      <span class="status-sep">·</span>
+      <span id="last-point-label">Letzter Datenpunkt:</span>&nbsp;<span id="last-point-time">–</span>
+      <span class="status-sep">·</span>
+      <span id="last-received-label">Empfangen:</span>&nbsp;<span id="last-received-time">–</span>
+    </div>
+
+    <div class="stat-row">
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header"><span class="card-title" id="card-nap-title">📡 NAP</span></div>
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <div class="kpi-label" id="lbl-nap-power">Leistung</div>
+            <div class="kpi-value" id="nap-power">–<span class="unit">kW</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header"><span class="card-title">🔌 AiO</span></div>
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <div class="kpi-label" id="lbl-inv-power">Leistung am Netzanschluss</div>
+            <div class="kpi-value" id="inverter-ac-power">–<span class="unit">kW</span></div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label" id="lbl-bat-power">Leistung der Batterie</div>
+            <div class="kpi-value" id="battery-power">–<span class="unit">kW</span></div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label" id="lbl-bat-soc">SOC der Batterie</div>
+            <div class="kpi-value" id="battery-soc">–<span class="unit">%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header"><span class="card-title" id="card-cp1-title">🔋 Ladepunkt 1</span></div>
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <div class="kpi-label">SOC</div>
+            <div class="kpi-value" id="ev-a-soc">–<span class="unit">%</span></div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label" id="lbl-cp1-power">Leistung</div>
+            <div class="kpi-value" id="ev-a-power">–<span class="unit">kW</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header"><span class="card-title" id="card-cp2-title">🔋 Ladepunkt 2</span></div>
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <div class="kpi-label">SOC</div>
+            <div class="kpi-value" id="ev-b-soc">–<span class="unit">%</span></div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label" id="lbl-cp2-power">Leistung</div>
+            <div class="kpi-value" id="ev-b-power">–<span class="unit">kW</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title" id="chart1-title">📊 NAP-/AC-Inverter-/PV-Leistung · SOC (letzte 24h)</span></div>
+      <p class="card-hint" id="chart-hint">Mit gedrückter linker Maustaste ein Rechteck aufziehen, um zu vergrößern. Klick ohne Ziehen setzt den Zoom zurück.</p>
+      <div class="chart-wrap">
+        <canvas id="power-chart"></canvas>
+      </div>
+      <div id="power-chart-empty" class="empty-hint" hidden>Noch keine Messdaten empfangen.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title" id="chart2-title">📊 Batterie-/Ladepunkt-Leistung · SOC (letzte 24h)</span></div>
+      <div class="chart-wrap">
+        <canvas id="ev-pv-chart"></canvas>
+      </div>
+      <div id="ev-pv-chart-empty" class="empty-hint" hidden>Noch keine Messdaten empfangen.</div>
+    </div>
+
+    <footer id="footer-text">
+      Daten werden per MQTT von einer lokalen Anlage übertragen (Snapshot alle 24h, Updates jede Minute). Kein direkter Zugriff auf die Anlage selbst.<br>
+      ELMI Power GmbH · Interne Nutzung
+    </footer>
+  </div>
+
+  <script>
+  // ─── i18n (gleiches Muster wie in allen anderen Modulen, elmi_lang in localStorage) ───
+  var STRINGS = {
+    de: {
+      back: 'Zurück', subtitle: 'Live Standortdaten – Echtzeit-Dashboard per MQTT',
+      connConnecting: 'Verbinde...', connConnected: 'Verbunden', connReconnecting: 'Verbinde erneut...', connClosed: 'Getrennt', connError: 'Fehler',
+      lastPoint: 'Letzter Datenpunkt:', lastReceived: 'Empfangen:',
+      napTitle: '📡 NAP', napPower: 'Leistung',
+      invPower: 'Leistung am Netzanschluss', batPower: 'Leistung der Batterie', batSoc: 'SOC der Batterie',
+      cp1Title: '🔋 Ladepunkt 1', cp2Title: '🔋 Ladepunkt 2', cpPower: 'Leistung',
+      chart1Title: '📊 NAP-/AC-Inverter-/PV-Leistung · SOC (letzte 24h)',
+      chart2Title: '📊 Batterie-/Ladepunkt-Leistung · SOC (letzte 24h)',
+      chartHint: 'Mit gedrückter linker Maustaste ein Rechteck aufziehen, um zu vergrößern. Klick ohne Ziehen setzt den Zoom zurück.',
+      emptyHint: 'Noch keine Messdaten empfangen.',
+      footer: 'Daten werden per MQTT von einer lokalen Anlage übertragen (Snapshot alle 24h, Updates jede Minute). Kein direkter Zugriff auf die Anlage selbst.<br>ELMI Power GmbH · Interne Nutzung'
+    },
+    en: {
+      back: 'Back', subtitle: 'Live site data – real-time MQTT dashboard',
+      connConnecting: 'Connecting...', connConnected: 'Connected', connReconnecting: 'Reconnecting...', connClosed: 'Disconnected', connError: 'Error',
+      lastPoint: 'Last data point:', lastReceived: 'Received:',
+      napTitle: '📡 NAP', napPower: 'Power',
+      invPower: 'Grid connection power', batPower: 'Battery power', batSoc: 'Battery SOC',
+      cp1Title: '🔋 Charge point 1', cp2Title: '🔋 Charge point 2', cpPower: 'Power',
+      chart1Title: '📊 NAP / AC inverter / PV power · SOC (last 24h)',
+      chart2Title: '📊 Battery / charge point power · SOC (last 24h)',
+      chartHint: 'Drag with the left mouse button to zoom into an area. Click without dragging resets the zoom.',
+      emptyHint: 'No measurement data received yet.',
+      footer: 'Data is transmitted via MQTT from a local site (snapshot every 24h, updates every minute). No direct access to the site itself.<br>ELMI Power GmbH · Internal use only'
+    }
+  };
+  var currentLang = localStorage.getItem('elmi_lang') || 'de';
+  var lastConnStatus = { connected: false, key: 'connConnecting' };
+
+  function applyLang(lang) {
+    var s = STRINGS[lang] || STRINGS.de;
+    currentLang = lang;
+    document.getElementById('back-label').textContent = s.back;
+    document.getElementById('subtitle-text').textContent = s.subtitle;
+    document.getElementById('last-point-label').textContent = s.lastPoint;
+    document.getElementById('last-received-label').textContent = s.lastReceived;
+    document.getElementById('card-nap-title').textContent = s.napTitle;
+    document.getElementById('lbl-nap-power').textContent = s.napPower;
+    document.getElementById('lbl-inv-power').textContent = s.invPower;
+    document.getElementById('lbl-bat-power').textContent = s.batPower;
+    document.getElementById('lbl-bat-soc').textContent = s.batSoc;
+    document.getElementById('card-cp1-title').textContent = s.cp1Title;
+    document.getElementById('card-cp2-title').textContent = s.cp2Title;
+    document.getElementById('lbl-cp1-power').textContent = s.cpPower;
+    document.getElementById('lbl-cp2-power').textContent = s.cpPower;
+    document.getElementById('chart1-title').textContent = s.chart1Title;
+    document.getElementById('chart2-title').textContent = s.chart2Title;
+    document.getElementById('chart-hint').textContent = s.chartHint;
+    document.getElementById('power-chart-empty').textContent = s.emptyHint;
+    document.getElementById('ev-pv-chart-empty').textContent = s.emptyHint;
+    document.getElementById('footer-text').innerHTML = s.footer;
+    document.getElementById('conn-text').textContent = s[lastConnStatus.key];
+    document.documentElement.lang = lang;
+    ['de', 'en'].forEach(function (l) {
+      var b = document.getElementById('lbtn-' + l);
+      if (b) b.classList.toggle('active', l === lang);
+    });
+  }
+  window.setLang = function (lang) {
+    localStorage.setItem('elmi_lang', lang);
+    applyLang(lang);
+  };
+  applyLang(currentLang);
+  </script>
+
+  <script>
+  // ─── Live-Dashboard: MQTT (HiveMQ Cloud, read-only "Subscribe only"-User) ───
+  // Beide Topics sind retained: einfaches Subscriben reicht, die letzte
+  // Nachricht kommt sofort beim Connect. snapshot = komplette letzte 24h
+  // (alle 24h neu), update = nur neue Zeilen (jede Minute). Rows werden nach
+  // Zeitstempel gemerged, damit sich Snapshot und Updates nicht duplizieren.
+  //
+  // Die MQTT-Zugangsdaten sind absichtlich oeffentlich im Client-Code - eigens
+  // dafuer angelegter, rein lesender ("Subscribe only") HiveMQ-Cloud-Nutzer,
+  // der ausschliesslich elmi/energy/# lesen kann. Selbst im Leak-Fall koennte
+  // hoechstens jemand dieselben oeffentlichen Energiedaten mitlesen - kein
+  // Publish-Zugriff, keine andere Anlage erreichbar.
+  (function () {
+    "use strict";
+
+    var MQTT_HOST = "c8e70e9a83bb48cbaa3791f6dbc975c5.s1.eu.hivemq.cloud";
+    var MQTT_PORT = 8884; // WSS
+    var MQTT_USER = "website";
+    var MQTT_PASS = "admin123456";
+    var TOPIC_PREFIX = "elmi/energy";
+
+    var GRID_COLOR = "rgba(14,14,20,.06)";
+    var TEXT_COLOR = "#6B6B76";
+    var HISTORY_WINDOW_MS = 24 * 3600 * 1000;
+
+    if (typeof ChartZoom !== "undefined") {
+      Chart.register(ChartZoom);
+    }
+
+    var ZOOM_OPTIONS = {
+      pan: { enabled: false },
+      zoom: {
+        drag: { enabled: true, backgroundColor: "rgba(227,32,40,.12)", borderColor: "rgba(227,32,40,.5)", borderWidth: 1 },
+        mode: "xy",
+      },
+    };
+
+    function attachClickToReset(canvas, chart) {
+      var downX = 0, downY = 0;
+      canvas.addEventListener("mousedown", function (e) { downX = e.clientX; downY = e.clientY; });
+      canvas.addEventListener("mouseup", function (e) {
+        var dx = e.clientX - downX, dy = e.clientY - downY;
+        if (Math.sqrt(dx * dx + dy * dy) < 5) chart.resetZoom();
+      });
+    }
+
+    function fmtTick(ms) {
+      var d = new Date(ms);
+      return d.toLocaleString(currentLang === 'en' ? 'en-GB' : 'de-DE', { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function fmt(value) {
+      if (value === null || value === undefined || Number.isNaN(value)) return "–";
+      return typeof value === "number" ? value.toFixed(2) : String(value);
+    }
+
+    function setValue(elId, value) {
+      var el = document.getElementById(elId);
+      if (!el) return;
+      var unit = el.querySelector('.unit');
+      el.firstChild.textContent = fmt(value);
+      el.classList.toggle("stale", value === null || value === undefined);
+    }
+
+    // Rows keyed by timestamp - retained "snapshot" (volle 24h) und die
+    // minuetlichen "update"-Deltas ueberlappen sich, ohne Punkte zu duplizieren.
+    var rowsByTs = new Map();
+    // Jedes Diagramm hat seine eigene Leistungs-Achse (unterschiedliche
+    // Wertebereiche). Die Grenzen wachsen nur - ein Schrumpfen bei jedem
+    // Update wuerde einen manuellen Zoom des Nutzers staendig zuruecksetzen.
+    var powerAxisBound1 = 10, powerAxisBound2 = 10;
+    var powerChart = null, batteryEvChart = null;
+
+    function toSeries(rows, field) {
+      return rows.filter(function (r) { return r[field] !== null && r[field] !== undefined; })
+        .map(function (r) { return { x: r.timestamp * 1000, y: r[field] }; });
+    }
+
+    function sortedRows() {
+      var cutoff = Date.now() - HISTORY_WINDOW_MS;
+      var rows = Array.from(rowsByTs.values()).filter(function (r) { return r.timestamp * 1000 >= cutoff; });
+      rows.sort(function (a, b) { return a.timestamp - b.timestamp; });
+      return rows;
+    }
+
+    function growBound(current, rows, fields) {
+      var bound = current;
+      rows.forEach(function (r) {
+        fields.forEach(function (f) {
+          if (r[f] !== null && r[f] !== undefined) bound = Math.max(bound, Math.abs(r[f]) * 1.1);
+        });
+      });
+      return bound;
+    }
+
+    function socDataset(rows) {
+      return {
+        label: "SOC [%]", data: toSeries(rows, "battery_soc"),
+        borderColor: "#F39A3A", backgroundColor: "transparent",
+        borderWidth: 2, borderDash: [4, 3], pointRadius: 0, spanGaps: true, yAxisID: "soc",
+      };
+    }
+
+    function baseScales(powerBound) {
+      return {
+        x: {
+          type: "linear", min: Date.now() - HISTORY_WINDOW_MS, max: Date.now(),
+          ticks: { color: TEXT_COLOR, callback: fmtTick, maxRotation: 0 }, grid: { color: GRID_COLOR },
+        },
+        power: {
+          type: "linear", position: "left", min: -powerBound, max: powerBound,
+          title: { display: true, text: "Leistung [kW]", color: TEXT_COLOR },
+          ticks: { color: TEXT_COLOR }, grid: { color: GRID_COLOR },
+        },
+        soc: {
+          type: "linear", position: "right", min: 0, max: 100,
+          title: { display: true, text: "SOC [%]", color: TEXT_COLOR },
+          ticks: { color: TEXT_COLOR }, grid: { display: false },
+        },
+      };
+    }
+
+    function buildPowerChart(rows) {
+      var canvas = document.getElementById("power-chart");
+      powerAxisBound1 = growBound(powerAxisBound1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
+      powerChart = new Chart(canvas.getContext("2d"), {
+        type: "line",
+        data: {
+          datasets: [
+            { label: "NAP-Leistung [kW]", data: toSeries(rows, "nap_power"), borderColor: "#E32028", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
+            { label: "AC-Inverter-Leistung [kW]", data: toSeries(rows, "inverter_ac_power"), borderColor: "#6D2A99", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
+            { label: "PV-Leistung [kW]", data: toSeries(rows, "pv_power"), borderColor: "#1F9D55", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
+            socDataset(rows),
+          ],
+        },
+        options: {
+          animation: false, responsive: true, maintainAspectRatio: false,
+          interaction: { mode: "nearest", intersect: false },
+          scales: baseScales(powerAxisBound1),
+          plugins: { legend: { labels: { color: TEXT_COLOR, boxWidth: 12, font: { size: 11 } } }, zoom: ZOOM_OPTIONS },
+        },
+      });
+      attachClickToReset(canvas, powerChart);
+    }
+
+    function buildBatteryEvChart(rows) {
+      var canvas = document.getElementById("ev-pv-chart");
+      powerAxisBound2 = growBound(powerAxisBound2, rows, ["battery_power", "ev_a_power", "ev_b_power"]);
+      batteryEvChart = new Chart(canvas.getContext("2d"), {
+        type: "line",
+        data: {
+          datasets: [
+            { label: "Batterieleistung [kW]", data: toSeries(rows, "battery_power"), borderColor: "#E32028", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
+            { label: "Ladepunkt-1-Leistung [kW]", data: toSeries(rows, "ev_a_power"), borderColor: "#B5188B", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
+            { label: "Ladepunkt-2-Leistung [kW]", data: toSeries(rows, "ev_b_power"), borderColor: "#6D2A99", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
+            socDataset(rows),
+          ],
+        },
+        options: {
+          animation: false, responsive: true, maintainAspectRatio: false,
+          interaction: { mode: "nearest", intersect: false },
+          scales: baseScales(powerAxisBound2),
+          plugins: { legend: { labels: { color: TEXT_COLOR, boxWidth: 12, font: { size: 11 } } }, zoom: ZOOM_OPTIONS },
+        },
+      });
+      attachClickToReset(canvas, batteryEvChart);
+    }
+
+    function refreshCharts() {
+      var rows = sortedRows();
+      var emptyPower = document.getElementById("power-chart-empty");
+      var emptyBatteryEv = document.getElementById("ev-pv-chart-empty");
+      var powerCanvas = document.getElementById("power-chart");
+      var batteryEvCanvas = document.getElementById("ev-pv-chart");
+
+      if (rows.length === 0) {
+        emptyPower.hidden = false; emptyBatteryEv.hidden = false;
+        powerCanvas.style.display = "none"; batteryEvCanvas.style.display = "none";
+        return;
+      }
+      emptyPower.hidden = true; emptyBatteryEv.hidden = true;
+      powerCanvas.style.display = ""; batteryEvCanvas.style.display = "";
+
+      if (!powerChart) {
+        buildPowerChart(rows);
+      } else {
+        powerAxisBound1 = growBound(powerAxisBound1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
+        powerChart.data.datasets[0].data = toSeries(rows, "nap_power");
+        powerChart.data.datasets[1].data = toSeries(rows, "inverter_ac_power");
+        powerChart.data.datasets[2].data = toSeries(rows, "pv_power");
+        powerChart.data.datasets[3].data = toSeries(rows, "battery_soc");
+        powerChart.options.scales.power.min = -powerAxisBound1;
+        powerChart.options.scales.power.max = powerAxisBound1;
+        powerChart.options.scales.x.max = Date.now();
+        powerChart.options.scales.x.min = Date.now() - HISTORY_WINDOW_MS;
+        powerChart.update("none");
+      }
+
+      if (!batteryEvChart) {
+        buildBatteryEvChart(rows);
+      } else {
+        powerAxisBound2 = growBound(powerAxisBound2, rows, ["battery_power", "ev_a_power", "ev_b_power"]);
+        batteryEvChart.data.datasets[0].data = toSeries(rows, "battery_power");
+        batteryEvChart.data.datasets[1].data = toSeries(rows, "ev_a_power");
+        batteryEvChart.data.datasets[2].data = toSeries(rows, "ev_b_power");
+        batteryEvChart.data.datasets[3].data = toSeries(rows, "battery_soc");
+        batteryEvChart.options.scales.power.min = -powerAxisBound2;
+        batteryEvChart.options.scales.power.max = powerAxisBound2;
+        batteryEvChart.options.scales.x.max = Date.now();
+        batteryEvChart.options.scales.x.min = Date.now() - HISTORY_WINDOW_MS;
+        batteryEvChart.update("none");
+      }
+
+      var latest = rows[rows.length - 1];
+      setValue("nap-power", latest.nap_power);
+      setValue("inverter-ac-power", latest.inverter_ac_power);
+      setValue("battery-power", latest.battery_power);
+      setValue("battery-soc", latest.battery_soc);
+      setValue("ev-a-soc", latest.ev_a_soc);
+      setValue("ev-a-power", latest.ev_a_power);
+      setValue("ev-b-soc", latest.ev_b_soc);
+      setValue("ev-b-power", latest.ev_b_power);
+      document.getElementById("last-point-time").textContent = new Date(latest.timestamp * 1000).toLocaleString(currentLang === 'en' ? 'en-GB' : 'de-DE');
+    }
+
+    function mergeRows(rows) {
+      rows.forEach(function (r) { rowsByTs.set(r.timestamp, r); });
+    }
+
+    function setConnStatus(connected, key) {
+      lastConnStatus = { connected: connected, key: key };
+      document.getElementById("conn-dot").classList.toggle("ok", connected);
+      document.getElementById("conn-text").textContent = STRINGS[currentLang][key];
+    }
+
+    var wsUrl = "wss://" + MQTT_HOST + ":" + MQTT_PORT + "/mqtt";
+    var client = mqtt.connect(wsUrl, {
+      username: MQTT_USER, password: MQTT_PASS,
+      clientId: "elmi-web-" + Math.random().toString(16).slice(2),
+      clean: true, reconnectPeriod: 5000, connectTimeout: 10000,
+    });
+
+    client.on("connect", function () {
+      setConnStatus(true, "connConnected");
+      client.subscribe(TOPIC_PREFIX + "/snapshot", { qos: 1 });
+      client.subscribe(TOPIC_PREFIX + "/update", { qos: 1 });
+    });
+    client.on("reconnect", function () { setConnStatus(false, "connReconnecting"); });
+    client.on("close", function () { setConnStatus(false, "connClosed"); });
+    client.on("error", function (err) { setConnStatus(false, "connError"); console.error("MQTT error", err); });
+
+    client.on("message", function (topic, payload) {
+      try {
+        var data = JSON.parse(payload.toString());
+        mergeRows(data.rows || []);
+        document.getElementById("last-received-time").textContent = new Date().toLocaleString(currentLang === 'en' ? 'en-GB' : 'de-DE');
+        refreshCharts();
+      } catch (e) {
+        console.error("Fehler beim Verarbeiten der MQTT-Nachricht", e);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
