@@ -147,40 +147,32 @@
     const TYPES = ['AC','DC','HPC'];
     const TYPE_COLOR = { AC: '#6D2A99', DC: '#EC6A2A', HPC: '#E32028' };
 
-    // ── Eigene Standortdaten aus IndexedDB laden ──
-    let stationUtilData = null;
+    // ── Eigene Standortdaten aus der Auslastungs-API laden (settings.html, Abschnitt
+    // "Auslastungsdaten (API)"). Alle angebundenen Geraete sind HPC-Standorte, daher
+    // wird der Datensatz eigenByType[rec.ladetyp] zugeordnet, AC/DC bleiben ohne Daten. ──
+    let auslRec = null;
 
     async function loadOwnStationData() {
-      try {
-        const data = await ELMI_DB.dbGet('settings', 'stationUtilisation');
-        if (!data || !data.active) return;
-        stationUtilData = data;
+      auslRec = await ELMI_DB.dbGet('ownUtilisationApi', 'main');
+      if (!auslRec || auslRec.sessionsPerDay == null) return;
 
-        // Badge oben auf der Seite
-        let badge = document.getElementById('ownDataBadge');
-        if (!badge) {
-          badge = document.createElement('div');
-          badge.id = 'ownDataBadge';
-          badge.style.cssText = 'padding:10px 16px;background:rgba(227,32,40,.06);border:1px solid rgba(227,32,40,.22);border-radius:8px;font-size:12px;color:#E32028;margin-bottom:16px';
-          const notice = document.getElementById('top-notice');
-          if (notice) notice.after(badge);
-        }
+      let badge = document.getElementById('ownDataBadge');
+      if (!badge) {
+        badge = document.createElement('div');
+        badge.id = 'ownDataBadge';
+        badge.style.cssText = 'padding:10px 16px;background:rgba(227,32,40,.06);border:1px solid rgba(227,32,40,.22);border-radius:8px;font-size:12px;color:#E32028;margin-bottom:16px';
+        const notice = document.getElementById('top-notice');
+        if (notice) notice.after(badge);
+      }
 
-        const station = data.active;
-        const ac  = station.ac?.util  != null ? station.ac.util.toFixed(1)  + ' %' : '–';
-        const dc  = station.dc?.util  != null ? station.dc.util.toFixed(1)  + ' %' : '–';
-        const hpc = station.hpc?.util != null ? station.hpc.util.toFixed(1) + ' %' : '–';
-
-        badge.innerHTML = `✓ Eigene Auslastung automatisch geladen · <strong>${data.activeSheetName || ''}</strong> (${data.fileName || ''})<br>
-          <span style="color:#9A9AA5;font-size:11px">AC: ${ac} · DC: ${dc} · HPC: ${hpc}</span>`;
-      } catch(e) { console.log('Keine Stationsdaten:', e); }
+      badge.innerHTML = `✓ Eigene Auslastung aus API geladen · <strong>${auslRec.sn}</strong> (${auslRec.ladetyp || 'HPC'})<br>
+        <span style="color:#9A9AA5;font-size:11px">${auslRec.sessionsPerDay.toFixed(1)} Sessions/Tag · ${auslRec.kwhPerDay != null ? auslRec.kwhPerDay.toFixed(1) + ' kWh/Tag' : '–'} · Abgerufen: ${new Date(auslRec.fetchedAt).toLocaleString('de-DE')}</span>`;
     }
 
     async function init() {
-      const [settings, wettData, eigeneLadedaten] = await Promise.all([
+      const [settings, wettData] = await Promise.all([
         ELMI_DB.loadSettings(),
-        ELMI_DB.loadWettbewerberDaten(),
-        ELMI_DB.dbGetAll('eigeneLadedaten')
+        ELMI_DB.loadWettbewerberDaten()
       ]);
 
       await loadOwnStationData();
@@ -189,15 +181,15 @@
       const overrides = await ELMI_DB.dbGetAll('wettbewerberOverrides');
       const joined    = ELMI_DB.joinWettbewerber(standorte, betreiber, overrides, settings);
 
-      // --- Eigene Kennzahlen je Ladetyp ---
-      const eigenByType = {};
-      TYPES.forEach(t => {
-        const guns = eigeneLadedaten.filter(e => e.ladetyp === t);
-        if (!guns.length) { eigenByType[t] = null; return; }
-        const avgSessions = guns.reduce((s, e) => s + e.ladevorgaenge / e.tageImZeitraum, 0) / guns.length;
-        const avgKwh      = guns.reduce((s, e) => s + e.gesamtEnergieKwh / e.tageImZeitraum, 0) / guns.length;
-        eigenByType[t] = { sessionsPerDay: avgSessions, kwhPerDay: avgKwh, beleg: null };
-      });
+      // --- Eigene Kennzahlen je Ladetyp (aus Auslastungs-API, nur der eine Ladetyp mit Daten) ---
+      const eigenByType = { AC: null, DC: null, HPC: null };
+      if (auslRec && auslRec.sessionsPerDay != null) {
+        eigenByType[auslRec.ladetyp || 'HPC'] = {
+          sessionsPerDay: auslRec.sessionsPerDay,
+          kwhPerDay: auslRec.kwhPerDay,
+          beleg: auslRec.belegMinPerDay
+        };
+      }
 
       // --- Wettbewerber-Benchmark aus auslastungsKennzahlen ---
       // Determine landkreise from standorteImRadius
@@ -239,7 +231,7 @@
       const notices = [];
       if (source === 'none') notices.push('⚠ Wettbewerberdaten noch nicht verfügbar – Benchmark-Spalte leer.');
       else if (source === 'cache' && meta) notices.push(`📴 Offline – Daten vom ${meta.analyse_datum}`);
-      if (!eigeneLadedaten.length) notices.push('ℹ Noch keine eigenen Ladedaten hochgeladen – bitte in den <a href="settings.html">Settings</a> importieren.');
+      if (!auslRec || auslRec.sessionsPerDay == null) notices.push('ℹ Keine eigenen Auslastungsdaten – bitte in <a href="settings.html">Settings → Auslastungsdaten (API)</a> abrufen.');
       if (!notices.length) noticeEl.style.display = 'none';
       else noticeEl.innerHTML = notices.join('<br>');
 

@@ -6,10 +6,13 @@
   <link rel="stylesheet" href="../design.css"/>
   <title>⚡ ELMI CPO · Preisempfehlung</title>
   <link rel="icon" type="image/png" href="/elmi-ai/assets/elmi-icon.png">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="js/db.js"></script>
   <script src="js/eco-api.js"></script>
+  <!-- Energiemarktdaten: gleiche Origin wie 03_electricity_procurement_ai, daher direkt
+       cross-Modul einbindbar (localStorage-Cache ist ohnehin pro Origin, nicht pro Pfad) -->
+  <script src="../03_electricity_procurement_ai/js/settings-store.js?v=2"></script>
+  <script src="../03_electricity_procurement_ai/js/energy-charts-api.js?v=2"></script>
   <style>
     :root {
       --green: var(--success);
@@ -174,22 +177,28 @@
   ════════════════════════════════════════════════ -->
   <div class="tab-panel active" id="panel-params">
 
-    <!-- Stationsdaten Status -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">📡 Stationsdaten</span>
-        <span id="fileStatusBadge" class="hidden" style="font-size:12px;color:var(--green);font-weight:600"></span>
+    <!-- Stationsdaten (Auslastung) + Energiemarktdaten, beide nur ueber API -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="two-col-cards">
+      <div class="card">
+        <div class="card-header"><span class="card-title">📡 Stationsdaten (Auslastung)</span></div>
+        <div class="station-status">
+          <div class="dot" id="stationDot"></div>
+          <span id="stationStatusText">Wird geladen …</span>
+        </div>
       </div>
-      <div class="station-status">
-        <div class="dot" id="stationDot"></div>
-        <span id="stationStatusText">Wird geladen …</span>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">📈 Energiemarktdaten</span></div>
+        <div class="station-status">
+          <div class="dot" id="marketDot"></div>
+          <span id="marketStatusText">Wird geladen …</span>
+        </div>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn-secondary" onclick="refreshMarketData()" style="font-size:12px" id="marketRefreshBtn">🔄 Aktualisieren</button>
+        </div>
       </div>
-      <div class="station-row hidden" id="stationRow">
-        <label>Aktive Station:</label>
-        <select id="stationSelect" style="flex:1;min-width:200px"><option value="">– wählen –</option></select>
-      </div>
-      <div id="utilFeedback" class="hidden" style="margin-top:12px;padding:12px 14px;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.25);border-radius:var(--radius);font-size:12px;color:var(--green)"></div>
     </div>
+    <style>@media(max-width:700px){.two-col-cards{grid-template-columns:1fr !important}}</style>
 
     <!-- Allgemeine Parameter -->
     <div class="card">
@@ -265,7 +274,7 @@
       <div class="kpi-box"><div class="kpi-label">HPC Empfehlung</div><div class="kpi-value" id="k-hpc">–</div><div class="kpi-sub" id="k-hpc-d"></div></div>
       <div class="kpi-box"><div class="kpi-label">DC Empfehlung</div><div class="kpi-value" id="k-dc">–</div><div class="kpi-sub" id="k-dc-d"></div></div>
       <div class="kpi-box"><div class="kpi-label">AC Empfehlung</div><div class="kpi-value" id="k-ac">–</div><div class="kpi-sub" id="k-ac-d"></div></div>
-      <div class="kpi-box"><div class="kpi-label">HPC Auslastung</div><div class="kpi-value" id="k-util">–</div><div class="kpi-sub">aus Excel</div></div>
+      <div class="kpi-box"><div class="kpi-label">Auslastung</div><div class="kpi-value" id="k-util">–</div><div class="kpi-sub">via API</div></div>
       <div class="kpi-box"><div class="kpi-label">HPC Markt Ø</div><div class="kpi-value" id="k-mkt">–</div><div class="kpi-sub">Wettbewerber</div></div>
       <div class="kpi-box"><div class="kpi-label">Aktive Station</div><div class="kpi-value" style="font-size:13px" id="k-station">–</div><div class="kpi-sub" id="k-file"></div></div>
     </div>
@@ -324,9 +333,13 @@
   <div class="tab-panel" id="panel-dynamic">
     <div class="card">
       <div class="card-header"><span class="card-title">📈 Dynamische Preisempfehlung</span></div>
-      <p style="color:var(--text-muted);font-size:12px;margin-bottom:14px">
-        Einfaches Modell: Marktmittelwert je Ladetyp, bei hoher historischer Auslastung (≥ Auslastungsschwelle aus Parameter-Tab) +10 Ct/kWh, bei geringer Auslastung −10 Ct/kWh.
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:10px">
+        Einfaches Modell: Marktmittelwert je Ladetyp abzüglich 20 Ct/kWh Stromkosten-Pauschale, bei hoher historischer Auslastung (≥ Auslastungsschwelle aus Parameter-Tab) +10 Ct/kWh, bei geringer Auslastung −10 Ct/kWh, zzgl. voller Strommarkt-Aufschlag (Ø Endkundenpreis nächste 24h).
       </p>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px;font-size:12px" id="dynFlags">
+        <span id="flag-strompreis"></span>
+        <span id="flag-auslastung"></span>
+      </div>
       <div class="kpi-grid" id="dynKpiGrid">
         <div class="kpi-box"><div class="kpi-label">AC</div><div class="kpi-value" id="dyn-ac">–</div><div class="kpi-sub" id="dyn-ac-s"></div></div>
         <div class="kpi-box"><div class="kpi-label">DC</div><div class="kpi-value" id="dyn-dc">–</div><div class="kpi-sub" id="dyn-dc-s"></div></div>
@@ -338,7 +351,7 @@
     <div class="card">
       <div class="card-header"><span class="card-title">📊 Tagesverlauf</span></div>
       <p style="color:var(--text-muted);font-size:11px;margin-bottom:10px">
-        Illustrative Modellkurve (keine gemessenen Stundenwerte): typische Tagesnachfrage skaliert auf den berechneten Preis je Ladetyp.
+        24h-Prognose ab der aktuellen (bzw. nächsten vollen) Stunde: je Stunde Marktpreis ± Auslastungs-Aufschlag (historisches Stundenprofil aus den Auslastungsdaten) + Strommarkt-Aufschlag (Stundenprognose aus Strombörsenpreise).
       </p>
       <canvas id="dynDayChart" height="90"></canvas>
     </div>
@@ -383,6 +396,7 @@ function switchTab(id) {
 // ─── State ───
 let settingsData = {}, competitorData = {}, stationData = {}, formulaResult = {};
 let _rawSettings = null;
+let auslSn = null;
 
 // ─── Load settings into param fields ───
 async function loadParamFields() {
@@ -421,9 +435,10 @@ async function loadParamFields() {
     if (el && val !== undefined && val !== null) el.value = val;
   });
 
-  // Load competitor data via shared ELMI_DB
+  // Wettbewerberdaten: respektiert den dataSource-Umschalter (Own Analysis / API),
+  // dieselbe Funktion wie Executive/Wettbewerber-Details.
   try {
-    const { standorte, betreiber } = await ELMI_DB.loadWettbewerberDaten();
+    const { standorte, betreiber } = await ELMI_DB.loadCompetitorData(s);
     const overrides = await ELMI_DB.dbGetAll('wettbewerberOverrides');
     const comps = ELMI_DB.joinWettbewerber(standorte, betreiber, overrides, s);
     const acP = [], dcP = [], hpcP = [];
@@ -439,88 +454,71 @@ async function loadParamFields() {
     competitorData = { acAvg: avg(acP), dcAvg: avg(dcP), hpcAvg: avg(hpcP), count: comps.length };
   } catch(_) {}
 
-  // Load station utilisation — prefer stationUtilisation, fallback to eigeneLadedaten
-  let su = await ELMI_DB.dbGet('settings', 'stationUtilisation');
-  if (su && su.active) {
-    stationData = su.active;
-    showStationInfo(su);
-    populateSheetSelect(su);
+  // Stationsdaten (Auslastung): ausschliesslich ueber die Device-Analysis-API
+  // (Settings → Auslastungsdaten), in beiden dataSource-Modi. Einzelner
+  // Auslastungswert wird gleichmaessig auf AC/DC/HPC angewendet, da die API
+  // keine Aufschluesselung je Ladetyp liefert.
+  const ausl = await ELMI_DB.dbGet('ownUtilisationApi', 'main');
+  if (ausl && ausl.util != null) {
+    const st = { util: ausl.util, hourly: ausl.hourlyUtilPct || null };
+    stationData = { ac: st, dc: st, hpc: st };
+    auslastungEinbezogen = true;
+    auslSn = ausl.sn;
+    document.getElementById('stationDot').className = 'dot ok';
+    document.getElementById('stationStatusText').textContent = `✓ ${ausl.sn} · Auslastung: ${ausl.util.toFixed(1)} % · Abgerufen: ${new Date(ausl.fetchedAt).toLocaleString('de-DE')}`;
   } else {
-    // Fallback: compute from eigeneLadedaten (written by settings.html processFile)
-    const ladedaten = await ELMI_DB.dbGetAll('eigeneLadedaten');
-    if (ladedaten.length) {
-      const byType = { AC: [], DC: [], HPC: [] };
-      ladedaten.forEach(d => { if (byType[d.ladetyp]) byType[d.ladetyp].push(d); });
-      const utilFromLade = (items) => {
-        if (!items.length) return null;
-        const totalKwh  = items.reduce((s, d) => s + (d.gesamtEnergieKwh || 0), 0);
-        const totalTage = items.reduce((s, d) => s + (d.tageImZeitraum   || 0), 0);
-        // Rough benchmark: AC=22kW, DC=150kW, HPC=300kW, 24h/day
-        const maxKw = items[0].ladetyp === 'HPC' ? 300 : items[0].ladetyp === 'DC' ? 150 : 22;
-        const maxKwh = maxKw * 24 * totalTage;
-        return maxKwh > 0 ? Math.min(100, (totalKwh / maxKwh) * 100) : null;
-      };
-      const syntheticActive = {
-        ac:  { util: utilFromLade(byType.AC)  },
-        dc:  { util: utilFromLade(byType.DC)  },
-        hpc: { util: utilFromLade(byType.HPC) },
-      };
-      const fileName = ladedaten[0].dateiname || 'Eigene Ladedaten';
-      const sheetName = ladedaten[0].stationSN || '–';
-      su = { active: syntheticActive, fileName, activeSheetName: sheetName, uploadedAt: null };
-      stationData = syntheticActive;
-      showStationInfo(su);
-    } else {
-      showNoStationData();
-    }
+    stationData = {};
+    auslastungEinbezogen = false;
+    document.getElementById('stationDot').className = 'dot';
+    document.getElementById('stationStatusText').innerHTML = 'Keine Auslastungsdaten – bitte in <a href="settings.html" style="color:var(--accent)">Settings → Auslastungsdaten</a> abrufen.';
   }
+
+  // Energiemarktdaten (Strombörsenpreise): aus dem Cache der Electricity-Procurement-
+  // Seite (gleiche Origin, siehe js/energy-charts-api.js), sonst leer.
+  loadMarketDataFromCache();
 
   updateOutputKPIs();
 }
 
-function showStationInfo(su) {
-  document.getElementById('stationDot').className = 'dot ok';
-  document.getElementById('stationStatusText').textContent = `✓ ${su.fileName || 'Datei geladen'} · Station: ${su.activeSheetName || '–'}`;
-  document.getElementById('fileStatusBadge').textContent = su.activeSheetName || '';
-  document.getElementById('fileStatusBadge').classList.remove('hidden');
-  document.getElementById('stationRow').classList.remove('hidden');
+// ─── Energiemarktdaten ───
+let marketSeries = null, marketFetchedAt = null;
+let auslastungEinbezogen = false, strompreiseEinbezogen = false;
 
-  const fb = document.getElementById('utilFeedback');
-  const ac  = su.active.ac?.util  != null ? su.active.ac.util.toFixed(1)+'%'  : '–';
-  const dc  = su.active.dc?.util  != null ? su.active.dc.util.toFixed(1)+'%'  : '–';
-  const hpc = su.active.hpc?.util != null ? su.active.hpc.util.toFixed(1)+'%' : '–';
-  fb.innerHTML = `AC: ${ac} · DC: ${dc} · HPC: ${hpc} · Gespeichert: ${su.uploadedAt ? new Date(su.uploadedAt).toLocaleDateString('de-DE') : '–'}`;
-  fb.classList.remove('hidden');
-}
-
-function showNoStationData() {
-  document.getElementById('stationDot').className = 'dot';
-  document.getElementById('stationStatusText').innerHTML = 'Keine Stationsdaten geladen – bitte in <a href="settings.html" style="color:var(--accent)">Settings → Eigene Ladedaten</a> hochladen.';
-}
-
-function populateSheetSelect(su) {
-  const sel = document.getElementById('stationSelect');
-  sel.innerHTML = '';
-  if (su.allSheets) {
-    Object.keys(su.allSheets).forEach(name => {
-      const opt = document.createElement('option');
-      opt.value = name; opt.textContent = name;
-      if (name === su.activeSheetName) opt.selected = true;
-      sel.appendChild(opt);
-    });
+function loadMarketDataFromCache() {
+  const cached = ELMI_ENERGY_CHARTS.loadSeriesCache();
+  if (cached && cached.series) {
+    marketSeries = cached.series;
+    marketFetchedAt = cached.fetchedAt;
+    strompreiseEinbezogen = true;
+    document.getElementById('marketDot').className = 'dot ok';
+    document.getElementById('marketStatusText').textContent = `✓ Zuletzt aktualisiert: ${new Date(marketFetchedAt).toLocaleString('de-DE')}`;
+  } else {
+    marketSeries = null;
+    strompreiseEinbezogen = false;
+    document.getElementById('marketDot').className = 'dot';
+    document.getElementById('marketStatusText').innerHTML = 'Keine Strommarktdaten – bitte in <a href="../03_electricity_procurement_ai/boersenpreise.html" style="color:var(--accent)">Strombörsenpreise</a> laden.';
   }
-  sel.onchange = async () => {
-    const su2 = await ELMI_DB.dbGet('settings', 'stationUtilisation');
-    if (su2 && su2.allSheets && su2.allSheets[sel.value]) {
-      su2.active = su2.allSheets[sel.value];
-      su2.activeSheetName = sel.value;
-      await ELMI_DB.dbPut('settings', su2);
-      stationData = su2.active;
-      showStationInfo(su2);
-      updateOutputKPIs();
-    }
-  };
 }
+
+window.refreshMarketData = async function() {
+  const btn = document.getElementById('marketRefreshBtn');
+  btn.disabled = true;
+  document.getElementById('marketDot').className = 'dot';
+  document.getElementById('marketStatusText').textContent = 'Lädt …';
+  try {
+    const result = await ELMI_ENERGY_CHARTS.loadFullSeries(48, 36); // speichert automatisch in den Cache
+    marketSeries = result.series;
+    marketFetchedAt = result.fetchedAt;
+    strompreiseEinbezogen = true;
+    document.getElementById('marketDot').className = 'dot ok';
+    document.getElementById('marketStatusText').textContent = `✓ Zuletzt aktualisiert: ${new Date(marketFetchedAt).toLocaleString('de-DE')}`;
+  } catch(e) {
+    strompreiseEinbezogen = false;
+    document.getElementById('marketDot').className = 'dot';
+    document.getElementById('marketStatusText').textContent = 'Fehler: ' + e.message;
+  }
+  btn.disabled = false;
+};
 
 // ─── Save params → shared settings store ───
 async function saveParams() {
@@ -571,8 +569,8 @@ function updateOutputKPIs() {
   document.getElementById('k-util').textContent = hpcUtil != null ? hpcUtil.toFixed(1)+' %' : '–';
   document.getElementById('k-util').style.color = utilColor(hpcUtil);
   document.getElementById('k-mkt').textContent = c.hpcAvg ? c.hpcAvg.toFixed(3)+' €' : '–';
-  document.getElementById('k-station').textContent = stationData.sheetName || '–';
-  document.getElementById('k-file').textContent = stationData.fileName || '';
+  document.getElementById('k-station').textContent = auslSn || '–';
+  document.getElementById('k-file').textContent = '';
 }
 function utilColor(u){if(u==null)return'var(--text)';if(u>=70)return'var(--green)';if(u>=40)return'var(--orange)';return'var(--red)'}
 
@@ -718,26 +716,49 @@ function renderStratChips(text){
 let dynChartInstance = null;
 
 window.renderDynamicRec = async function() {
-  const s = _rawSettings || await ELMI_DB.loadSettings();
-  let utilOverride = null;
-  if (s.dataSource === 'api') {
-    const rec = await ELMI_DB.dbGet('ownUtilisationApi', 'main');
-    if (rec && rec.util != null) utilOverride = rec.util;
-  }
   const schwelle = settingsData.auslastungSchwelle || 60;
   const types = ['ac', 'dc', 'hpc'];
+
+  // Strommarkt-Aufschlag: Ø Endkundenpreis (ct/kWh) der naechsten 24h Prognose,
+  // *0.1 auf die Empfehlung aufgeschlagen. Formel + Settings kommen aus
+  // 03_electricity_procurement_ai (gleiche Origin, siehe Kopf der Datei).
+  let strompreisAdj = null;
+  if (marketSeries) {
+    const avgEurMwh = ELMI_ENERGY_CHARTS.avgFuturePrice(marketSeries, 24);
+    if (avgEurMwh != null) {
+      const stromSettings = ELMI_STROMPREIS.loadSettings();
+      const endkundenpreisCtKwh = ELMI_STROMPREIS.computeStrompreisCtKwh(avgEurMwh, stromSettings);
+      strompreisAdj = endkundenpreisCtKwh != null ? endkundenpreisCtKwh / 100 : null; // ct/kWh -> €/kWh, voll (kein Faktor)
+    }
+  }
+
+  // Strompreis wird jetzt voll aufgeschlagen (s.o.) - im Marktpreis/Settings-Preis
+  // steckt bereits eine implizite Stromkosten-Pauschale, sonst wuerde er doppelt
+  // gezaehlt. Pauschal 0,20 € vom Basispreis abziehen, bevor der volle
+  // Strommarkt-Aufschlag oben draufkommt.
+  const STROMKOSTEN_PAUSCHALE = 0.20;
   const results = {};
   types.forEach(t => {
-    const mkt  = competitorData[t + 'Avg'];
-    const util = utilOverride != null ? utilOverride : (stationData[t] && stationData[t].util);
-    const base = mkt != null ? mkt : (settingsData['price' + t.toUpperCase()] || null);
+    const mkt      = competitorData[t + 'Avg'];
+    const util     = stationData[t] && stationData[t].util;
+    const baseRaw  = mkt != null ? mkt : (settingsData['price' + t.toUpperCase()] || null);
+    const base     = baseRaw != null ? baseRaw - STROMKOSTEN_PAUSCHALE : null;
     let rec = base, adj = 0;
     if (base != null && util != null) {
       adj = util >= schwelle ? 0.10 : -0.10;
       rec = base + adj;
     }
-    results[t] = { base, util, adj, rec };
+    if (rec != null && strompreisAdj != null) rec += strompreisAdj;
+    results[t] = { base: baseRaw, baseCalc: base, util, adj, rec };
   });
+
+  // Flags: Strompreise / Auslastungsdaten mit einbezogen
+  document.getElementById('flag-strompreis').innerHTML = strompreiseEinbezogen
+    ? '<span style="color:var(--green)">✓ Strompreise mit einbezogen</span>'
+    : '<span style="color:var(--text-muted)">✗ Strompreise nicht einbezogen → <a href="../03_electricity_procurement_ai/boersenpreise.html" style="color:var(--accent)">Settings konfigurieren</a></span>';
+  document.getElementById('flag-auslastung').innerHTML = auslastungEinbezogen
+    ? '<span style="color:var(--green)">✓ Auslastungsdaten mit einbezogen</span>'
+    : '<span style="color:var(--text-muted)">✗ Auslastungsdaten nicht einbezogen → <a href="settings.html" style="color:var(--accent)">Settings konfigurieren</a></span>';
 
   types.forEach(t => {
     const r = results[t];
@@ -745,54 +766,96 @@ window.renderDynamicRec = async function() {
     const sub = document.getElementById('dyn-' + t + '-s');
     if (r.rec != null) {
       el.textContent = r.rec.toFixed(3) + ' €';
-      sub.textContent = `Basis ${r.base.toFixed(3)} € ${r.adj > 0 ? '+' : r.adj < 0 ? '−' : '±'} ${Math.abs(r.adj).toFixed(2)} € · Auslastung ${r.util != null ? r.util.toFixed(1) + ' %' : 'k.A.'}`;
+      const parts = [`Basis ${r.base.toFixed(3)} €`, `− ${STROMKOSTEN_PAUSCHALE.toFixed(2)} € Stromkosten (Basis)`];
+      if (r.adj) parts.push(`${r.adj > 0 ? '+' : '−'} ${Math.abs(r.adj).toFixed(2)} € Auslastung`);
+      if (strompreisAdj != null) parts.push(`+ ${strompreisAdj.toFixed(3)} € Strommarkt`);
+      sub.textContent = parts.join(' · ');
     } else {
       el.textContent = '–';
       sub.textContent = r.base == null ? 'Kein Marktpreis verfügbar' : 'Keine Auslastungsdaten verfügbar';
     }
   });
 
-  renderDayChart(results);
+  renderDayChart(results, schwelle, strompreisAdj != null);
 };
 
-// Einfache Glockenkurve: Peak ca. 14 Uhr, Minimum nachts — reine Modellkurve,
-// keine gemessenen Stundenwerte (die App hat keine stündliche Auflösung).
-function dayShape(hour) {
-  const x = (hour - 14) / 6;
-  return Math.max(0.25, Math.exp(-x * x / 2));
+// Startstunde fuer die 24h-Prognose: naechste volle Stunde, ausser es sind noch
+// mehr als 20 Minuten bis dahin - dann die laufende (zurueckliegende) Stunde.
+function computeStartHour(now) {
+  const d = new Date(now || Date.now());
+  const min = d.getMinutes();
+  d.setSeconds(0, 0);
+  d.setMinutes(0);
+  if (min >= 40) d.setHours(d.getHours() + 1); // <=20min bis zur naechsten -> aufrunden
+  return d;
 }
 
-function renderDayChart(results) {
+// Boersenpreis (EUR/MWh) fuer eine bestimmte volle Stunde aus der geladenen Serie -
+// exaktes Match auf den Stunden-Unixzeitstempel, sonst naechstgelegener Punkt.
+function findMarketPriceAtHour(series, hourStartMs) {
+  if (!series || !series.length) return null;
+  const targetT = Math.floor(hourStartMs / 1000);
+  const exact = series.find(p => p.t === targetT && p.boerse != null);
+  if (exact) return exact.boerse;
+  let best = null, bestDiff = Infinity;
+  for (const p of series) {
+    if (p.boerse == null) continue;
+    const diff = Math.abs(p.t - targetT);
+    if (diff < bestDiff) { bestDiff = diff; best = p; }
+  }
+  return best ? best.boerse : null;
+}
+
+// 24h-Prognose je Ladetyp: fuer jede Stunde ab computeStartHour() der Marktpreis
+// als Basis, plus Auslastungs-Aufschlag (historisches Stundenprofil aus den
+// Auslastungsdaten, sonst der aktuelle Gesamtwert als Fallback) und
+// Strommarkt-Aufschlag (Stundenprognose statt 24h-Durchschnitt).
+function renderDayChart(results, schwelle, hasStrompreis) {
   const canvas = document.getElementById('dynDayChart');
   if (!canvas || typeof Chart === 'undefined') return;
-  const hours = Array.from({ length: 24 }, (_, h) => h);
-  const shape = hours.map(dayShape);
-  const shapeAvg = shape.reduce((a, b) => a + b, 0) / shape.length;
+
+  const startHour = computeStartHour();
+  const hourTimestamps = Array.from({ length: 24 }, (_, i) => new Date(startHour.getTime() + i * 3600000));
+  const stromSettings = hasStrompreis ? ELMI_STROMPREIS.loadSettings() : null;
   const colors = { ac: '#58a6ff', dc: '#f7c325', hpc: '#ff7b72' };
 
   const datasets = ['ac', 'dc', 'hpc']
-    .filter(t => results[t].rec != null)
-    .map(t => ({
-      label: t.toUpperCase(),
-      data: shape.map(v => Math.round(results[t].rec * (v / shapeAvg) * 1000) / 1000),
-      borderColor: colors[t],
-      backgroundColor: colors[t] + '22',
-      tension: .35,
-      pointRadius: 0,
-      borderWidth: 2
-    }));
+    .filter(t => results[t].baseCalc != null)
+    .map(t => {
+      const base = results[t].baseCalc;
+      const hourly = stationData[t] && stationData[t].hourly;
+      const fallbackUtil = stationData[t] && stationData[t].util;
+      const data = hourTimestamps.map(hDate => {
+        let v = base;
+        const utilAtHour = hourly ? hourly[hDate.getHours()] : fallbackUtil;
+        if (utilAtHour != null) v += utilAtHour >= schwelle ? 0.10 : -0.10;
+        if (hasStrompreis && marketSeries) {
+          const eurMwh = findMarketPriceAtHour(marketSeries, hDate.getTime());
+          if (eurMwh != null) {
+            const ctKwh = ELMI_STROMPREIS.computeStrompreisCtKwh(eurMwh, stromSettings);
+            if (ctKwh != null) v += ctKwh / 100;
+          }
+        }
+        return Math.round(v * 1000) / 1000;
+      });
+      return {
+        label: t.toUpperCase(), data,
+        borderColor: colors[t], backgroundColor: colors[t] + '22',
+        tension: .35, pointRadius: 0, borderWidth: 2
+      };
+    });
 
   if (dynChartInstance) dynChartInstance.destroy();
   if (!datasets.length) return;
   dynChartInstance = new Chart(canvas.getContext('2d'), {
     type: 'line',
-    data: { labels: hours.map(h => h + ':00'), datasets },
+    data: { labels: hourTimestamps.map(d => String(d.getHours()).padStart(2,'0') + ':00'), datasets },
     options: {
       responsive: true,
       plugins: { legend: { labels: { color: '#8b949e' } } },
       scales: {
         x: { ticks: { color: '#8b949e', maxTicksLimit: 12 }, grid: { display: false } },
-        y: { ticks: { color: '#8b949e' }, title: { display: true, text: '€/kWh (Modell)', color: '#8b949e' } }
+        y: { ticks: { color: '#8b949e' }, title: { display: true, text: '€/kWh', color: '#8b949e' } }
       }
     }
   });

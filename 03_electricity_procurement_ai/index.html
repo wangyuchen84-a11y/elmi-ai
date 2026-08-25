@@ -8,233 +8,186 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --elmi-orange:     #F39A3A;
-      --elmi-tangerine:  #EC6A2A;
-      --elmi-red:        #E32028;
-      --elmi-magenta:    #B5188B;
-      --elmi-purple:     #6D2A99;
-      --elmi-gradient:   linear-gradient(90deg, #F39A3A 0%, #EC6A2A 22%, #E32028 48%, #B5188B 78%, #6D2A99 100%);
-      --elmi-accent:     #E32028;
-
-      --neutral-0:   #FFFFFF;
-      --neutral-50:  #FAFAFB;
-      --neutral-100: #F4F4F6;
-      --neutral-200: #E7E7EB;
-      --neutral-300: #D1D1D8;
-      --neutral-400: #9A9AA5;
-      --neutral-500: #6B6B76;
-      --neutral-600: #4A4A55;
-      --neutral-700: #2E2E36;
-      --neutral-800: #1B1B22;
-      --neutral-900: #0E0E14;
-
-      --fg1: var(--neutral-900);
-      --fg2: var(--neutral-600);
-      --fg3: var(--neutral-400);
-      --bg1: var(--neutral-0);
-      --bg2: var(--neutral-50);
-      --bg3: var(--neutral-100);
-      --border-1: var(--neutral-200);
-      --border-2: var(--neutral-300);
-
-      --font-body: "Maven Pro", system-ui, sans-serif;
-
-      --radius-sm:   8px;
-      --radius-md:   14px;
-      --radius-lg:   22px;
-      --radius-pill: 999px;
-
-      --shadow-1: 0 1px 2px rgba(14,14,20,.06);
-      --shadow-2: 0 4px 12px rgba(14,14,20,.08);
-
-      --ease-out: cubic-bezier(.22,1,.36,1);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: var(--font-body);
-      background: var(--bg2);
-      color: var(--fg1);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 0;
-    }
-
-    .appbar {
-      width: 100%;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(255,255,255,.88);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-1);
-    }
-    .appbar-top {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      padding: 12px 28px;
-      max-width: 1320px;
-      margin: 0 auto;
-    }
-    .appbar-meta .title { font-size: 14px; font-weight: 700; color: var(--fg1); }
-    .appbar-meta .sub { font-size: 12px; color: var(--fg2); }
-    .gbar { height: 3px; background: var(--elmi-gradient); }
-
-    .logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 9px;
-      background: var(--elmi-gradient);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-    }
-
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 14px;
-      background: var(--neutral-100);
-      border: 1px solid var(--border-2);
-      border-radius: var(--radius-pill);
-      color: var(--fg2);
-      font: 13px/1 var(--font-body);
-      font-weight: 600;
-      text-decoration: none;
-      transition: background .2s, color .2s;
-    }
-    .back-btn:hover { background: var(--neutral-200); color: var(--fg1); }
-
-    .lang-toggle { display:flex; align-items:center; gap:2px; padding:3px; border:1px solid var(--border-1); border-radius:var(--radius-pill); background:#fff; }
-    .lang-btn { background:transparent; border:0; border-radius:var(--radius-pill); padding:6px 13px; cursor:pointer; font:700 12px/1 var(--font-body); color:var(--fg2); letter-spacing:.04em; transition:background .14s,color .14s; }
-    .lang-btn:hover { color:var(--fg1); }
-    .lang-btn.active { background:var(--neutral-900); color:#fff; }
-    .logo { display:none !important; }
-    .ab-brand { display:flex; align-items:center; gap:11px; text-decoration:none; }
-    .brand-logo { height:26px; display:block; }
-    .brand-div { width:1px; height:22px; background:var(--border-1); display:block; }
-    .brand-ai { font-family:var(--font-body); font-weight:800; font-size:18px; letter-spacing:.02em; color:var(--fg1); }
-
-    .content {
-      width: 100%;
-      max-width: 1320px;
-      margin: 0 auto;
-      padding: 40px 28px 80px;
-      flex: 1;
-    }
-
-    .placeholder {
-      background: var(--neutral-0);
-      border: 1px solid var(--border-1);
-      border-radius: var(--radius-lg);
-      padding: 48px 40px;
-      text-align: center;
-      max-width: 520px;
-      box-shadow: var(--shadow-2);
-      margin: 60px auto;
-    }
-    .placeholder-icon { font-size: 40px; margin-bottom: 16px; }
-    .placeholder-title { font-size: 20px; font-weight: 800; color: var(--fg1); margin-bottom: 10px; }
-    .placeholder-text { font-size: 14px; color: var(--fg2); line-height: 1.6; }
-    .placeholder-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 20px;
-      padding: 6px 14px;
-      background: var(--neutral-100);
-      border-radius: var(--radius-pill);
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--fg2);
-      letter-spacing: .04em;
-      text-transform: uppercase;
-    }
-
-    footer { margin-top: 64px; font-size: 12px; color: var(--fg3); text-align: center; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: 'Maven Pro', system-ui, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    @keyframes elmiPulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+    @media (prefers-reduced-motion: reduce) { .status-dot { animation: none !important; } }
+    a:focus-visible, button:focus-visible { outline: 2px solid #E32028; outline-offset: 2px; }
   </style>
-  <link rel="stylesheet" href="../assets/css/responsive.css">
 </head>
 <body>
+<div style="background:#FFFFFF; color:#0E0E14; min-height:100vh; font-family:'Maven Pro', system-ui, sans-serif;">
 
-  <header class="appbar">
-    <div class="appbar-top">
-      <a class="ab-brand" href="../"><img class="brand-logo" src="../assets/logo-elmi-gradient.png" alt="ELMI"><span class="brand-div"></span><span class="brand-ai">AI</span></a><div class="logo">⚡</div>
-      <div class="appbar-meta">
-        <div class="title">Electricity Procurement AI</div>
-        <div class="sub" id="subtitle-text">Intelligente Strombeschaffung & Prognose</div>
-      </div>
-      <div style="flex:1"></div>
-      <a class="back-btn" id="back-btn" href="../">← <span id="back-label">Zurück</span></a>
-      <div class="lang-toggle">
-        <button class="lang-btn" id="lbtn-de" onclick="setLang('de')">DE</button>
-        <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">EN</button>
+  <header style="position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.85); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid #E7E7EB;">
+    <div style="max-width:1180px; margin:0 auto; padding:14px 32px; display:flex; align-items:center; gap:16px;">
+      <a href="../" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
+        <img src="../assets/logo-elmi-gradient.png" alt="ELMI" style="height:26px; display:block;">
+        <span style="width:1px; height:22px; background:#E7E7EB; display:block;"></span>
+        <span style="font-family:'Maven Pro', sans-serif; font-weight:800; font-size:18px; letter-spacing:0.02em; color:#0E0E14;">AI</span>
+        <span id="subtitle-text" style="font-size:13px; color:#6B6B76; margin-left:6px; font-weight:500;">Interne Tools & Dashboards</span>
+      </a>
+      <div style="flex:1;"></div>
+      <div style="display:flex; align-items:center; gap:2px; padding:3px; border:1px solid #E7E7EB; border-radius:999px;">
+        <button id="lbtn-de" onclick="setLang('de')" style="border:0; cursor:pointer; font-family:'Maven Pro', sans-serif; font-weight:700; font-size:12px; letter-spacing:0.04em; padding:6px 15px; border-radius:999px; background:#0E0E14; color:#FFFFFF; transition:background 140ms, color 140ms;">DE</button>
+        <button id="lbtn-en" onclick="setLang('en')" style="border:0; cursor:pointer; font-family:'Maven Pro', sans-serif; font-weight:700; font-size:12px; letter-spacing:0.04em; padding:6px 15px; border-radius:999px; background:transparent; color:#6B6B76; transition:background 140ms, color 140ms;">EN</button>
       </div>
     </div>
-    <div class="gbar"></div>
   </header>
 
-  <div class="content">
-    <div class="placeholder">
-      <div class="placeholder-icon">⚡</div>
-      <div class="placeholder-title" id="placeholder-title">Electricity Procurement AI</div>
-      <p class="placeholder-text" id="placeholder-text">Dieses Modul wird gerade aufgebaut.</p>
-      <div class="placeholder-badge" id="placeholder-badge">Coming Soon</div>
+  <section style="max-width:1180px; margin:0 auto; padding:48px 32px 52px;">
+    <div>
+      <a href="../" style="display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:600; color:#6B6B76; text-decoration:none;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span id="back-label">Zurück zur Übersicht</span>
+      </a>
     </div>
 
-    <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
-  </div>
+    <div style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(90deg,#F39A3A 0%,#EC6A2A 22%,#E32028 48%,#B5188B 78%,#6D2A99 100%); color:#FFFFFF; padding:7px 15px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; margin-top:24px;">
+      <span>⚡</span><span id="eyebrow-text">ELMI AI · AI Centers</span>
+    </div>
 
-  <script>
-  (function(){
-    var STRINGS = {
-      de: {
-        back: 'Zurück',
-        subtitle: 'Intelligente Strombeschaffung & Prognose',
-        title: 'Electricity Procurement AI',
-        placeholder: 'Dieses Modul wird gerade aufgebaut.',
-        badge: 'Coming Soon',
-        footer: 'ELMI Power GmbH · Interne Nutzung'
-      },
-      en: {
-        back: 'Back',
-        subtitle: 'Intelligent electricity procurement & forecasting',
-        title: 'Electricity Procurement AI',
-        placeholder: 'This module is currently under construction.',
-        badge: 'Coming Soon',
-        footer: 'ELMI Power GmbH · Internal use only'
-      }
-    };
+    <div style="display:flex; align-items:center; gap:22px; margin-top:24px;">
+      <div style="flex:none; width:68px; height:68px; border-radius:18px; background:linear-gradient(#FFFFFF,#FFFFFF) padding-box, linear-gradient(135deg,#F39A3A,#E32028,#6D2A99) border-box; border:2px solid transparent; display:flex; align-items:center; justify-content:center;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#E32028" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+      </div>
+      <div>
+        <h1 style="font-family:'Maven Pro', sans-serif; font-weight:800; font-size:44px; line-height:1.05; letter-spacing:-0.02em; margin:0;">Electricity Procurement AI</h1>
+        <p id="lead-text" style="font-size:18px; line-height:1.5; color:#6B6B76; margin:10px 0 0;">Intelligente Strombeschaffung & Prognose</p>
+      </div>
+    </div>
 
-    function applyLang(lang) {
-      var s = STRINGS[lang] || STRINGS.de;
-      document.getElementById('back-label').textContent       = s.back;
-      document.getElementById('subtitle-text').textContent    = s.subtitle;
-      document.getElementById('placeholder-title').textContent = s.title;
-      document.getElementById('placeholder-text').textContent = s.placeholder;
-      document.getElementById('placeholder-badge').textContent = s.badge;
-      document.getElementById('footer-text').textContent      = s.footer;
-      document.documentElement.lang = lang;
-      ['de','en'].forEach(function(l){
-        var b = document.getElementById('lbtn-'+l);
-        if (b) b.classList.toggle('active', l === lang);
-      });
+    <div style="display:inline-flex; align-items:center; gap:10px; margin-top:30px; font-family:'JetBrains Mono', monospace; font-size:13px; color:#6B6B76;">
+      <span class="status-dot" style="width:8px; height:8px; border-radius:999px; background:#1F9D55; animation:elmiPulse 1.6s ease-in-out infinite; display:inline-block;"></span>
+      <span id="status-text">Day-Ahead-Preise · Energy-Charts / Fraunhofer ISE</span>
+    </div>
+  </section>
+
+  <section style="background:#FAFAFB; border-top:1px solid #E7E7EB; padding:56px 32px 88px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px;">
+        <span id="views-label" style="font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#E32028;">Ansichten</span>
+        <span id="views-meta" style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#9A9AA5;">2 Module</span>
+        <div style="flex:1; height:1px; background:#E7E7EB;"></div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:20px;">
+
+        <a href="settings.html" style="position:relative; display:flex; flex-direction:column; gap:18px; background:#FFFFFF; border:1px solid #E7E7EB; border-radius:14px; padding:24px; text-decoration:none; color:inherit; box-shadow:0 1px 2px rgba(14,14,20,0.06); transition:transform 240ms cubic-bezier(0.22,1,0.36,1), box-shadow 240ms cubic-bezier(0.22,1,0.36,1), border-color 240ms;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(14,14,20,0.12)';this.style.borderColor='#D1D1D8';" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 2px rgba(14,14,20,0.06)';this.style.borderColor='#E7E7EB';">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+            <div style="width:48px; height:48px; border-radius:12px; background:#F4F4F6; display:flex; align-items:center; justify-content:center;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E32028" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#C7C7CF; letter-spacing:0.05em;">01</span>
+          </div>
+          <div>
+            <h3 id="card-settings-title" style="font-family:'Maven Pro', sans-serif; font-weight:700; font-size:19px; line-height:1.2; letter-spacing:-0.01em; color:#0E0E14; margin:0;">Settings</h3>
+            <p id="card-settings-desc" style="font-size:14px; line-height:1.5; color:#6B6B76; margin:8px 0 0;">Preisbestandteile konfigurieren</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:7px; color:#E32028; font-weight:600; font-size:13px; margin-top:auto;">
+            <span id="card-settings-cta">Öffnen</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="boersenpreise.html" style="position:relative; display:flex; flex-direction:column; gap:18px; background:#FFFFFF; border:1px solid #E7E7EB; border-radius:14px; padding:24px; text-decoration:none; color:inherit; box-shadow:0 1px 2px rgba(14,14,20,0.06); transition:transform 240ms cubic-bezier(0.22,1,0.36,1), box-shadow 240ms cubic-bezier(0.22,1,0.36,1), border-color 240ms;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(14,14,20,0.12)';this.style.borderColor='#D1D1D8';" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 2px rgba(14,14,20,0.06)';this.style.borderColor='#E7E7EB';">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+            <div style="width:48px; height:48px; border-radius:12px; background:#F4F4F6; display:flex; align-items:center; justify-content:center;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E32028" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>
+            </div>
+            <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#C7C7CF; letter-spacing:0.05em;">02</span>
+          </div>
+          <div>
+            <h3 id="card-boersenpreise-title" style="font-family:'Maven Pro', sans-serif; font-weight:700; font-size:19px; line-height:1.2; letter-spacing:-0.01em; color:#0E0E14; margin:0;">Strombörsenpreise</h3>
+            <p id="card-boersenpreise-desc" style="font-size:14px; line-height:1.5; color:#6B6B76; margin:8px 0 0;">Day-Ahead-Börsenstrompreise inkl. Endkundenpreis der letzten 48h und Prognose für die nächsten 36h</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:7px; color:#E32028; font-weight:600; font-size:13px; margin-top:auto;">
+            <span id="card-boersenpreise-cta">Öffnen</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <footer style="background:#0E0E14; color:#FFFFFF;">
+    <div style="max-width:1180px; margin:0 auto; padding:48px 32px; display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+      <img src="../assets/logo-elmi-gradient.png" alt="ELMI POWER" style="height:38px; display:block;">
+      <div style="flex:1;"></div>
+      <span id="footer-text" style="font-size:13px; color:#B8B8C2;">ELMI Power GmbH · Interne Nutzung</span>
+    </div>
+    <div style="height:4px; background:linear-gradient(90deg,#F39A3A 0%,#EC6A2A 22%,#E32028 48%,#B5188B 78%,#6D2A99 100%);"></div>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var STRINGS = {
+    de: {
+      back: 'Zurück zur Übersicht',
+      subtitle: 'Interne Tools & Dashboards',
+      eyebrow: 'ELMI AI · AI Centers',
+      lead: 'Intelligente Strombeschaffung & Prognose',
+      status: 'Day-Ahead-Preise · Energy-Charts / Fraunhofer ISE',
+      viewsLabel: 'Ansichten', viewsMeta: '2 Module',
+      settingsTitle: 'Settings',
+      settingsDesc: 'Preisbestandteile konfigurieren',
+      boersenpreiseTitle: 'Strombörsenpreise',
+      boersenpreiseDesc: 'Day-Ahead-Börsenstrompreise inkl. Endkundenpreis der letzten 48h und Prognose für die nächsten 36h',
+      open: 'Öffnen',
+      footer: 'ELMI Power GmbH · Interne Nutzung'
+    },
+    en: {
+      back: 'Back to overview',
+      subtitle: 'Internal tools & dashboards',
+      eyebrow: 'ELMI AI · AI Centers',
+      lead: 'Intelligent electricity procurement & forecasting',
+      status: 'Day-ahead prices · Energy-Charts / Fraunhofer ISE',
+      viewsLabel: 'Views', viewsMeta: '2 modules',
+      settingsTitle: 'Settings',
+      settingsDesc: 'Configure price components',
+      boersenpreiseTitle: 'Power exchange prices',
+      boersenpreiseDesc: 'Day-ahead exchange prices incl. end-customer price for the last 48h and forecast for the next 36h',
+      open: 'Open',
+      footer: 'ELMI Power GmbH · Internal use'
     }
+  };
 
-    window.setLang = function(lang) {
-      localStorage.setItem('elmi_lang', lang);
-      applyLang(lang);
-    };
+  function applyLang(lang) {
+    var s = STRINGS[lang] || STRINGS.de;
+    document.getElementById('back-label').textContent = s.back;
+    document.getElementById('subtitle-text').textContent = s.subtitle;
+    document.getElementById('eyebrow-text').textContent = s.eyebrow;
+    document.getElementById('lead-text').textContent = s.lead;
+    document.getElementById('status-text').textContent = s.status;
+    document.getElementById('views-label').textContent = s.viewsLabel;
+    document.getElementById('views-meta').textContent = s.viewsMeta;
+    document.getElementById('card-settings-title').textContent = s.settingsTitle;
+    document.getElementById('card-settings-desc').textContent = s.settingsDesc;
+    document.getElementById('card-boersenpreise-title').textContent = s.boersenpreiseTitle;
+    document.getElementById('card-boersenpreise-desc').textContent = s.boersenpreiseDesc;
+    document.getElementById('card-settings-cta').textContent = s.open;
+    document.getElementById('card-boersenpreise-cta').textContent = s.open;
+    document.getElementById('footer-text').textContent = s.footer;
+    document.documentElement.lang = lang;
+    var de = document.getElementById('lbtn-de'), en = document.getElementById('lbtn-en');
+    if (lang === 'de') {
+      de.style.background = '#0E0E14'; de.style.color = '#FFFFFF';
+      en.style.background = 'transparent'; en.style.color = '#6B6B76';
+    } else {
+      en.style.background = '#0E0E14'; en.style.color = '#FFFFFF';
+      de.style.background = 'transparent'; de.style.color = '#6B6B76';
+    }
+  }
 
-    applyLang(localStorage.getItem('elmi_lang') || 'de');
-  })();
-  </script>
+  window.setLang = function(lang) {
+    localStorage.setItem('elmi_lang', lang);
+    applyLang(lang);
+  };
+
+  applyLang(localStorage.getItem('elmi_lang') || 'de');
+})();
+</script>
 </body>
 </html>

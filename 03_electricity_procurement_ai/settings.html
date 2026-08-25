@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ ELMI Procurement · Settings</title>
+  <link rel="icon" type="image/png" href="/elmi-ai/assets/elmi-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline: 2px solid #E32028; outline-offset: 2px; border-radius: 4px;
+    }
+
+    /* Inhalt: Design-System von CPO Sales Center (design.css-Tokens) */
+    .content { width: 100%; max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; flex: 1; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+
+    .price-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .price-table th { text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    .price-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .price-table tr:last-child td { border-bottom: none; }
+    .price-table input[type=text] { width: 100%; }
+    .price-table input[type=number] { width: 100px; text-align: right; }
+    .price-table td.col-remove { width: 36px; }
+
+    input[type=text], input[type=number] {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      padding: 7px 10px; border-radius: var(--radius); font-size: 13px; font-family: var(--font);
+    }
+    input:focus { outline: none; border-color: var(--accent); }
+    label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+    .btn-remove { width: 30px; height: 30px; border-radius: var(--radius); border: 1px solid rgba(220,38,38,.3); background: transparent; color: var(--danger); cursor: pointer; font-size: 14px; line-height: 1; }
+    .btn-remove:hover { background: var(--danger-bg); }
+
+    .btn { display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; font: 700 13px var(--font); transition: opacity .15s; border-radius: var(--radius); }
+    .btn-primary { background: var(--accent); color: #000; padding: 9px 22px; }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); padding: 7px 16px; }
+    .btn:hover { opacity: .85; }
+    .btn-row { display: flex; gap: 12px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+
+    .mwst-field { display: flex; flex-direction: column; gap: 6px; max-width: 160px; }
+    .save-feedback { font-size: 12px; color: var(--success); font-weight: 600; }
+
+    footer { margin-top: 40px; font-size: 12px; color: var(--text-dim); text-align: center; }
+    @media (max-width: 560px) { .price-table { font-size: 12px; } .price-table input[type=number] { width: 76px; } }
+  </style>
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="elmi-brand.css">
+</head>
+<body>
+
+  <header class="elmi-appbar">
+    <a class="ab-brand" href="index.html">
+      <img class="ab-logo" src="../assets/logo-elmi-gradient.png" alt="ELMI">
+      <span class="ab-div"></span>
+      <span class="ab-ai">AI</span>
+    </a>
+    <span class="ab-crumb">Electricity Procurement AI · Settings</span>
+    <div class="ab-right">
+      <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="lbtn-de" onclick="setLang('de')">DE</button>
+        <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+    <h1 id="page-title">⚙️ Settings</h1>
+    <p class="subtitle" id="page-subtitle">Preisbestandteile, aus denen der Endkunden-Strompreis berechnet wird</p>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title" id="section-bestandteile">Preisbestandteile (ct/kWh)</span></div>
+      <table class="price-table">
+        <thead>
+          <tr><th id="th-bezeichnung">Bezeichnung</th><th id="th-wert">ct/kWh</th><th></th></tr>
+        </thead>
+        <tbody id="bestandteile-list"></tbody>
+      </table>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="addBestandteil()">+ <span id="btn-add-label">Bestandteil hinzufügen</span></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title" id="section-mwst">Mehrwertsteuer</span></div>
+      <div class="mwst-field">
+        <label id="label-mwst">MwSt. (%)</label>
+        <input type="number" id="in-mwst" step="0.1" min="0" max="100">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveAll()"><span id="btn-save-label">💾 Speichern</span></button>
+      <span id="save-feedback" class="save-feedback" style="display:none">✓ <span id="save-feedback-text">Gespeichert</span></span>
+    </div>
+
+    <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
+  </div>
+
+  <script src="js/settings-store.js"></script>
+  <script>
+  (function(){
+    var STRINGS = {
+      de: {
+        back: 'Zurück', subtitle: 'Settings', pageTitle: '⚙️ Settings',
+        pageSubtitle: 'Preisbestandteile, aus denen der Endkunden-Strompreis berechnet wird',
+        sectionBestandteile: 'Preisbestandteile (ct/kWh)', addBestandteil: 'Bestandteil hinzufügen',
+        thBezeichnung: 'Bezeichnung', thWert: 'ct/kWh',
+        sectionMwst: 'Mehrwertsteuer', labelMwst: 'MwSt. (%)',
+        save: '💾 Speichern', saved: 'Gespeichert', footer: 'ELMI Power GmbH · Interne Nutzung',
+        placeholderLabel: 'Bezeichnung', removeAria: 'Entfernen'
+      },
+      en: {
+        back: 'Back', subtitle: 'Settings', pageTitle: '⚙️ Settings',
+        pageSubtitle: 'Price components used to calculate the end-customer electricity price',
+        sectionBestandteile: 'Price components (ct/kWh)', addBestandteil: 'Add component',
+        thBezeichnung: 'Label', thWert: 'ct/kWh',
+        sectionMwst: 'VAT', labelMwst: 'VAT (%)',
+        save: '💾 Save', saved: 'Saved', footer: 'ELMI Power GmbH · Internal use only',
+        placeholderLabel: 'Label', removeAria: 'Remove'
+      }
+    };
+    var lang = localStorage.getItem('elmi_lang') || 'de';
+    var settings = ELMI_STROMPREIS.loadSettings();
+
+    function applyLang() {
+      var s = STRINGS[lang] || STRINGS.de;
+      document.getElementById('back-label').textContent = s.back;
+      document.getElementById('page-title').textContent = s.pageTitle;
+      document.getElementById('page-subtitle').textContent = s.pageSubtitle;
+      document.getElementById('section-bestandteile').textContent = s.sectionBestandteile;
+      document.getElementById('btn-add-label').textContent = s.addBestandteil;
+      document.getElementById('th-bezeichnung').textContent = s.thBezeichnung;
+      document.getElementById('th-wert').textContent = s.thWert;
+      document.getElementById('section-mwst').textContent = s.sectionMwst;
+      document.getElementById('label-mwst').textContent = s.labelMwst;
+      document.getElementById('btn-save-label').textContent = s.save;
+      document.getElementById('save-feedback-text').textContent = s.saved;
+      document.getElementById('footer-text').textContent = s.footer;
+      document.documentElement.lang = lang;
+      ['de','en'].forEach(function(l){ var b = document.getElementById('lbtn-'+l); if (b) b.classList.toggle('active', l === lang); });
+      renderBestandteile();
+    }
+    window.setLang = function(l) { lang = l; localStorage.setItem('elmi_lang', l); applyLang(); };
+
+    function fillForm() {
+      document.getElementById('in-mwst').value = settings.mwst;
+      renderBestandteile();
+    }
+
+    function renderBestandteile() {
+      var s = STRINGS[lang] || STRINGS.de;
+      var list = document.getElementById('bestandteile-list');
+      list.innerHTML = settings.bestandteile.map(function(b, idx) {
+        return '<tr>' +
+          '<td><input type="text" value="' + escapeHtml(b.label) + '" placeholder="' + s.placeholderLabel + '" oninput="updateBestandteil(' + idx + ',\'label\',this.value)"></td>' +
+          '<td><input type="number" step="0.001" value="' + b.value + '" oninput="updateBestandteil(' + idx + ',\'value\',this.value)"></td>' +
+          '<td class="col-remove"><button class="btn-remove" onclick="removeBestandteil(' + idx + ')" aria-label="' + s.removeAria + '">✕</button></td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    window.updateBestandteil = function(idx, field, val) {
+      settings.bestandteile[idx][field] = field === 'value' ? parseFloat(val) || 0 : val;
+    };
+    window.removeBestandteil = function(idx) {
+      settings.bestandteile.splice(idx, 1);
+      renderBestandteile();
+    };
+    window.addBestandteil = function() {
+      settings.bestandteile.push({ label: '', value: 0 });
+      renderBestandteile();
+    };
+
+    window.saveAll = function() {
+      settings.mwst = parseFloat(document.getElementById('in-mwst').value) || 0;
+      ELMI_STROMPREIS.saveSettings(settings);
+      var fb = document.getElementById('save-feedback');
+      fb.style.display = 'inline';
+      setTimeout(function(){ fb.style.display = 'none'; }, 2500);
+    };
+
+    fillForm();
+    applyLang();
+  })();
+  </script>
+</body>
+</html>

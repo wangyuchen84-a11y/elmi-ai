@@ -1,0 +1,110 @@
+/* ════════════════════════════════════════════════════════════
+   ELMI POWER — Brand refresh overlay · CPO Sales Center AI
+   Loaded LAST on every tool page (after design.css + page styles).
+   Pure visual layer: unifies the gold/purple accents onto the
+   ELMI red → tangerine → purple identity and adds one shared
+   app header. No markup IDs or JS behaviour are changed.
+════════════════════════════════════════════════════════════ */
+
+/* ── Accent tokens: gold/purple → ELMI red ── */
+:root{
+  --accent:#E32028; --accent-dark:#C31A22; --accent-bg:#FDECEC;
+  --accent-border:#F4C3C5; --accent-text:#991B1B; --border-focus:#E32028;
+}
+
+/* ── Unified app bar ── */
+.elmi-appbar{
+  position:fixed; top:0; left:0; right:0; z-index:300;
+  display:flex; align-items:center; gap:14px; height:56px; padding:0 24px;
+  background:rgba(255,255,255,.85);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid #E7E7EB;
+  font-family:'Maven Pro', system-ui, sans-serif;
+}
+.elmi-appbar .ab-brand{display:flex; align-items:center; gap:11px; text-decoration:none; flex-shrink:0;}
+.elmi-appbar .ab-logo{height:24px; display:block;}
+.elmi-appbar .ab-div{width:1px; height:20px; background:#E7E7EB; display:block;}
+.elmi-appbar .ab-ai{font-weight:800; font-size:17px; letter-spacing:.02em; color:#0E0E14;}
+.elmi-appbar .ab-crumb{font-size:13px; color:#6B6B76; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.elmi-appbar .ab-right{margin-left:auto; display:flex; align-items:center; gap:12px; flex-shrink:0;}
+body{padding-top:56px;}
+@media(max-width:600px){ .elmi-appbar .ab-crumb{display:none;} }
+
+/* back button in bar */
+.elmi-appbar .back-btn, a.back-btn{
+  position:static !important; top:auto !important; left:auto !important; right:auto !important;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 14px; background:#fff; border:1px solid #E7E7EB; border-radius:999px;
+  color:#4A4A55; font:600 13px/1 'Maven Pro', system-ui, sans-serif; text-decoration:none; transition:all .15s;
+}
+.elmi-appbar .back-btn:hover, a.back-btn:hover{border-color:#D1D1D8; color:#0E0E14; background:#fff;}
+
+/* language pill group */
+.lang-toggle{
+  position:static !important; top:auto !important; right:auto !important;
+  display:flex; align-items:center; gap:2px; padding:3px;
+  border:1px solid #E7E7EB; border-radius:999px; background:#fff;
+}
+.lang-btn{
+  background:transparent !important; border:0 !important; border-radius:999px !important;
+  padding:6px 13px !important; cursor:pointer; letter-spacing:.04em;
+  font:700 12px/1 'Maven Pro', system-ui, sans-serif !important; color:#6B6B76 !important;
+  transition:background .14s,color .14s; display:inline-flex; align-items:center; gap:4px;
+}
+.lang-btn:hover{color:#0E0E14 !important;}
+.lang-btn.active{background:#0E0E14 !important; color:#fff !important; border-color:#0E0E14 !important;}
+
+/* ── Primary buttons → ELMI red ── */
+.btn-primary{background:#E32028 !important; color:#fff !important; border:none !important;}
+.btn-primary:hover{background:#C31A22 !important; opacity:1 !important;}
+
+/* ── Focus rings ── */
+input:focus, select:focus, textarea:focus{
+  border-color:#E32028 !important; box-shadow:0 0 0 3px rgba(227,32,40,.13) !important;
+}
+
+/* ── Section titles / labels (purple → red) ── */
+.section-title{color:#E32028 !important;}
+.preis-group .group-label{color:#E32028 !important;}
+.notice a{color:#E32028 !important;}
+
+/* ── Upload / file zones ── */
+.upload-zone{border-color:rgba(227,32,40,.35) !important; background:rgba(227,32,40,.04) !important;}
+.upload-zone:hover, .upload-zone.dragover{border-color:#E32028 !important; background:rgba(227,32,40,.07) !important;}
+.file-zone:hover{border-color:#E32028 !important; background:rgba(227,32,40,.04) !important;}
+.progress-fill{background:linear-gradient(90deg,#EC6A2A,#E32028) !important;}
+
+/* ── Sortable table headers / row hover (purple → red) ── */
+thead th:hover{color:#E32028 !important;}
+thead th.sorted{color:#E32028 !important;}
+thead th.sorted .sort-icon{color:#E32028 !important;}
+tbody tr:hover{background:rgba(227,32,40,.05) !important;}
+
+/* ── Override controls ── */
+.ov-btn{background:rgba(227,32,40,.12) !important; border-color:#E32028 !important; color:#E32028 !important;}
+.ov-btn:hover{background:rgba(227,32,40,.20) !important;}
+
+/* ── Charge-type badges / tags — unified ELMI mapping ──
+   HPC = red · DC = tangerine · AC = purple */
+.badge-hpc, .badge-HPC, .type-hpc, .tag-hpc, .pill-expensive{
+  background:rgba(227,32,40,.12) !important; color:#E32028 !important;
+}
+.badge-dc, .badge-DC, .type-dc, .tag-dc{
+  background:rgba(236,106,42,.15) !important; color:#C9551B !important;
+}
+.badge-ac, .badge-AC, .type-ac, .tag-ac{
+  background:rgba(109,42,153,.12) !important; color:#6D2A99 !important;
+}
+
+/* ── Accent surfaces (gold → ELMI red/purple tint) ── */
+.ai-box, .price-rec-widget{
+  background:linear-gradient(135deg,rgba(227,32,40,.05),rgba(109,42,153,.03)) !important;
+  border-color:rgba(227,32,40,.20) !important;
+}
+.ai-header{color:#E32028 !important;}
+.chip-a, .cluster-premium{
+  background:rgba(227,32,40,.10) !important; color:#E32028 !important; border-color:rgba(227,32,40,.30) !important;
+}
+
+/* ── Footer brand cue ── */
+footer, .footer, .elmi-footer{ border-top:1px solid #E7E7EB; }

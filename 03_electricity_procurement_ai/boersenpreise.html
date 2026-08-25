@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ ELMI Procurement · Strombörsenpreise</title>
+  <link rel="icon" type="image/png" href="/elmi-ai/assets/elmi-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --elmi-red:    #E32028;
+      --elmi-purple: #6D2A99;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+    a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+      outline: 2px solid var(--elmi-red); outline-offset: 2px; border-radius: 4px;
+    }
+
+    .content { width: 100%; max-width: 1100px; margin: 0 auto; padding: 32px 20px 80px; flex: 1; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+    .chart-wrap { position: relative; height: 420px; }
+    @media (max-width: 640px) { .chart-wrap { height: 320px; } }
+
+    .status-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); flex-shrink: 0; }
+    .status-dot.ok { background: var(--success); }
+    .status-dot.err { background: var(--danger); }
+    .btn-refresh { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface2); color: var(--text); font: 700 12px var(--font); cursor: pointer; transition: background .15s; margin-left: auto; }
+    .btn-refresh:hover { background: var(--surface3); }
+    .btn-refresh:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-refresh .spin { display: inline-block; animation: spin 1s linear infinite; }
+    @media (prefers-reduced-motion: reduce) { .btn-refresh .spin { animation: none; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .legend-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 14px; font-size: 12px; color: var(--text-muted); }
+    .legend-item { display: flex; align-items: center; gap: 7px; }
+    .legend-swatch { width: 22px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+    .legend-swatch.dashed { background: repeating-linear-gradient(90deg, currentColor 0 6px, transparent 6px 10px); }
+
+    .source-note { font-size: 11px; color: var(--text-dim); margin-top: 10px; }
+    .error-box { background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger-text); border-radius: var(--radius); padding: 12px 16px; font-size: 13px; margin-bottom: 16px; display: none; }
+
+    footer { margin-top: 40px; font-size: 12px; color: var(--text-dim); text-align: center; }
+  </style>
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="elmi-brand.css">
+</head>
+<body>
+
+  <header class="elmi-appbar">
+    <a class="ab-brand" href="index.html">
+      <img class="ab-logo" src="../assets/logo-elmi-gradient.png" alt="ELMI">
+      <span class="ab-div"></span>
+      <span class="ab-ai">AI</span>
+    </a>
+    <span class="ab-crumb">Electricity Procurement AI · Strombörsenpreise</span>
+    <div class="ab-right">
+      <a class="back-btn" href="index.html">← <span id="back-label">Zurück</span></a>
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="lbtn-de" onclick="setLang('de')">DE</button>
+        <button class="lang-btn" id="lbtn-en" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+    <h1 id="page-title">⚡ Strombörsenpreise</h1>
+    <p class="subtitle" id="page-subtitle">Day-Ahead-Börsenpreise (48h Vergangenheit, 36h Prognose) und daraus berechneter Endkunden-Strompreis</p>
+
+    <div class="error-box" id="error-box"></div>
+
+    <div class="card">
+      <div class="legend-row">
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--elmi-purple)"></span> Börsenpreis (€/MWh, links)</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--elmi-red)"></span> Strompreis (ct/kWh, rechts)</div>
+        <div class="legend-item"><span class="legend-swatch dashed" style="color:var(--text-muted)"></span> Prognose (Zukunft)</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="priceChart" role="img" aria-label="Zeitreihe Strombörsenpreise und berechneter Endkunden-Strompreis"></canvas>
+      </div>
+      <div class="status-row">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Lädt…</span>
+        <button class="btn-refresh" id="refresh-btn" onclick="manualRefresh()">🔄 <span id="refresh-label">Aktualisieren</span></button>
+      </div>
+      <div class="source-note" id="source-note">Daten: Energy-Charts / Fraunhofer ISE (CC BY 4.0)</div>
+    </div>
+
+    <footer id="footer-text">ELMI Power GmbH · Interne Nutzung</footer>
+  </div>
+
+  <script src="js/settings-store.js"></script>
+  <script src="js/energy-charts-api.js"></script>
+  <script>
+  (function(){
+    var STRINGS = {
+      de: {
+        back: 'Zurück', subtitle: 'Strombörsenpreise', pageTitle: '⚡ Strombörsenpreise',
+        pageSubtitle: 'Day-Ahead-Börsenpreise (48h Vergangenheit, 36h Prognose) und daraus berechneter Endkunden-Strompreis',
+        refresh: 'Aktualisieren', loading: 'Lädt…', footer: 'ELMI Power GmbH · Interne Nutzung',
+        legendBoerse: 'Börsenpreis (€/MWh, links)', legendStrom: 'Strompreis (ct/kWh, rechts)', legendForecast: 'Prognose (Zukunft)',
+        source: 'Daten: Energy-Charts / Fraunhofer ISE (CC BY 4.0)',
+        lastUpdated: 'Zuletzt aktualisiert', errorPrefix: 'Fehler beim Laden der Preisdaten: '
+      },
+      en: {
+        back: 'Back', subtitle: 'Power exchange prices', pageTitle: '⚡ Power exchange prices',
+        pageSubtitle: 'Day-ahead exchange prices (48h past, 36h forecast) and the resulting end-customer electricity price',
+        refresh: 'Refresh', loading: 'Loading…', footer: 'ELMI Power GmbH · Internal use only',
+        legendBoerse: 'Exchange price (€/MWh, left)', legendStrom: 'Electricity price (ct/kWh, right)', legendForecast: 'Forecast (future)',
+        source: 'Data: Energy-Charts / Fraunhofer ISE (CC BY 4.0)',
+        lastUpdated: 'Last updated', errorPrefix: 'Error loading price data: '
+      }
+    };
+    var lang = localStorage.getItem('elmi_lang') || 'de';
+
+    function applyLang() {
+      var s = STRINGS[lang] || STRINGS.de;
+      document.getElementById('back-label').textContent = s.back;
+      document.getElementById('page-title').textContent = s.pageTitle;
+      document.getElementById('page-subtitle').textContent = s.pageSubtitle;
+      document.getElementById('refresh-label').textContent = s.refresh;
+      document.getElementById('footer-text').textContent = s.footer;
+      document.getElementById('source-note').textContent = s.source;
+      document.querySelectorAll('.legend-item')[0].lastChild.textContent = ' ' + s.legendBoerse;
+      document.querySelectorAll('.legend-item')[1].lastChild.textContent = ' ' + s.legendStrom;
+      document.querySelectorAll('.legend-item')[2].lastChild.textContent = ' ' + s.legendForecast;
+      document.documentElement.lang = lang;
+      ['de','en'].forEach(function(l){ var b = document.getElementById('lbtn-'+l); if (b) b.classList.toggle('active', l === lang); });
+      updateStatusText();
+    }
+    window.setLang = function(l) { lang = l; localStorage.setItem('elmi_lang', l); applyLang(); };
+
+    // ── State ──
+    var currentSeries = null;
+    var lastFetchedAt = null;
+    var chart = null;
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function updateStatusText(errored) {
+      var s = STRINGS[lang] || STRINGS.de;
+      var dot = document.getElementById('status-dot');
+      var text = document.getElementById('status-text');
+      if (errored) { dot.className = 'status-dot err'; text.textContent = s.errorPrefix + errored; return; }
+      if (!lastFetchedAt) { dot.className = 'status-dot'; text.textContent = s.loading; return; }
+      dot.className = 'status-dot ok';
+      var d = new Date(lastFetchedAt);
+      text.textContent = s.lastUpdated + ': ' + d.toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB') + ' ' + d.toLocaleTimeString(lang === 'de' ? 'de-DE' : 'en-GB', {hour:'2-digit', minute:'2-digit'});
+    }
+
+    function fmtTick(ms) {
+      var d = new Date(ms);
+      var day = d.toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', {weekday:'short'});
+      var time = d.toLocaleTimeString(lang === 'de' ? 'de-DE' : 'en-GB', {hour:'2-digit', minute:'2-digit'});
+      return day + ' ' + time;
+    }
+
+    function buildChartData(series, settings) {
+      var boerseData = series.map(function(p){ return {x: p.t*1000, y: p.boerse, future: !!p.future}; });
+      var stromData = series.map(function(p){ return {x: p.t*1000, y: ELMI_STROMPREIS.computeStrompreisCtKwh(p.boerse, settings), future: !!p.future}; });
+      return { boerseData: boerseData, stromData: stromData };
+    }
+
+    function dashSegment(ctx) {
+      return (ctx.p1.raw && ctx.p1.raw.future) ? [6,4] : undefined;
+    }
+
+    function renderChart(series) {
+      var settings = ELMI_STROMPREIS.loadSettings();
+      var data = buildChartData(series, settings);
+      var ctx = document.getElementById('priceChart').getContext('2d');
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [
+            {
+              label: 'Börsenpreis €/MWh',
+              data: data.boerseData,
+              borderColor: '#6D2A99',
+              backgroundColor: 'transparent',
+              yAxisID: 'y',
+              pointRadius: 0,
+              borderWidth: 2,
+              tension: 0,
+              segment: { borderDash: dashSegment }
+            },
+            {
+              label: 'Strompreis ct/kWh',
+              data: data.stromData,
+              borderColor: '#E32028',
+              backgroundColor: 'transparent',
+              yAxisID: 'y1',
+              pointRadius: 0,
+              borderWidth: 2,
+              tension: 0,
+              segment: { borderDash: dashSegment }
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: reduceMotion ? false : { duration: 500 },
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: function(items) { return items.length ? fmtTick(items[0].parsed.x) : ''; },
+                label: function(item) {
+                  var v = item.parsed.y;
+                  if (v == null) return '';
+                  return item.dataset.label + ': ' + v.toFixed(2);
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'linear',
+              ticks: { color: '#6B6B76', font: {size: 10}, maxTicksLimit: 10, callback: function(v){ return fmtTick(v); } },
+              grid: { color: 'rgba(14,14,20,.05)' }
+            },
+            y: {
+              type: 'linear', position: 'left',
+              title: { display: true, text: '€/MWh', color: '#6B6B76' },
+              ticks: { color: '#6B6B76' },
+              grid: { color: 'rgba(14,14,20,.05)' }
+            },
+            y1: {
+              type: 'linear', position: 'right',
+              title: { display: true, text: 'ct/kWh', color: '#6B6B76' },
+              ticks: { color: '#6B6B76' },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function recomputeRightAxisOnly() {
+      if (!chart || !currentSeries) return;
+      var settings = ELMI_STROMPREIS.loadSettings();
+      var stromData = currentSeries.map(function(p){ return {x: p.t*1000, y: ELMI_STROMPREIS.computeStrompreisCtKwh(p.boerse, settings), future: !!p.future}; });
+      chart.data.datasets[1].data = stromData;
+      chart.update('none');
+    }
+
+    async function loadData() {
+      var errBox = document.getElementById('error-box');
+      errBox.style.display = 'none';
+      document.getElementById('refresh-btn').disabled = true;
+      document.getElementById('status-dot').className = 'status-dot';
+      try {
+        var result = await ELMI_ENERGY_CHARTS.loadFullSeries(48, 36);
+        currentSeries = result.series;
+        lastFetchedAt = result.fetchedAt;
+        renderChart(currentSeries);
+        updateStatusText();
+      } catch (e) {
+        errBox.textContent = (STRINGS[lang] || STRINGS.de).errorPrefix + e.message;
+        errBox.style.display = 'block';
+        updateStatusText(e.message);
+      }
+      document.getElementById('refresh-btn').disabled = false;
+    }
+
+    window.manualRefresh = function() { loadData(); };
+
+    // ── Settings-Aenderung: rechte Achse sofort neu berechnen, kein API-Call ──
+    window.addEventListener('storage', function(e) {
+      if (e.key === ELMI_STROMPREIS.SETTINGS_KEY) recomputeRightAxisOnly();
+    });
+    window.addEventListener('strompreis-settings-changed', recomputeRightAxisOnly);
+
+    // ── Taeglicher Auto-Refresh um 14:00 lokal ──
+    // Hinweis: rein clientseitiger Timer, feuert nur solange die Seite offen
+    // ist (Tab/Fenster geschlossen = kein Refresh). Falls das Repo einmal
+    // ein Backend bekommt, waere ein serverseitiger Cron/Scheduler-Job
+    // (z.B. APScheduler) die robustere Variante, die auch ohne offene
+    // Seite aktualisiert - aktuell laut Anforderung Client-Timer als Default.
+    function msUntilNext(hour) {
+      var now = new Date();
+      var target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, 0, 0, 0);
+      if (target.getTime() <= now.getTime()) target.setDate(target.getDate() + 1);
+      return target.getTime() - now.getTime();
+    }
+    function scheduleDaily(hour, cb) {
+      setTimeout(function() { cb(); scheduleDaily(hour, cb); }, msUntilNext(hour));
+    }
+    scheduleDaily(14, loadData);
+
+    applyLang();
+    loadData();
+  })();
+  </script>
+</body>
+</html>
