@@ -144,14 +144,27 @@
     .card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--fg2); display: flex; align-items: center; gap: 8px; }
     .card-hint { font-size: 11.5px; color: var(--fg3); margin-bottom: 12px; }
 
-    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 20px; align-items: stretch; }
+    .stat-row .card { display: flex; flex-direction: column; }
 
-    .kpi-grid { display: grid; gap: 10px; }
-    .kpi-box { background: var(--bg2); border: 1px solid var(--border-1); border-radius: var(--radius-sm); padding: 10px 13px; }
-    .kpi-label { font-size: 10.5px; color: var(--fg3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
-    .kpi-value { font-size: 19px; font-weight: 700; font-family: 'JetBrains Mono', 'Courier New', monospace; color: var(--fg1); }
-    .kpi-value .unit { font-size: 12px; font-weight: 500; color: var(--fg3); margin-left: 3px; }
-    .kpi-value.stale { color: var(--fg3); }
+    /* ── Wertzeilen (Label links, grosser Wert rechts) - fuer alle 4 Karten
+       oben, an das Kartenende ausgerichtet (freier Raum bleibt zwischen
+       Ueberschrift und Zahlen, statt die Karte oben buendig zu fuellen). ── */
+    .card-lines { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+    .card-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .card-line-label { font-size: 13px; color: var(--fg2); font-weight: 600; }
+    .card-line-value { font-size: 22px; font-weight: 800; font-family: 'JetBrains Mono', 'Courier New', monospace; color: var(--fg1); }
+    .card-line-value .unit { font-size: 12px; font-weight: 600; color: var(--fg3); margin-left: 3px; }
+    .card-line-value.stale { color: var(--fg3); }
+
+    /* ── Netzanschluss-Karte: hervorgehoben, Farbe = Kurvenfarbe in der Grafik,
+       Bezug/Einspeisung etwas groesser als die Werte der anderen Karten. ── */
+    .nap-card { --nap-color: #2563EB; background: rgba(37,99,235,.06); border-color: rgba(37,99,235,.28); }
+    .card-tint-yellow { background: rgba(247,195,37,.10); border-color: rgba(247,195,37,.4); }
+    .card-tint-red    { background: rgba(227,32,40,.06);  border-color: rgba(227,32,40,.28); }
+    .nap-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .nap-icon { font-size: 32px; line-height: 1; }
+    .nap-title { font-size: 15px; font-weight: 800; color: var(--fg1); letter-spacing: .01em; }
 
     .chart-wrap { position: relative; height: 320px; }
     .empty-hint { text-align: center; padding: 60px 0; color: var(--fg3); font-size: 13px; }
@@ -200,65 +213,68 @@
     </div>
 
     <div class="stat-row">
-      <div class="card" style="margin-bottom:0">
-        <div class="card-header"><span class="card-title" id="card-nap-title">📡 NAP</span></div>
-        <div class="kpi-grid">
-          <div class="kpi-box">
-            <div class="kpi-label" id="lbl-nap-power">Leistung</div>
-            <div class="kpi-value" id="nap-power">–<span class="unit">kW</span></div>
+      <div class="card nap-card" style="margin-bottom:0">
+        <div class="nap-card-header">
+          <span class="nap-icon">🔌</span>
+          <span class="nap-title" id="card-nap-title">Netzanschluss</span>
+        </div>
+        <div class="card-lines">
+          <div class="card-line">
+            <span class="card-line-label" id="lbl-bezug">Bezug</span>
+            <span class="card-line-value" id="nap-bezug">–<span class="unit">kW</span></span>
+          </div>
+          <div class="card-line">
+            <span class="card-line-label" id="lbl-einspeisung">Einspeisung</span>
+            <span class="card-line-value" id="nap-einspeisung">–<span class="unit">kW</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-tint-yellow" style="margin-bottom:0">
+        <div class="card-header"><span class="card-title" id="card-erzeugung-title">☀️ Stromerzeugung</span></div>
+        <div class="card-lines">
+          <div class="card-line">
+            <span class="card-line-label" id="lbl-pv">PV</span>
+            <span class="card-line-value" id="pv-power">–<span class="unit">kW</span></span>
+          </div>
+          <div class="card-line">
+            <span class="card-line-label" id="lbl-erzeugung-gesamt">Gesamt</span>
+            <span class="card-line-value" id="erzeugung-gesamt">–<span class="unit">kW</span></span>
           </div>
         </div>
       </div>
 
       <div class="card" style="margin-bottom:0">
-        <div class="card-header"><span class="card-title">🔌 AiO</span></div>
-        <div class="kpi-grid">
-          <div class="kpi-box">
-            <div class="kpi-label" id="lbl-inv-power">Leistung am Netzanschluss</div>
-            <div class="kpi-value" id="inverter-ac-power">–<span class="unit">kW</span></div>
+        <div class="card-header"><span class="card-title" id="card-verbrauch-title">🏭 Stromverbrauch</span></div>
+        <div class="card-lines">
+          <div class="card-line">
+            <span class="card-line-label" id="lbl-aio">AiO</span>
+            <span class="card-line-value" id="inverter-ac-power">–<span class="unit">kW</span></span>
           </div>
-          <div class="kpi-box">
-            <div class="kpi-label" id="lbl-bat-power">Leistung der Batterie</div>
-            <div class="kpi-value" id="battery-power">–<span class="unit">kW</span></div>
-          </div>
-          <div class="kpi-box">
-            <div class="kpi-label" id="lbl-bat-soc">SOC der Batterie</div>
-            <div class="kpi-value" id="battery-soc">–<span class="unit">%</span></div>
+          <div class="card-line">
+            <span class="card-line-label" id="lbl-sonstige">Sonstige</span>
+            <span class="card-line-value" id="verbrauch-sonstige">–<span class="unit">kW</span></span>
           </div>
         </div>
       </div>
 
-      <div class="card" style="margin-bottom:0">
-        <div class="card-header"><span class="card-title" id="card-cp1-title">🔋 Ladepunkt 1</span></div>
-        <div class="kpi-grid">
-          <div class="kpi-box">
-            <div class="kpi-label">SOC</div>
-            <div class="kpi-value" id="ev-a-soc">–<span class="unit">%</span></div>
+      <div class="card card-tint-red" style="margin-bottom:0">
+        <div class="card-header"><span class="card-title" id="card-ladepunkte-title">⚡ Ladepunkte</span></div>
+        <div class="card-lines">
+          <div class="card-line">
+            <span class="card-line-label" id="lbl-cp1">Ladepunkt 1</span>
+            <span class="card-line-value" id="ev-a-power">–<span class="unit">kW</span></span>
           </div>
-          <div class="kpi-box">
-            <div class="kpi-label" id="lbl-cp1-power">Leistung</div>
-            <div class="kpi-value" id="ev-a-power">–<span class="unit">kW</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:0">
-        <div class="card-header"><span class="card-title" id="card-cp2-title">🔋 Ladepunkt 2</span></div>
-        <div class="kpi-grid">
-          <div class="kpi-box">
-            <div class="kpi-label">SOC</div>
-            <div class="kpi-value" id="ev-b-soc">–<span class="unit">%</span></div>
-          </div>
-          <div class="kpi-box">
-            <div class="kpi-label" id="lbl-cp2-power">Leistung</div>
-            <div class="kpi-value" id="ev-b-power">–<span class="unit">kW</span></div>
+          <div class="card-line">
+            <span class="card-line-label" id="lbl-cp2">Ladepunkt 2</span>
+            <span class="card-line-value" id="ev-b-power">–<span class="unit">kW</span></span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-header"><span class="card-title" id="chart1-title">📊 NAP-/AC-Inverter-/PV-Leistung · SOC (letzte 24h)</span></div>
+      <div class="card-header"><span class="card-title" id="chart1-title">📊 Verbrauch und Erzeugung der letzten 24h</span></div>
       <p class="card-hint" id="chart-hint">Mit gedrückter linker Maustaste ein Rechteck aufziehen, um zu vergrößern. Klick ohne Ziehen setzt den Zoom zurück.</p>
       <div class="chart-wrap">
         <canvas id="power-chart"></canvas>
@@ -267,7 +283,7 @@
     </div>
 
     <div class="card">
-      <div class="card-header"><span class="card-title" id="chart2-title">📊 Batterie-/Ladepunkt-Leistung · SOC (letzte 24h)</span></div>
+      <div class="card-header"><span class="card-title" id="chart2-title">📊 Ladestrom und Batterieleistung der letzten 24h</span></div>
       <div class="chart-wrap">
         <canvas id="ev-pv-chart"></canvas>
       </div>
@@ -287,26 +303,30 @@
       back: 'Zurück', subtitle: 'Live Standortdaten – Echtzeit-Dashboard per MQTT',
       connConnecting: 'Verbinde...', connConnected: 'Verbunden', connReconnecting: 'Verbinde erneut...', connClosed: 'Getrennt', connError: 'Fehler',
       lastPoint: 'Letzter Datenpunkt:', lastReceived: 'Empfangen:',
-      napTitle: '📡 NAP', napPower: 'Leistung',
-      invPower: 'Leistung am Netzanschluss', batPower: 'Leistung der Batterie', batSoc: 'SOC der Batterie',
-      cp1Title: '🔋 Ladepunkt 1', cp2Title: '🔋 Ladepunkt 2', cpPower: 'Leistung',
-      chart1Title: '📊 NAP-/AC-Inverter-/PV-Leistung · SOC (letzte 24h)',
-      chart2Title: '📊 Batterie-/Ladepunkt-Leistung · SOC (letzte 24h)',
+      napTitle: 'Netzanschluss', bezug: 'Bezug', einspeisung: 'Einspeisung',
+      erzeugungTitle: '☀️ Stromerzeugung', pv: 'PV', erzeugungGesamt: 'Gesamt',
+      verbrauchTitle: '🏭 Stromverbrauch', aio: 'AiO', sonstige: 'Sonstige',
+      ladepunkteTitle: '⚡ Ladepunkte', cp1: 'Ladepunkt 1', cp2: 'Ladepunkt 2',
+      chart1Title: '📊 Verbrauch und Erzeugung der letzten 24h',
+      chart2Title: '📊 Ladestrom und Batterieleistung der letzten 24h',
       chartHint: 'Mit gedrückter linker Maustaste ein Rechteck aufziehen, um zu vergrößern. Klick ohne Ziehen setzt den Zoom zurück.',
       emptyHint: 'Noch keine Messdaten empfangen.',
+      sStromverbrauch: 'Stromverbrauch', sStromverbrauchAio: 'Stromverbrauch (AiO)', sErzeugungPv: 'Erzeugung (PV)', sSoc: 'SOC',
       footer: 'Daten werden per MQTT von einer lokalen Anlage übertragen (Snapshot alle 24h, Updates jede Minute). Kein direkter Zugriff auf die Anlage selbst.<br>ELMI Power GmbH · Interne Nutzung'
     },
     en: {
       back: 'Back', subtitle: 'Live site data – real-time MQTT dashboard',
       connConnecting: 'Connecting...', connConnected: 'Connected', connReconnecting: 'Reconnecting...', connClosed: 'Disconnected', connError: 'Error',
       lastPoint: 'Last data point:', lastReceived: 'Received:',
-      napTitle: '📡 NAP', napPower: 'Power',
-      invPower: 'Grid connection power', batPower: 'Battery power', batSoc: 'Battery SOC',
-      cp1Title: '🔋 Charge point 1', cp2Title: '🔋 Charge point 2', cpPower: 'Power',
-      chart1Title: '📊 NAP / AC inverter / PV power · SOC (last 24h)',
-      chart2Title: '📊 Battery / charge point power · SOC (last 24h)',
+      napTitle: 'Grid connection', bezug: 'Import', einspeisung: 'Export',
+      erzeugungTitle: '☀️ Generation', pv: 'PV', erzeugungGesamt: 'Total',
+      verbrauchTitle: '🏭 Consumption', aio: 'AiO', sonstige: 'Other',
+      ladepunkteTitle: '⚡ Charge points', cp1: 'Charge point 1', cp2: 'Charge point 2',
+      chart1Title: '📊 Consumption and generation, last 24h',
+      chart2Title: '📊 Charging current and battery power, last 24h',
       chartHint: 'Drag with the left mouse button to zoom into an area. Click without dragging resets the zoom.',
       emptyHint: 'No measurement data received yet.',
+      sStromverbrauch: 'Consumption', sStromverbrauchAio: 'Consumption (AiO)', sErzeugungPv: 'Generation (PV)', sSoc: 'SOC',
       footer: 'Data is transmitted via MQTT from a local site (snapshot every 24h, updates every minute). No direct access to the site itself.<br>ELMI Power GmbH · Internal use only'
     }
   };
@@ -321,14 +341,17 @@
     document.getElementById('last-point-label').textContent = s.lastPoint;
     document.getElementById('last-received-label').textContent = s.lastReceived;
     document.getElementById('card-nap-title').textContent = s.napTitle;
-    document.getElementById('lbl-nap-power').textContent = s.napPower;
-    document.getElementById('lbl-inv-power').textContent = s.invPower;
-    document.getElementById('lbl-bat-power').textContent = s.batPower;
-    document.getElementById('lbl-bat-soc').textContent = s.batSoc;
-    document.getElementById('card-cp1-title').textContent = s.cp1Title;
-    document.getElementById('card-cp2-title').textContent = s.cp2Title;
-    document.getElementById('lbl-cp1-power').textContent = s.cpPower;
-    document.getElementById('lbl-cp2-power').textContent = s.cpPower;
+    document.getElementById('lbl-bezug').textContent = s.bezug;
+    document.getElementById('lbl-einspeisung').textContent = s.einspeisung;
+    document.getElementById('card-erzeugung-title').textContent = s.erzeugungTitle;
+    document.getElementById('lbl-pv').textContent = s.pv;
+    document.getElementById('lbl-erzeugung-gesamt').textContent = s.erzeugungGesamt;
+    document.getElementById('card-verbrauch-title').textContent = s.verbrauchTitle;
+    document.getElementById('lbl-aio').textContent = s.aio;
+    document.getElementById('lbl-sonstige').textContent = s.sonstige;
+    document.getElementById('card-ladepunkte-title').textContent = s.ladepunkteTitle;
+    document.getElementById('lbl-cp1').textContent = s.cp1;
+    document.getElementById('lbl-cp2').textContent = s.cp2;
     document.getElementById('chart1-title').textContent = s.chart1Title;
     document.getElementById('chart2-title').textContent = s.chart2Title;
     document.getElementById('chart-hint').textContent = s.chartHint;
@@ -345,6 +368,7 @@
   window.setLang = function (lang) {
     localStorage.setItem('elmi_lang', lang);
     applyLang(lang);
+    if (window.__relabelCharts) window.__relabelCharts();
   };
   applyLang(currentLang);
   </script>
@@ -400,6 +424,31 @@
       return d.toLocaleString(currentLang === 'en' ? 'en-GB' : 'de-DE', { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
     }
 
+    // Tooltip: korrektes Datum/Uhrzeit in der Titelzeile (statt des rohen
+    // Unix-x-Werts) + Wert samt Einheit je Kurve beim Hover ueber einen Punkt.
+    function tooltipTitle(items) {
+      if (!items.length) return '';
+      var d = new Date(items[0].parsed.x);
+      return d.toLocaleString(currentLang === 'en' ? 'en-GB' : 'de-DE', { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+    function tooltipLabel(item) {
+      var v = item.parsed.y;
+      var unit = item.dataset.yAxisID === "soc" ? "%" : "kW";
+      return item.dataset.label + ": " + (v == null ? "–" : v.toFixed(2)) + " " + unit;
+    }
+    // Bei hoher Punktdichte (24h auf ~1150px) liegen mehrere Minutenpunkte
+    // derselben Kurve im selben Pixel - "x"-Modus matcht dann mehrere davon.
+    // Filter behaelt pro Kurve nur den zum ersten (Referenz-)Punkt naechsten.
+    function tooltipFilter(item, index, array) {
+      var refX = array[0].parsed.x;
+      var sameDataset = array.filter(function (it) { return it.datasetIndex === item.datasetIndex; });
+      var closest = sameDataset.reduce(function (best, it) {
+        return Math.abs(it.parsed.x - refX) < Math.abs(best.parsed.x - refX) ? it : best;
+      }, sameDataset[0]);
+      return item.dataIndex === closest.dataIndex;
+    }
+    var TOOLTIP_OPTIONS = { callbacks: { title: tooltipTitle, label: tooltipLabel }, filter: tooltipFilter };
+
     function fmt(value) {
       if (value === null || value === undefined || Number.isNaN(value)) return "–";
       return typeof value === "number" ? value.toFixed(2) : String(value);
@@ -417,9 +466,10 @@
     // minuetlichen "update"-Deltas ueberlappen sich, ohne Punkte zu duplizieren.
     var rowsByTs = new Map();
     // Jedes Diagramm hat seine eigene Leistungs-Achse (unterschiedliche
-    // Wertebereiche). Die Grenzen wachsen nur - ein Schrumpfen bei jedem
-    // Update wuerde einen manuellen Zoom des Nutzers staendig zuruecksetzen.
-    var powerAxisBound1 = 10, powerAxisBound2 = 10;
+    // Wertebereiche). Min/Max wachsen getrennt (keine gespiegelte Achse) und
+    // nur nach aussen - ein Schrumpfen bei jedem Update wuerde einen
+    // manuellen Zoom des Nutzers staendig zuruecksetzen.
+    var powerMin1 = 0, powerMax1 = 10, powerMin2 = 0, powerMax2 = 10;
     var powerChart = null, batteryEvChart = null;
 
     function toSeries(rows, field) {
@@ -434,32 +484,60 @@
       return rows;
     }
 
-    function growBound(current, rows, fields) {
-      var bound = current;
+    // Getrennte Min-/Max-Grenzen statt gespiegelter Achse: jeweils auf den
+    // naechsten 10-kW-Schritt ab-/aufgerundet. "current" ist die bisherige
+    // (bereits gerundete) Grenze - Math.min/max davor stellt sicher, dass die
+    // Grenze nur wachsen, nie schrumpfen kann.
+    function growMin(current, rows, fields) {
+      var m = current;
       rows.forEach(function (r) {
         fields.forEach(function (f) {
-          if (r[f] !== null && r[f] !== undefined) bound = Math.max(bound, Math.abs(r[f]) * 1.1);
+          if (r[f] !== null && r[f] !== undefined) m = Math.min(m, r[f]);
         });
       });
-      return bound;
+      return Math.floor(m / 10) * 10;
+    }
+    function growMax(current, rows, fields) {
+      var m = current;
+      rows.forEach(function (r) {
+        fields.forEach(function (f) {
+          if (r[f] !== null && r[f] !== undefined) m = Math.max(m, r[f]);
+        });
+      });
+      return Math.ceil(m / 10) * 10;
     }
 
     function socDataset(rows) {
       return {
-        label: "SOC [%]", data: toSeries(rows, "battery_soc"),
-        borderColor: "#F39A3A", backgroundColor: "transparent",
+        label: STRINGS[currentLang].sSoc, data: toSeries(rows, "battery_soc"),
+        borderColor: SOC_COLOR, backgroundColor: "transparent",
         borderWidth: 2, borderDash: [4, 3], pointRadius: 0, spanGaps: true, yAxisID: "soc",
       };
     }
 
-    function baseScales(powerBound) {
+    // Linie + Flaeche bis 0 kW in derselben (transparenten) Farbe - fuer
+    // Stromverbrauch, Stromverbrauch (AiO) und Erzeugung (PV) im ersten Diagramm.
+    function filledDataset(label, rows, field, borderColor, fillColor) {
+      return {
+        label: label, data: toSeries(rows, field),
+        borderColor: borderColor, backgroundColor: fillColor,
+        borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power",
+        fill: { target: { value: 0 } },
+      };
+    }
+    var NAP_COLOR = "#2563EB", NAP_FILL = "rgba(37,99,235,.15)";
+    var AIO_COLOR = "#6D2A99", AIO_FILL = "rgba(109,42,153,.15)"; // ELMI Lila
+    var PV_COLOR  = "#F7C325", PV_FILL  = "rgba(247,195,37,.20)";
+    var SOC_COLOR = "#4A4A55";
+
+    function baseScales(powerMin, powerMax) {
       return {
         x: {
           type: "linear", min: Date.now() - HISTORY_WINDOW_MS, max: Date.now(),
           ticks: { color: TEXT_COLOR, callback: fmtTick, maxRotation: 0 }, grid: { color: GRID_COLOR },
         },
         power: {
-          type: "linear", position: "left", min: -powerBound, max: powerBound,
+          type: "linear", position: "left", min: powerMin, max: powerMax,
           title: { display: true, text: "Leistung [kW]", color: TEXT_COLOR },
           ticks: { color: TEXT_COLOR }, grid: { color: GRID_COLOR },
         },
@@ -473,22 +551,24 @@
 
     function buildPowerChart(rows) {
       var canvas = document.getElementById("power-chart");
-      powerAxisBound1 = growBound(powerAxisBound1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
+      var s = STRINGS[currentLang];
+      powerMin1 = growMin(powerMin1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
+      powerMax1 = growMax(powerMax1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
       powerChart = new Chart(canvas.getContext("2d"), {
         type: "line",
         data: {
           datasets: [
-            { label: "NAP-Leistung [kW]", data: toSeries(rows, "nap_power"), borderColor: "#E32028", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
-            { label: "AC-Inverter-Leistung [kW]", data: toSeries(rows, "inverter_ac_power"), borderColor: "#6D2A99", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
-            { label: "PV-Leistung [kW]", data: toSeries(rows, "pv_power"), borderColor: "#1F9D55", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
+            filledDataset(s.sStromverbrauch, rows, "nap_power", NAP_COLOR, NAP_FILL),
+            filledDataset(s.sStromverbrauchAio, rows, "inverter_ac_power", AIO_COLOR, AIO_FILL),
+            filledDataset(s.sErzeugungPv, rows, "pv_power", PV_COLOR, PV_FILL),
             socDataset(rows),
           ],
         },
         options: {
           animation: false, responsive: true, maintainAspectRatio: false,
-          interaction: { mode: "nearest", intersect: false },
-          scales: baseScales(powerAxisBound1),
-          plugins: { legend: { labels: { color: TEXT_COLOR, boxWidth: 12, font: { size: 11 } } }, zoom: ZOOM_OPTIONS },
+          interaction: { mode: "x", intersect: false },
+          scales: baseScales(powerMin1, powerMax1),
+          plugins: { legend: { labels: { color: TEXT_COLOR, boxWidth: 12, font: { size: 11 } } }, zoom: ZOOM_OPTIONS, tooltip: TOOLTIP_OPTIONS },
         },
       });
       attachClickToReset(canvas, powerChart);
@@ -496,22 +576,23 @@
 
     function buildBatteryEvChart(rows) {
       var canvas = document.getElementById("ev-pv-chart");
-      powerAxisBound2 = growBound(powerAxisBound2, rows, ["battery_power", "ev_a_power", "ev_b_power"]);
+      powerMin2 = growMin(powerMin2, rows, ["battery_power", "ev_a_power", "ev_b_power"]);
+      powerMax2 = growMax(powerMax2, rows, ["battery_power", "ev_a_power", "ev_b_power"]);
       batteryEvChart = new Chart(canvas.getContext("2d"), {
         type: "line",
         data: {
           datasets: [
-            { label: "Batterieleistung [kW]", data: toSeries(rows, "battery_power"), borderColor: "#E32028", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
-            { label: "Ladepunkt-1-Leistung [kW]", data: toSeries(rows, "ev_a_power"), borderColor: "#B5188B", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
-            { label: "Ladepunkt-2-Leistung [kW]", data: toSeries(rows, "ev_b_power"), borderColor: "#6D2A99", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
+            { label: "Batterieleistung", data: toSeries(rows, "battery_power"), borderColor: "#E32028", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
+            { label: "Ladepunkt 1", data: toSeries(rows, "ev_a_power"), borderColor: "#B5188B", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
+            { label: "Ladepunkt 2", data: toSeries(rows, "ev_b_power"), borderColor: "#6D2A99", backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, spanGaps: true, yAxisID: "power" },
             socDataset(rows),
           ],
         },
         options: {
           animation: false, responsive: true, maintainAspectRatio: false,
-          interaction: { mode: "nearest", intersect: false },
-          scales: baseScales(powerAxisBound2),
-          plugins: { legend: { labels: { color: TEXT_COLOR, boxWidth: 12, font: { size: 11 } } }, zoom: ZOOM_OPTIONS },
+          interaction: { mode: "x", intersect: false },
+          scales: baseScales(powerMin2, powerMax2),
+          plugins: { legend: { labels: { color: TEXT_COLOR, boxWidth: 12, font: { size: 11 } } }, zoom: ZOOM_OPTIONS, tooltip: TOOLTIP_OPTIONS },
         },
       });
       attachClickToReset(canvas, batteryEvChart);
@@ -535,13 +616,14 @@
       if (!powerChart) {
         buildPowerChart(rows);
       } else {
-        powerAxisBound1 = growBound(powerAxisBound1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
+        powerMin1 = growMin(powerMin1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
+        powerMax1 = growMax(powerMax1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
         powerChart.data.datasets[0].data = toSeries(rows, "nap_power");
         powerChart.data.datasets[1].data = toSeries(rows, "inverter_ac_power");
         powerChart.data.datasets[2].data = toSeries(rows, "pv_power");
         powerChart.data.datasets[3].data = toSeries(rows, "battery_soc");
-        powerChart.options.scales.power.min = -powerAxisBound1;
-        powerChart.options.scales.power.max = powerAxisBound1;
+        powerChart.options.scales.power.min = powerMin1;
+        powerChart.options.scales.power.max = powerMax1;
         powerChart.options.scales.x.max = Date.now();
         powerChart.options.scales.x.min = Date.now() - HISTORY_WINDOW_MS;
         powerChart.update("none");
@@ -550,26 +632,33 @@
       if (!batteryEvChart) {
         buildBatteryEvChart(rows);
       } else {
-        powerAxisBound2 = growBound(powerAxisBound2, rows, ["battery_power", "ev_a_power", "ev_b_power"]);
+        powerMin2 = growMin(powerMin2, rows, ["battery_power", "ev_a_power", "ev_b_power"]);
+        powerMax2 = growMax(powerMax2, rows, ["battery_power", "ev_a_power", "ev_b_power"]);
         batteryEvChart.data.datasets[0].data = toSeries(rows, "battery_power");
         batteryEvChart.data.datasets[1].data = toSeries(rows, "ev_a_power");
         batteryEvChart.data.datasets[2].data = toSeries(rows, "ev_b_power");
         batteryEvChart.data.datasets[3].data = toSeries(rows, "battery_soc");
-        batteryEvChart.options.scales.power.min = -powerAxisBound2;
-        batteryEvChart.options.scales.power.max = powerAxisBound2;
+        batteryEvChart.options.scales.power.min = powerMin2;
+        batteryEvChart.options.scales.power.max = powerMax2;
         batteryEvChart.options.scales.x.max = Date.now();
         batteryEvChart.options.scales.x.min = Date.now() - HISTORY_WINDOW_MS;
         batteryEvChart.update("none");
       }
 
       var latest = rows[rows.length - 1];
-      setValue("nap-power", latest.nap_power);
+      // Netzanschluss: ein Messwert (Vorzeichen), zwei Anzeigen - Bezug (>0)
+      // und Einspeisung (<0, als positive Groesse dargestellt).
+      var nap = latest.nap_power;
+      setValue("nap-bezug", nap != null ? Math.max(nap, 0) : null);
+      setValue("nap-einspeisung", nap != null ? Math.max(-nap, 0) : null);
+      setValue("pv-power", latest.pv_power);
+      setValue("erzeugung-gesamt", latest.pv_power); // PV ist aktuell die einzige Erzeugungsquelle
       setValue("inverter-ac-power", latest.inverter_ac_power);
-      setValue("battery-power", latest.battery_power);
-      setValue("battery-soc", latest.battery_soc);
-      setValue("ev-a-soc", latest.ev_a_soc);
+      // Sonstige Verbraucher = Bilanz aus Netzanschluss + PV abzueglich AiO
+      var sonstige = (nap != null && latest.pv_power != null && latest.inverter_ac_power != null)
+        ? nap + latest.pv_power - latest.inverter_ac_power : null;
+      setValue("verbrauch-sonstige", sonstige);
       setValue("ev-a-power", latest.ev_a_power);
-      setValue("ev-b-soc", latest.ev_b_soc);
       setValue("ev-b-power", latest.ev_b_power);
       document.getElementById("last-point-time").textContent = new Date(latest.timestamp * 1000).toLocaleString(currentLang === 'en' ? 'en-GB' : 'de-DE');
     }
@@ -577,6 +666,23 @@
     function mergeRows(rows) {
       rows.forEach(function (r) { rowsByTs.set(r.timestamp, r); });
     }
+
+    // Legenden-/Tooltip-Beschriftungen der Kurven neu setzen, wenn die Sprache
+    // umgeschaltet wird (die Labels stecken sonst nur im Chart-Objekt vom Bau-Zeitpunkt).
+    window.__relabelCharts = function () {
+      var s = STRINGS[currentLang];
+      if (powerChart) {
+        powerChart.data.datasets[0].label = s.sStromverbrauch;
+        powerChart.data.datasets[1].label = s.sStromverbrauchAio;
+        powerChart.data.datasets[2].label = s.sErzeugungPv;
+        powerChart.data.datasets[3].label = s.sSoc;
+        powerChart.update("none");
+      }
+      if (batteryEvChart) {
+        batteryEvChart.data.datasets[3].label = s.sSoc;
+        batteryEvChart.update("none");
+      }
+    };
 
     function setConnStatus(connected, key) {
       lastConnStatus = { connected: connected, key: key };
