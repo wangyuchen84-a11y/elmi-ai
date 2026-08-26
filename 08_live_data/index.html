@@ -291,7 +291,7 @@
     </div>
 
     <footer id="footer-text">
-      Daten werden per MQTT von einer lokalen Anlage übertragen (Snapshot alle 24h, Updates jede Minute). Kein direkter Zugriff auf die Anlage selbst.<br>
+      Daten werden per MQTT von einer lokalen Anlage übertragen (Snapshot alle 15 Minuten, Updates jede Minute). Kein direkter Zugriff auf die Anlage selbst.<br>
       ELMI Power GmbH · Interne Nutzung
     </footer>
   </div>
@@ -312,7 +312,7 @@
       chartHint: 'Mit gedrückter linker Maustaste ein Rechteck aufziehen, um zu vergrößern. Klick ohne Ziehen setzt den Zoom zurück.',
       emptyHint: 'Noch keine Messdaten empfangen.',
       sStromverbrauch: 'Stromverbrauch', sStromverbrauchAio: 'Stromverbrauch (AiO)', sErzeugungPv: 'Erzeugung (PV)', sSoc: 'SOC',
-      footer: 'Daten werden per MQTT von einer lokalen Anlage übertragen (Snapshot alle 24h, Updates jede Minute). Kein direkter Zugriff auf die Anlage selbst.<br>ELMI Power GmbH · Interne Nutzung'
+      footer: 'Daten werden per MQTT von einer lokalen Anlage übertragen (Snapshot alle 15 Minuten, Updates jede Minute). Kein direkter Zugriff auf die Anlage selbst.<br>ELMI Power GmbH · Interne Nutzung'
     },
     en: {
       back: 'Back', subtitle: 'Live site data – real-time MQTT dashboard',
@@ -327,7 +327,7 @@
       chartHint: 'Drag with the left mouse button to zoom into an area. Click without dragging resets the zoom.',
       emptyHint: 'No measurement data received yet.',
       sStromverbrauch: 'Consumption', sStromverbrauchAio: 'Consumption (AiO)', sErzeugungPv: 'Generation (PV)', sSoc: 'SOC',
-      footer: 'Data is transmitted via MQTT from a local site (snapshot every 24h, updates every minute). No direct access to the site itself.<br>ELMI Power GmbH · Internal use only'
+      footer: 'Data is transmitted via MQTT from a local site (snapshot every 15 minutes, updates every minute). No direct access to the site itself.<br>ELMI Power GmbH · Internal use only'
     }
   };
   var currentLang = localStorage.getItem('elmi_lang') || 'de';
@@ -377,8 +377,8 @@
   // ─── Live-Dashboard: MQTT (HiveMQ Cloud, read-only "Subscribe only"-User) ───
   // Beide Topics sind retained: einfaches Subscriben reicht, die letzte
   // Nachricht kommt sofort beim Connect. snapshot = komplette letzte 24h
-  // (alle 24h neu), update = nur neue Zeilen (jede Minute). Rows werden nach
-  // Zeitstempel gemerged, damit sich Snapshot und Updates nicht duplizieren.
+  // (alle 15 Minuten neu), update = nur neue Zeilen (jede Minute). Rows werden
+  // nach Zeitstempel gemerged, damit sich Snapshot und Updates nicht duplizieren.
   //
   // Die MQTT-Zugangsdaten sind absichtlich oeffentlich im Client-Code - eigens
   // dafuer angelegter, rein lesender ("Subscribe only") HiveMQ-Cloud-Nutzer,
@@ -667,6 +667,18 @@
       rows.forEach(function (r) { rowsByTs.set(r.timestamp, r); });
     }
 
+    // Payload sendet {"columns": [...], "rows": [[v, v, ...], ...]} statt
+    // eines Objekts pro Zeile (spart die ~17 Feldnamen je Zeile). Hier zu
+    // normalen Objekten expandieren - identisch zu elmi-energy-monitor-web/js/app.js.
+    function expandCompactRows(data) {
+      var columns = data.columns || [];
+      return (data.rows || []).map(function (values) {
+        var row = {};
+        columns.forEach(function (col, i) { row[col] = values[i]; });
+        return row;
+      });
+    }
+
     // Legenden-/Tooltip-Beschriftungen der Kurven neu setzen, wenn die Sprache
     // umgeschaltet wird (die Labels stecken sonst nur im Chart-Objekt vom Bau-Zeitpunkt).
     window.__relabelCharts = function () {
@@ -709,7 +721,7 @@
     client.on("message", function (topic, payload) {
       try {
         var data = JSON.parse(payload.toString());
-        mergeRows(data.rows || []);
+        mergeRows(expandCompactRows(data));
         document.getElementById("last-received-time").textContent = new Date().toLocaleString(currentLang === 'en' ? 'en-GB' : 'de-DE');
         refreshCharts();
       } catch (e) {
