@@ -162,6 +162,7 @@
     .nap-card { --nap-color: #2563EB; background: rgba(37,99,235,.06); border-color: rgba(37,99,235,.28); }
     .card-tint-yellow { background: rgba(247,195,37,.10); border-color: rgba(247,195,37,.4); }
     .card-tint-red    { background: rgba(227,32,40,.06);  border-color: rgba(227,32,40,.28); }
+    .card-tint-purple { background: rgba(109,42,153,.06); border-color: rgba(109,42,153,.3); }
     .nap-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
     .nap-icon { font-size: 32px; line-height: 1; }
     .nap-title { font-size: 15px; font-weight: 800; color: var(--fg1); letter-spacing: .01em; }
@@ -244,7 +245,7 @@
         </div>
       </div>
 
-      <div class="card" style="margin-bottom:0">
+      <div class="card card-tint-purple" style="margin-bottom:0">
         <div class="card-header"><span class="card-title" id="card-verbrauch-title">🏭 Stromverbrauch</span></div>
         <div class="card-lines">
           <div class="card-line">
@@ -311,7 +312,7 @@
       chart2Title: '📊 Ladestrom und Batterieleistung der letzten 24h',
       chartHint: 'Mit gedrückter linker Maustaste ein Rechteck aufziehen, um zu vergrößern. Klick ohne Ziehen setzt den Zoom zurück.',
       emptyHint: 'Noch keine Messdaten empfangen.',
-      sStromverbrauch: 'Stromverbrauch', sStromverbrauchAio: 'Stromverbrauch (AiO)', sErzeugungPv: 'Erzeugung (PV)', sSoc: 'SOC',
+      sStromverbrauch: 'Stromverbrauch', sAio: 'AiO', sNetzanschluss: 'Netzanschluss', sStromerzeugungPv: 'Stromerzeugung (PV)', sSoc: 'SOC',
       footer: 'Daten werden per MQTT von einer lokalen Anlage übertragen (Snapshot alle 15 Minuten, Updates jede Minute). Kein direkter Zugriff auf die Anlage selbst.<br>ELMI Power GmbH · Interne Nutzung'
     },
     en: {
@@ -326,7 +327,7 @@
       chart2Title: '📊 Charging current and battery power, last 24h',
       chartHint: 'Drag with the left mouse button to zoom into an area. Click without dragging resets the zoom.',
       emptyHint: 'No measurement data received yet.',
-      sStromverbrauch: 'Consumption', sStromverbrauchAio: 'Consumption (AiO)', sErzeugungPv: 'Generation (PV)', sSoc: 'SOC',
+      sStromverbrauch: 'Consumption', sAio: 'AiO', sNetzanschluss: 'Grid connection', sStromerzeugungPv: 'Generation (PV)', sSoc: 'SOC',
       footer: 'Data is transmitted via MQTT from a local site (snapshot every 15 minutes, updates every minute). No direct access to the site itself.<br>ELMI Power GmbH · Internal use only'
     }
   };
@@ -472,9 +473,10 @@
     var powerMin1 = 0, powerMax1 = 10, powerMin2 = 0, powerMax2 = 10;
     var powerChart = null, batteryEvChart = null;
 
+    // field ist entweder ein Feldname (String) oder eine Getter-Funktion(row).
     function toSeries(rows, field) {
-      return rows.filter(function (r) { return r[field] !== null && r[field] !== undefined; })
-        .map(function (r) { return { x: r.timestamp * 1000, y: r[field] }; });
+      return rows.filter(function (r) { var v = fieldValue(r, field); return v !== null && v !== undefined; })
+        .map(function (r) { return { x: r.timestamp * 1000, y: fieldValue(r, field) }; });
     }
 
     function sortedRows() {
@@ -488,11 +490,15 @@
     // naechsten 10-kW-Schritt ab-/aufgerundet. "current" ist die bisherige
     // (bereits gerundete) Grenze - Math.min/max davor stellt sicher, dass die
     // Grenze nur wachsen, nie schrumpfen kann.
+    // "fields" Eintraege sind entweder ein Feldname (String) oder eine
+    // Getter-Funktion(row) - fuer berechnete Kurven wie den Gesamtverbrauch.
+    function fieldValue(r, f) { return typeof f === "function" ? f(r) : r[f]; }
     function growMin(current, rows, fields) {
       var m = current;
       rows.forEach(function (r) {
         fields.forEach(function (f) {
-          if (r[f] !== null && r[f] !== undefined) m = Math.min(m, r[f]);
+          var v = fieldValue(r, f);
+          if (v !== null && v !== undefined) m = Math.min(m, v);
         });
       });
       return Math.floor(m / 10) * 10;
@@ -501,10 +507,16 @@
       var m = current;
       rows.forEach(function (r) {
         fields.forEach(function (f) {
-          if (r[f] !== null && r[f] !== undefined) m = Math.max(m, r[f]);
+          var v = fieldValue(r, f);
+          if (v !== null && v !== undefined) m = Math.max(m, v);
         });
       });
       return Math.ceil(m / 10) * 10;
+    }
+    // Gesamt-Stromverbrauch = Netzanschluss (Bezug/Einspeisung) + PV-Erzeugung
+    // (Bilanz: was reinkommt, wird verbraucht - AiO ist nur ein Teil davon).
+    function totalVerbrauch(r) {
+      return (r.nap_power != null && r.pv_power != null) ? r.nap_power + r.pv_power : null;
     }
 
     function socDataset(rows) {
@@ -516,7 +528,8 @@
     }
 
     // Linie + Flaeche bis 0 kW in derselben (transparenten) Farbe - fuer
-    // Stromverbrauch, Stromverbrauch (AiO) und Erzeugung (PV) im ersten Diagramm.
+    // Stromverbrauch (Gesamt), AiO und Erzeugung (PV) im ersten Diagramm.
+    // field: Feldname (String) oder Getter-Funktion(row), wie bei toSeries.
     function filledDataset(label, rows, field, borderColor, fillColor) {
       return {
         label: label, data: toSeries(rows, field),
@@ -525,8 +538,9 @@
         fill: { target: { value: 0 } },
       };
     }
+    var VERBRAUCH_COLOR = "#6D2A99", VERBRAUCH_FILL = "rgba(109,42,153,.15)"; // ELMI Lila, passend zur Stromverbrauch-Kachel
+    var AIO_COLOR = "#E32028", AIO_FILL = "rgba(227,32,40,.15)"; // separat in Rot (aktuell nicht im Diagramm)
     var NAP_COLOR = "#2563EB", NAP_FILL = "rgba(37,99,235,.15)";
-    var AIO_COLOR = "#6D2A99", AIO_FILL = "rgba(109,42,153,.15)"; // ELMI Lila
     var PV_COLOR  = "#F7C325", PV_FILL  = "rgba(247,195,37,.20)";
     var SOC_COLOR = "#4A4A55";
 
@@ -552,16 +566,18 @@
     function buildPowerChart(rows) {
       var canvas = document.getElementById("power-chart");
       var s = STRINGS[currentLang];
-      powerMin1 = growMin(powerMin1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
-      powerMax1 = growMax(powerMax1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
+      powerMin1 = growMin(powerMin1, rows, [totalVerbrauch, "nap_power", "pv_power"]);
+      powerMax1 = growMax(powerMax1, rows, [totalVerbrauch, "nap_power", "pv_power"]);
       powerChart = new Chart(canvas.getContext("2d"), {
         type: "line",
         data: {
+          // Reihenfolge = Zeichenreihenfolge (spaeter = im Vordergrund) - PV zuletzt.
+          // AiO aktuell nicht angezeigt (erstmal entfernt).
           datasets: [
-            filledDataset(s.sStromverbrauch, rows, "nap_power", NAP_COLOR, NAP_FILL),
-            filledDataset(s.sStromverbrauchAio, rows, "inverter_ac_power", AIO_COLOR, AIO_FILL),
-            filledDataset(s.sErzeugungPv, rows, "pv_power", PV_COLOR, PV_FILL),
+            filledDataset(s.sStromverbrauch, rows, totalVerbrauch, VERBRAUCH_COLOR, VERBRAUCH_FILL),
+            filledDataset(s.sNetzanschluss, rows, "nap_power", NAP_COLOR, NAP_FILL),
             socDataset(rows),
+            filledDataset(s.sStromerzeugungPv, rows, "pv_power", PV_COLOR, PV_FILL),
           ],
         },
         options: {
@@ -616,12 +632,12 @@
       if (!powerChart) {
         buildPowerChart(rows);
       } else {
-        powerMin1 = growMin(powerMin1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
-        powerMax1 = growMax(powerMax1, rows, ["nap_power", "inverter_ac_power", "pv_power"]);
-        powerChart.data.datasets[0].data = toSeries(rows, "nap_power");
-        powerChart.data.datasets[1].data = toSeries(rows, "inverter_ac_power");
-        powerChart.data.datasets[2].data = toSeries(rows, "pv_power");
-        powerChart.data.datasets[3].data = toSeries(rows, "battery_soc");
+        powerMin1 = growMin(powerMin1, rows, [totalVerbrauch, "nap_power", "pv_power"]);
+        powerMax1 = growMax(powerMax1, rows, [totalVerbrauch, "nap_power", "pv_power"]);
+        powerChart.data.datasets[0].data = toSeries(rows, totalVerbrauch);
+        powerChart.data.datasets[1].data = toSeries(rows, "nap_power");
+        powerChart.data.datasets[2].data = toSeries(rows, "battery_soc");
+        powerChart.data.datasets[3].data = toSeries(rows, "pv_power");
         powerChart.options.scales.power.min = powerMin1;
         powerChart.options.scales.power.max = powerMax1;
         powerChart.options.scales.x.max = Date.now();
@@ -685,9 +701,9 @@
       var s = STRINGS[currentLang];
       if (powerChart) {
         powerChart.data.datasets[0].label = s.sStromverbrauch;
-        powerChart.data.datasets[1].label = s.sStromverbrauchAio;
-        powerChart.data.datasets[2].label = s.sErzeugungPv;
-        powerChart.data.datasets[3].label = s.sSoc;
+        powerChart.data.datasets[1].label = s.sNetzanschluss;
+        powerChart.data.datasets[2].label = s.sSoc;
+        powerChart.data.datasets[3].label = s.sStromerzeugungPv;
         powerChart.update("none");
       }
       if (batteryEvChart) {
